@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/superficie"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Buscar"
+        android:textColor="@color/verde_arthur"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/etBusca"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Buscar produtos..."
+        android:background="@color/superficie"
+        android:padding="14dp"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:singleLine="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Filtrar por:"
+        android:textColor="@color/cinza_texto"
+        android:textSize="13sp"
+        android:layout_marginTop="12dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
+
+        <TextView
+            android:id="@+id/chipPromocao"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔥 Promoção"
+            android:padding="20dp"
+            android:paddingVertical="10dp"
+            android:background="@color/superficie"
+            android:textColor="@color/texto_primario"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/chipBaratos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Até R$ 50"
+            android:padding="20dp"
+            android:paddingVertical="10dp"
+            android:background="@color/superficie"
+            android:textColor="@color/texto_primario"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/chipLimpar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Limpar"
+            android:padding="20dp"
+            android:paddingVertical="10dp"
+            android:background="@color/superficie"
+            android:textColor="@color/cinza_texto" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvResultadoInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Digite para buscar"
+        android:textColor="@color/cinza_texto"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvResultados"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>
