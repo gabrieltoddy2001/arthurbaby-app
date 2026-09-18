@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Grades -->
+    <path android:fillColor="#3B82F6"
+        android:pathData="M4,6 L20,6 L20,8 L4,8 Z"/>
+    <path android:fillColor="#3B82F6"
+        android:pathData="M4,10 L20,10 L20,12 L4,12 Z"/>
+    <path android:fillColor="#3B82F6"
+        android:pathData="M4,14 L20,14 L20,16 L4,16 Z"/>
+    <!-- Colchão -->
+    <path android:fillColor="#93C5FD"
+        android:pathData="M3,16 L21,16 L21,19 L3,19 Z"/>
+    <!-- Pés -->
+    <path android:fillColor="#3B82F6"
+        android:pathData="M4,19 L6,19 L6,22 L4,22 Z"/>
+    <path android:fillColor="#3B82F6"
+        android:pathData="M18,19 L20,19 L20,22 L18,22 Z"/>
+</vector>

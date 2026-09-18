@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Bico -->
+    <path android:fillColor="#F97316"
+        android:pathData="M11,2 C11,2 12,1 13,2 C14,3 13,4 13,4 L13,6 L11,6 Z"/>
+    <!-- Corpo -->
+    <path android:fillColor="#F97316"
+        android:pathData="M9,6 L15,6 L15,19 C15,20.1 14.1,21 13,21 L11,21 C9.9,21 9,20.1 9,19 Z"/>
+    <!-- Marcações -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M10,10 L14,10 L14,11 L10,11 Z"/>
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M10,13 L14,13 L14,14 L10,14 Z"/>
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M10,16 L14,16 L14,17 L10,17 Z"/>
+</vector>

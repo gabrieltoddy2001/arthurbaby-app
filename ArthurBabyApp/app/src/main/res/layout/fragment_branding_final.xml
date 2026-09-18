@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/branco">
+
+
+    <!-- Curvas decorativas -->
+    <View
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="-160dp"
+        android:layout_marginEnd="-120dp"
+        android:background="@drawable/bg_splash_top" />
+
+    <View
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="-220dp"
+        android:layout_marginStart="-150dp"
+        android:background="@drawable/bg_splash_bottom" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingHorizontal="32dp">
+
+        <ImageView
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:src="@mipmap/ic_launcher"
+            android:scaleType="fitCenter"
+            android:contentDescription="Logo ArthurBaby" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ARTHURBABY"
+            android:textColor="@color/rosa_arthur"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Obrigado por usar nosso app!"
+            android:textColor="@color/cinza_medio"
+            android:textSize="14sp"
+            android:layout_marginTop="6dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sugira esse app para outras mamães 💕"
+            android:textColor="@color/verde_arthur"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="24dp" />
+
+        <!-- Redes sociais -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="20dp">
+
+            <ImageView
+                android:id="@+id/btnInstagram"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@color/rosa_claro"
+                android:src="@drawable/ic_instagram"
+                app:tint="@color/rosa_arthur"
+                android:contentDescription="Instagram" />
+
+            <ImageView
+                android:id="@+id/btnWhatsapp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@color/verde_claro"
+                android:src="@drawable/ic_whatsapp"
+                app:tint="@color/verde_arthur"
+                android:layout_marginStart="16dp"
+                android:contentDescription="WhatsApp" />
+
+            <ImageView
+                android:id="@+id/btnShopee"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
+                android:background="@color/superficie"
+                android:src="@drawable/ic_shopee"
+                app:tint="@color/cinza_medio"
+                android:layout_marginStart="16dp"
+                android:contentDescription="Shopee" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@lojao_arthur_baby"
+            android:textColor="@color/cinza_medio"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp" />
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnVoltarInicio"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="VOLTAR AO INÍCIO"
+        android:backgroundTint="@color/rosa_arthur"
+        android:textColor="@color/branco" />
+
+</RelativeLayout>

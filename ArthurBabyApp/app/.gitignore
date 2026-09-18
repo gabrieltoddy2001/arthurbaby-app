@@ -1,0 +1,28 @@
+# Build outputs (Pastas que são geradas automaticamente pelo Android Studio)
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+build/
+.gradle/
+
+# Arquivos de configuração local (Contém o caminho do SDK da SUA máquina)
+local.properties
+
+# Arquivos do Android Studio (Configurações específicas da sua máquina)
+.idea/
+*.iml
+captures/
+.navigation/
+
+# Arquivos de assinatura (NUNCA suba isso)
+*.jks
+*.keystore
+
+# Outros
+.DS_Store
+Thumbs.db

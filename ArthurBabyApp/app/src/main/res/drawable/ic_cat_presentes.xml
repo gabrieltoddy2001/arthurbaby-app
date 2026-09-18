@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Caixa -->
+    <path android:fillColor="#EC4899"
+        android:pathData="M3,10 L21,10 L21,21 L3,21 Z"/>
+    <!-- Tampa -->
+    <path android:fillColor="#BE185D"
+        android:pathData="M3,8 L21,8 L21,11 L3,11 Z"/>
+    <!-- Fita vertical -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M10,8 L14,8 L14,21 L10,21 Z"/>
+    <!-- Laço -->
+    <path android:fillColor="#F472B6"
+        android:pathData="M9,4 C7,3 6,5 7,6 L10,8 L10,7 L9,6 Z"/>
+    <path android:fillColor="#F472B6"
+        android:pathData="M15,4 C17,3 18,5 17,6 L14,8 L14,7 L15,6 Z"/>
+</vector>
