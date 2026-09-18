@@ -1,4 +1,0 @@
-<resources>
-    <string name="app_name">ArthurBaby</string>
-    <string name="base_url">http://10.0.2.2:8080/api/</string>
-</resources>
