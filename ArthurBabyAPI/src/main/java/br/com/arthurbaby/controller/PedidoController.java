@@ -1,9 +1,9 @@
 package br.com.arthurbaby.controller;
 
 import br.com.arthurbaby.dto.*;
-import br.com.arthurbaby.entity.Pedido;
-import br.com.arthurbaby.repository.PedidoRepository;
+import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.service.PedidoService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -11,19 +11,26 @@ import java.util.List;
 @RequestMapping("/api/pedidos")
 public class PedidoController {
     private final PedidoService service;
-    private final PedidoRepository pedidos;
-    public PedidoController(PedidoService service, PedidoRepository pedidos) {
-        this.service = service;
-        this.pedidos = pedidos;
+    public PedidoController(PedidoService service) { this.service = service; }
+
+    @PostMapping public PedidoResponse criar(@RequestBody PedidoRequest request) { return service.criar(request); }
+    @GetMapping("/{id}") public PedidoResponse buscar(@PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
+        return service.buscarPorId(id, logado);
     }
-    @PostMapping public Pedido criar(@RequestBody PedidoRequest request) { return service.criar(request); }
-    @GetMapping("/{id}") public Pedido buscar(@PathVariable Long id) {
-        return pedidos.findById(id).orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado"));
+    @GetMapping("/numero/{numeroPedido}")
+    public PedidoResponse buscarPorNumero(@PathVariable String numeroPedido, @AuthenticationPrincipal Usuario logado) {
+        return service.buscarPorNumero(numeroPedido, logado);
     }
-    @GetMapping("/cliente/{id}") public List<Pedido> porCliente(@PathVariable Long id) {
-        return pedidos.findByClienteIdOrderByCriadoEmDesc(id);
+    @GetMapping("/cliente/{id}")
+    public List<PedidoResponse> porCliente(@PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
+        return service.listarPorCliente(id, logado);
     }
-    @PutMapping("/{id}/status") public Pedido status(@PathVariable Long id, @RequestBody StatusPedidoRequest request) {
+    @PutMapping("/{id}/status") public PedidoResponse status(@PathVariable Long id, @RequestBody StatusPedidoRequest request) {
         return service.alterarStatus(id, request);
+    }
+    @PutMapping("/{numeroPedido}/cancelar")
+    public PedidoResponse cancelar(@PathVariable String numeroPedido, @RequestBody CancelarPedidoRequest request,
+                                   @AuthenticationPrincipal Usuario logado) {
+        return service.cancelarPorNumero(numeroPedido, request.motivoEfetivo(), logado);
     }
 }

@@ -22,6 +22,7 @@ public class Pedido {
     @Column(nullable = false, precision = 12, scale = 2) private BigDecimal desconto = BigDecimal.ZERO;
     @Column(nullable = false, precision = 12, scale = 2) private BigDecimal frete = BigDecimal.ZERO;
     @Column(nullable = false, precision = 12, scale = 2) private BigDecimal total = BigDecimal.ZERO;
+    @Column(length = 50) private String cupom;
     @Column(columnDefinition = "TEXT") private String observacao;
     private String motivoCancelamento;
     private LocalDateTime criadoEm;

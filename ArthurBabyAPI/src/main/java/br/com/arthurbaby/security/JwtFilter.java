@@ -1,5 +1,6 @@
 package br.com.arthurbaby.security;
 
+import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,10 +27,12 @@ public class JwtFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             try {
                 String email = jwtService.getSubject(header.substring(7));
-                usuarios.findByEmail(email).ifPresent(usuario -> {
-                    var auth = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                });
+                usuarios.findByEmail(email)
+                        .filter(Usuario::isEnabled)
+                        .ifPresent(usuario -> {
+                            var auth = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                            SecurityContextHolder.getContext().setAuthentication(auth);
+                        });
             } catch (RuntimeException ignored) {
                 SecurityContextHolder.clearContext();
             }

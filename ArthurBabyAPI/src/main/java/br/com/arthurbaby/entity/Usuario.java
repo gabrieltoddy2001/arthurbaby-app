@@ -36,6 +36,9 @@ public class Usuario implements UserDetails {
     private LocalDateTime dataAceiteTermoUso;
     private boolean aceiteLgpd;
     private LocalDateTime dataAceiteLgpd;
+    @Column(length = 100)
+    private String tokenRecuperacaoSenha;
+    private LocalDateTime tokenRecuperacaoSenhaExpiraEm;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)

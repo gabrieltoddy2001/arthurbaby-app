@@ -15,7 +15,7 @@ public class DataInitializer {
     @Bean
     CommandLineRunner seed(UsuarioRepository usuarios, CategoriaRepository categorias, MarcaRepository marcas,
                            TamanhoRepository tamanhos, CorRepository cores, ProdutoRepository produtos,
-                           ConfiguracaoLojaRepository configs, PasswordEncoder encoder) {
+                           ConfiguracaoLojaRepository configs, CupomRepository cupons, PasswordEncoder encoder) {
         return args -> {
             if (configs.count() == 0) {
                 ConfiguracaoLoja c = new ConfiguracaoLoja();
@@ -29,9 +29,12 @@ public class DataInitializer {
                 configs.save(c);
             }
             if (usuarios.count() == 0) {
-                Usuario admin = usuario("Administrador ArthurBaby", "admin@arthurbaby.com.br", "admin123", Perfil.ADMINISTRADOR, encoder);
-                Usuario cliente = usuario("Cliente Teste", "cliente@teste.com", "cliente123", Perfil.CLIENTE, encoder);
-                usuarios.saveAll(List.of(admin, cliente));
+                Usuario admin = usuario("Administrador ArthurBaby", "admin@arthurbaby.com.br", "123456", Perfil.ADMINISTRADOR, encoder);
+                Usuario vendedor = usuario("Carlos Almeida", "vendedor@arthurbaby.com.br", "123456", Perfil.VENDEDOR, encoder);
+                Usuario ana = usuario("Ana Souza", "ana.souza@email.com", "123456", Perfil.CLIENTE, encoder);
+                Usuario mariana = usuario("Mariana Santos", "mariana.santos@email.com", "123456", Perfil.CLIENTE, encoder);
+                Usuario mariaTeste = usuario("Maria Teste Silva Atualizada", "maria.teste@exemplo.com", "123456", Perfil.CLIENTE, encoder);
+                usuarios.saveAll(List.of(admin, vendedor, ana, mariana, mariaTeste));
             }
             if (categorias.count() == 0) {
                 int i = 1;
@@ -39,8 +42,22 @@ public class DataInitializer {
                         "Alimentacao", "Quarto do Bebe", "Presentes", "Kits", "Promocoes")) {
                     Categoria c = new Categoria();
                     c.setNome(nome); c.setDescricao("Categoria " + nome); c.setOrdemExibicao(i++);
+                    c.setIcone(iconeDe(nome));
                     categorias.save(c);
                 }
+                Categoria enxoval = categorias.findAll().get(0);
+                int j = 1;
+                for (String nome : List.of("Kit Berco", "Mantas e Cobertores", "Toalhas")) {
+                    Categoria sub = new Categoria();
+                    sub.setNome(nome); sub.setDescricao("Subcategoria de Enxoval"); sub.setOrdemExibicao(j++);
+                    sub.setCategoriaPai(enxoval);
+                    categorias.save(sub);
+                }
+            }
+            if (cupons.count() == 0) {
+                Cupom cupom = new Cupom();
+                cupom.setCodigo("ARTHUR10"); cupom.setPercentualDesconto(new BigDecimal("10.00"));
+                cupons.save(cupom);
             }
             if (tamanhos.count() == 0) {
                 int i = 1; for (String nome : List.of("RN", "P", "M", "G", "GG", "2", "4", "6", "8", "10", "12", "14")) {
@@ -57,13 +74,18 @@ public class DataInitializer {
                 p.setCategoria(categorias.findAll().get(0)); p.setMarca(marcas.findAll().get(0));
                 p.setCodigo("AB-001"); p.setSku("AB-001"); p.setNome("Kit Enxoval Bebe");
                 p.setDescricao("Produto inicial para testes da API"); p.setPreco(new BigDecimal("129.90"));
-                p.setDestaque(true); p.setPromocao(false);
+                p.setDestaque(true); p.setPromocao(false); p.setAvaliacao(new BigDecimal("5.0"));
                 ProdutoVariacao v = new ProdutoVariacao();
                 v.setProduto(p); v.setSku("AB-001-RN-BR"); v.setTamanho(tamanhos.findAll().get(0)); v.setCor(cores.findAll().get(0)); v.setEstoqueAtual(10);
                 p.getVariacoes().add(v);
                 produtos.save(p);
             }
         };
+    }
+    /** Identificador de icone consumido pelo app: nome da categoria em minusculas, sem acentos, com "_" no lugar dos espacos. */
+    private static String iconeDe(String nome) {
+        return java.text.Normalizer.normalize(nome, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
     }
     private Usuario usuario(String nome, String email, String senha, Perfil perfil, PasswordEncoder encoder) {
         Usuario u = new Usuario();
