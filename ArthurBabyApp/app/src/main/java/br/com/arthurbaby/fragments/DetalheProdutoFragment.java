@@ -19,15 +19,22 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.text.NumberFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.models.Produto;
 import br.com.arthurbaby.models.Variacao;
+import br.com.arthurbaby.network.ApiService;
+import br.com.arthurbaby.network.Conversor;
+import br.com.arthurbaby.network.RetrofitClient;
+import br.com.arthurbaby.network.dto.ProdutoResponse;
 import br.com.arthurbaby.repositories.CarrinhoRepository;
 import br.com.arthurbaby.repositories.FavoritoRepository;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DetalheProdutoFragment extends Fragment {
 
@@ -35,9 +42,10 @@ public class DetalheProdutoFragment extends Fragment {
     private Produto produto;
     private int qtd = 1;
 
-    private String tamSel = "M";
-    private String corSel = "Rosa";
-    private String modSel = "Padrão";
+    private String tamSel = null;
+    private String corSel = null;
+    private String modSel = null;
+    private Long variacaoIdSel = null;
 
     public static DetalheProdutoFragment newInstance(Produto p) {
         DetalheProdutoFragment f = new DetalheProdutoFragment();
@@ -72,6 +80,7 @@ public class DetalheProdutoFragment extends Fragment {
 
         NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
+        // Preenche com dados do adapter (imediatamente)
         if (produto != null) {
             tvNome.setText(produto.getNome());
             tvMarca.setText("Marca: " + produto.getMarca());
@@ -79,8 +88,8 @@ public class DetalheProdutoFragment extends Fragment {
             tvPreco.setText(nf.format(produto.getPreco()));
             tvEstrelas.setText("★★★★★");
             tvAvaliacao.setText("(5.0)");
+            img.setBackgroundColor(0xFFFAD1DE);
 
-            // Preço antigo riscado se em promoção
             if (produto.getPreco().doubleValue() < 50 && produto.temEstoque()) {
                 tvPrecoAntigo.setVisibility(View.VISIBLE);
                 tvPrecoAntigo.setText("R$ " + String.format("%.2f",
@@ -89,70 +98,26 @@ public class DetalheProdutoFragment extends Fragment {
                         | Paint.STRIKE_THRU_TEXT_FLAG);
             }
 
-            // Coração
-            boolean fav = FavoritoRepository.getInstance().isFavorito(produto);
+            boolean fav = FavoritoRepository.getInstance().isFavorito(produto.getId());
             atualizarCoracao(btnFav, fav);
             btnFav.setOnClickListener(x -> {
-                FavoritoRepository.getInstance().toggle(produto);
-                boolean agora = FavoritoRepository.getInstance().isFavorito(produto);
+                boolean agora = FavoritoRepository.getInstance()
+                        .toggle(requireContext(), produto.getId(), () -> {});
                 atualizarCoracao(btnFav, agora);
             });
 
-            // Esgotado
-            if (produto.isEsgotado()) {
-                com.google.android.material.button.MaterialButton btn =
-                        v.findViewById(R.id.btnAddCarrinho);
-                btn.setEnabled(false);
-                btn.setBackgroundColor(0xFF94A3B8);
-                btn.setText("PRODUTO ESGOTADO");
-            }
+            // Busca detalhes atualizados no backend
+            carregarProdutoBackend(v);
         }
 
-        // Botão voltar
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack()
-        );
-
-        // CORES — círculos
-        LinearLayout cCor = v.findViewById(R.id.containerCores);
-        List<String> cores = Arrays.asList("Branco", "Azul", "Rosa", "Amarelo", "Verde");
-        int[] hexCores = {0xFFFFFFFF, 0xFF3B82F6, 0xFFED83A4, 0xFFFFC107, 0xFF10B981};
-        for (int i = 0; i < cores.size(); i++) {
-            final int idx = i;
-            View circulo = criarCirculoCor(hexCores[i], cores.get(i).equals(corSel));
-            circulo.setOnClickListener(x -> {
-                corSel = cores.get(idx);
-                atualizarCirculos(cCor, cores.indexOf(corSel), hexCores);
-            });
-            cCor.addView(circulo);
-        }
-
-        // TAMANHOS — botões redondos
-        LinearLayout cTam = v.findViewById(R.id.containerTamanhos);
-        List<String> tamanhos = Arrays.asList("RN", "P", "M", "G", "GG");
-        for (String t : tamanhos) {
-            cTam.addView(criarChipTamanho(t, t.equals(tamSel), view -> {
-                tamSel = t;
-                atualizarChips(cTam, t);
-            }));
-        }
-
-        // MODELOS — chips
-        LinearLayout cMod = v.findViewById(R.id.containerModelos);
-        List<String> modelos = Arrays.asList("Padrão", "Premium", "Deluxe");
-        for (String m : modelos) {
-            cMod.addView(criarChipTamanho(m, m.equals(modSel), view -> {
-                modSel = m;
-                atualizarChips(cMod, m);
-            }));
-        }
+                requireActivity().getSupportFragmentManager().popBackStack());
 
         // Quantidade
         v.findViewById(R.id.btnMais).setOnClickListener(x -> {
             qtd++;
             tvQtd.setText(String.valueOf(qtd));
         });
-
         v.findViewById(R.id.btnMenos).setOnClickListener(x -> {
             if (qtd > 1) {
                 qtd--;
@@ -163,11 +128,16 @@ public class DetalheProdutoFragment extends Fragment {
         // Adicionar ao carrinho
         v.findViewById(R.id.btnAddCarrinho).setOnClickListener(x -> {
             if (produto != null && produto.temEstoque()) {
-                Variacao variacao = new Variacao(tamSel, corSel, modSel);
-                CarrinhoRepository.getInstance().adicionar(produto, qtd, variacao);
+                Variacao variacao = null;
+                if (tamSel != null || corSel != null || modSel != null) {
+                    variacao = new Variacao(
+                            tamSel != null ? tamSel : "-",
+                            corSel != null ? corSel : "-",
+                            modSel != null ? modSel : "-");
+                }
+                CarrinhoRepository.getInstance().adicionar(produto, qtd, variacao, variacaoIdSel);
                 Toast.makeText(requireContext(),
-                        qtd + " item(ns) adicionado(s)",
-                        Toast.LENGTH_SHORT).show();
+                        qtd + " item(ns) adicionado(s)", Toast.LENGTH_SHORT).show();
                 requireActivity().getSupportFragmentManager().popBackStack();
             }
         });
@@ -175,55 +145,154 @@ public class DetalheProdutoFragment extends Fragment {
         return v;
     }
 
-    private void atualizarCoracao(ImageView btn, boolean fav) {
-        btn.setImageResource(fav ? R.drawable.ic_favorito_preenchido : R.drawable.ic_favorito);
-        btn.setColorFilter(ContextCompat.getColor(requireContext(),
-                fav ? R.color.coracao_ativo : R.color.coracao_inativo));
+    private void carregarProdutoBackend(View v) {
+        ApiService api = RetrofitClient.getApi(requireContext());
+        api.buscarProduto(produto.getId()).enqueue(new Callback<ProdutoResponse>() {
+            @Override
+            public void onResponse(Call<ProdutoResponse> call, Response<ProdutoResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Produto atualizado = Conversor.paraProduto(response.body());
+                    if (atualizado == null) return;
+
+                    produto = atualizado;
+
+                    TextView tvNome = v.findViewById(R.id.tvNome);
+                    TextView tvPreco = v.findViewById(R.id.tvPreco);
+                    TextView tvDescricao = v.findViewById(R.id.tvDescricao);
+                    TextView tvAvaliacao = v.findViewById(R.id.tvAvaliacao);
+
+                    tvNome.setText(atualizado.getNome());
+                    tvDescricao.setText(atualizado.getDescricao());
+
+                    NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+                    tvPreco.setText(nf.format(atualizado.getPreco()));
+
+                    if (atualizado.getAvaliacao() > 0) {
+                        tvAvaliacao.setText("(" + atualizado.getAvaliacao() + ".0)");
+                    }
+
+                    // Desenha as variações
+                    desenharVariacoes(v);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ProdutoResponse> call, Throwable t) {
+                // Silencioso
+            }
+        });
     }
 
     /**
-     * Cria um círculo de cor clicável (com borda se selecionado).
+     * Desenha as seções de Tamanho, Cor e Modelo com base nas variações reais.
      */
-    private View criarCirculoCor(int cor, boolean selecionado) {
-        View container = new View(getContext());
+    private void desenharVariacoes(View v) {
+        if (produto == null || produto.getVariacoes().isEmpty()) return;
 
-        int tamanho = 44;
-        int padding = 4;
+        List<String> tamanhos = new ArrayList<>();
+        List<String> cores = new ArrayList<>();
+        List<String> modelos = new ArrayList<>();
 
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                dp(tamanho), dp(tamanho));
-        lp.setMargins(0, 0, 12, 0);
-        container.setLayoutParams(lp);
-
-        GradientDrawable bg = new GradientDrawable();
-        bg.setShape(GradientDrawable.OVAL);
-        bg.setColor(cor);
-        if (selecionado) {
-            bg.setStroke(dp(3), 0xFF37B6B0);
-        } else {
-            bg.setStroke(dp(1), 0xFFE2E8F0);
+        for (Produto.VariacaoReal var : produto.getVariacoes()) {
+            if (var.tamanho != null && !tamanhos.contains(var.tamanho)) tamanhos.add(var.tamanho);
+            if (var.cor != null && !cores.contains(var.cor)) cores.add(var.cor);
+            if (var.modelo != null && !modelos.contains(var.modelo)) modelos.add(var.modelo);
         }
-        container.setBackground(bg);
 
-        return container;
-    }
-
-    private void atualizarCirculos(LinearLayout container, int idxSelecionado, int[] hexCores) {
-        for (int i = 0; i < container.getChildCount(); i++) {
-            View child = container.getChildAt(i);
-            GradientDrawable bg = new GradientDrawable();
-            bg.setShape(GradientDrawable.OVAL);
-            bg.setColor(hexCores[i]);
-            if (i == idxSelecionado) {
-                bg.setStroke(dp(3), 0xFF37B6B0);
-            } else {
-                bg.setStroke(dp(1), 0xFFE2E8F0);
+        // TAMANHO
+        LinearLayout cTam = v.findViewById(R.id.containerTamanhos);
+        if (!tamanhos.isEmpty()) {
+            cTam.removeAllViews();
+            for (String t : tamanhos) {
+                cTam.addView(criarChip(t, t.equals(tamSel), view -> {
+                    tamSel = t;
+                    atualizarChips(cTam, t);
+                    atualizarVariacaoIdSel();
+                }));
             }
-            child.setBackground(bg);
+            // seleciona o primeiro
+            if (tamSel == null) {
+                tamSel = tamanhos.get(0);
+                atualizarChips(cTam, tamSel);
+            }
+        } else {
+            esconderSecao(v, cTam);
+        }
+
+        // COR
+        LinearLayout cCor = v.findViewById(R.id.containerCores);
+        if (!cores.isEmpty()) {
+            cCor.removeAllViews();
+            for (String c : cores) {
+                cCor.addView(criarChip(c, c.equals(corSel), view -> {
+                    corSel = c;
+                    atualizarChips(cCor, c);
+                    atualizarVariacaoIdSel();
+                }));
+            }
+            if (corSel == null) {
+                corSel = cores.get(0);
+                atualizarChips(cCor, corSel);
+            }
+        } else {
+            esconderSecao(v, cCor);
+        }
+
+        // MODELO
+        LinearLayout cMod = v.findViewById(R.id.containerModelos);
+        if (!modelos.isEmpty()) {
+            cMod.removeAllViews();
+            for (String m : modelos) {
+                cMod.addView(criarChip(m, m.equals(modSel), view -> {
+                    modSel = m;
+                    atualizarChips(cMod, m);
+                    atualizarVariacaoIdSel();
+                }));
+            }
+            if (modSel == null) {
+                modSel = modelos.get(0);
+                atualizarChips(cMod, modSel);
+            }
+        } else {
+            esconderSecao(v, cMod);
+        }
+
+        atualizarVariacaoIdSel();
+    }
+
+    /**
+     * Descobre qual variação corresponde à seleção atual.
+     */
+    private void atualizarVariacaoIdSel() {
+        variacaoIdSel = null;
+        if (produto == null) return;
+        for (Produto.VariacaoReal var : produto.getVariacoes()) {
+            boolean tamOk = (tamSel == null) || tamSel.equals(var.tamanho);
+            boolean corOk = (corSel == null) || corSel.equals(var.cor);
+            boolean modOk = (modSel == null) || modSel.equals(var.modelo);
+            if (tamOk && corOk && modOk) {
+                variacaoIdSel = var.id;
+                return;
+            }
         }
     }
 
-    private TextView criarChipTamanho(String texto, boolean selecionado, View.OnClickListener onClick) {
+    private void esconderSecao(View root, View container) {
+        if (container != null) container.setVisibility(View.GONE);
+        // Esconde o título acima
+        if (root instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                if (group.getChildAt(i) == container && i > 0) {
+                    View ant = group.getChildAt(i - 1);
+                    if (ant instanceof TextView) ant.setVisibility(View.GONE);
+                    return;
+                }
+            }
+        }
+    }
+
+    private TextView criarChip(String texto, boolean selecionado, View.OnClickListener onClick) {
         TextView chip = new TextView(getContext());
         chip.setText(texto);
         chip.setPadding(dp(18), dp(10), dp(18), dp(10));
@@ -236,7 +305,6 @@ public class DetalheProdutoFragment extends Fragment {
                 LinearLayout.LayoutParams.WRAP_CONTENT);
         lp.setMargins(0, 0, 10, 0);
         chip.setLayoutParams(lp);
-
         chip.setOnClickListener(onClick);
         return chip;
     }
@@ -261,6 +329,12 @@ public class DetalheProdutoFragment extends Fragment {
             TextView chip = (TextView) container.getChildAt(i);
             aplicarEstiloChip(chip, chip.getText().toString().equals(selecionado));
         }
+    }
+
+    private void atualizarCoracao(ImageView btn, boolean fav) {
+        btn.setImageResource(fav ? R.drawable.ic_favorito_preenchido : R.drawable.ic_favorito);
+        btn.setColorFilter(ContextCompat.getColor(requireContext(),
+                fav ? R.color.coracao_ativo : R.color.coracao_inativo));
     }
 
     private int dp(int valor) {

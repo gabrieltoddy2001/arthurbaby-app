@@ -1,7 +1,10 @@
 package br.com.arthurbaby.controller;
 
+import br.com.arthurbaby.dto.CategoriaResponse;
+import br.com.arthurbaby.dto.ProdutoDetalheResponse;
 import br.com.arthurbaby.entity.*;
 import br.com.arthurbaby.repository.*;
+import br.com.arthurbaby.service.CatalogoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,23 +14,24 @@ import java.util.List;
 
 @RestController
 public class PublicCatalogController {
-    private final CategoriaRepository categorias;
     private final ProdutoRepository produtos;
     private final ProdutoVariacaoRepository variacoes;
     private final MovimentacaoEstoqueRepository movimentos;
-    public PublicCatalogController(CategoriaRepository categorias, ProdutoRepository produtos,
-                                   ProdutoVariacaoRepository variacoes, MovimentacaoEstoqueRepository movimentos) {
-        this.categorias = categorias;
+    private final CatalogoService catalogo;
+    public PublicCatalogController(ProdutoRepository produtos, ProdutoVariacaoRepository variacoes,
+                                   MovimentacaoEstoqueRepository movimentos, CatalogoService catalogo) {
         this.produtos = produtos;
         this.variacoes = variacoes;
         this.movimentos = movimentos;
+        this.catalogo = catalogo;
     }
-    @GetMapping("/api/categorias") public List<Categoria> categorias() { return categorias.findAll(); }
+    @GetMapping("/api/categorias") public List<CategoriaResponse> categorias() { return catalogo.arvoreCategorias(); }
     @GetMapping("/api/produtos")
     public Page<ProdutoResponse> produtos(@RequestParam(required = false) String q,
                                           @RequestParam(required = false) Long categoriaId,
                                           @RequestParam(required = false) BigDecimal precoMin,
                                           @RequestParam(required = false) BigDecimal precoMax,
+                                          @RequestParam(required = false) Boolean promocao,
                                           Pageable pageable) {
         Specification<Produto> spec = Specification.where(null);
         if (q != null && !q.isBlank()) {
@@ -41,12 +45,11 @@ public class PublicCatalogController {
         if (categoriaId != null) spec = spec.and((root, query, cb) -> cb.equal(root.get("categoria").get("id"), categoriaId));
         if (precoMin != null) spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("preco"), precoMin));
         if (precoMax != null) spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("preco"), precoMax));
+        if (Boolean.TRUE.equals(promocao)) spec = spec.and((root, query, cb) -> cb.isTrue(root.get("promocao")));
         return produtos.findAll(spec, pageable).map(this::toResponse);
     }
-    @GetMapping("/api/produtos/{id}") public ProdutoResponse produto(@PathVariable Long id) {
-        return produtos.findById(id)
-                .map(this::toResponse)
-                .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
+    @GetMapping("/api/produtos/{id}") public ProdutoDetalheResponse produto(@PathVariable Long id) {
+        return catalogo.detalhe(id);
     }
     @GetMapping("/api/estoque/{produtoId}") public List<ProdutoVariacao> estoque(@PathVariable Long produtoId) {
         return variacoes.findByProdutoId(produtoId);

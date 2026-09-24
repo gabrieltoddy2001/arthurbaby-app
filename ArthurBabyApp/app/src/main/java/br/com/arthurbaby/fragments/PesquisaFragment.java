@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,13 +18,18 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.adapters.ProdutoAdapter;
-import br.com.arthurbaby.models.Produto;
-import br.com.arthurbaby.repositories.ProdutoRepository;
+import br.com.arthurbaby.network.ApiService;
+import br.com.arthurbaby.network.Conversor;
+import br.com.arthurbaby.network.RetrofitClient;
+import br.com.arthurbaby.network.dto.PageResponse;
+import br.com.arthurbaby.network.dto.ProdutoResponse;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PesquisaFragment extends Fragment {
 
@@ -32,7 +38,7 @@ public class PesquisaFragment extends Fragment {
     private EditText etBusca;
     private ProdutoAdapter adapter;
 
-    private String filtroAtual = "TODAS"; // TODAS, PROMOCAO, BARATOS
+    private String filtroAtual = "TODAS";
     private String termoAtual = "";
 
     @Nullable
@@ -52,62 +58,98 @@ public class PesquisaFragment extends Fragment {
         chipLimpar = v.findViewById(R.id.chipLimpar);
 
         v.findViewById(R.id.btnVoltarBusca).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack()
-        );
+                requireActivity().getSupportFragmentManager().popBackStack());
 
         rvResultados.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        aplicarFiltros();
+        buscarProdutos(null, null);
 
         etBusca.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 termoAtual = s.toString();
-                aplicarFiltros();
+                aplicarFiltro();
             }
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        chipTodas.setOnClickListener(x -> { filtroAtual = "TODAS"; aplicarFiltros(); });
-        chipPromocao.setOnClickListener(x -> { filtroAtual = "PROMOCAO"; aplicarFiltros(); });
-        chipBaratos.setOnClickListener(x -> { filtroAtual = "BARATOS"; aplicarFiltros(); });
+        chipTodas.setOnClickListener(x -> { filtroAtual = "TODAS"; aplicarFiltro(); });
+        chipPromocao.setOnClickListener(x -> { filtroAtual = "PROMOCAO"; aplicarFiltro(); });
+        chipBaratos.setOnClickListener(x -> { filtroAtual = "BARATOS"; aplicarFiltro(); });
         chipLimpar.setOnClickListener(x -> {
             filtroAtual = "TODAS";
             etBusca.setText("");
             termoAtual = "";
-            aplicarFiltros();
+            aplicarFiltro();
         });
 
         return v;
     }
 
-    private void aplicarFiltros() {
+    private void aplicarFiltro() {
         pintarChip(chipTodas, "TODAS".equals(filtroAtual));
         pintarChip(chipPromocao, "PROMOCAO".equals(filtroAtual));
         pintarChip(chipBaratos, "BARATOS".equals(filtroAtual));
 
-        List<Produto> lista = ProdutoRepository.getInstance().buscar(termoAtual);
-
-        List<Produto> filtrados = new ArrayList<>();
-        for (Produto p : lista) {
-            if ("PROMOCAO".equals(filtroAtual) && p.getPreco().doubleValue() >= 50) continue;
-            if ("BARATOS".equals(filtroAtual) && p.getPreco().doubleValue() > 50) continue;
-            filtrados.add(p);
+        if ("PROMOCAO".equals(filtroAtual)) {
+            // Filtro de promoção (preço < 50 no front, até o back implementar)
+            buscarProdutos(termoAtual, null);
+        } else if ("BARATOS".equals(filtroAtual)) {
+            buscarProdutos(termoAtual, null);
+        } else {
+            buscarProdutos(termoAtual, null);
         }
+    }
 
-        adapter = new ProdutoAdapter(filtrados, produto -> {
-            DetalheProdutoFragment frag = DetalheProdutoFragment.newInstance(produto);
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.frameContainer, frag)
-                    .addToBackStack(null)
-                    .commit();
-        });
-        rvResultados.setAdapter(adapter);
+    private void buscarProdutos(String busca, Long categoriaId) {
+        ApiService api = RetrofitClient.getApi(requireContext());
+        api.listarProdutos(busca, categoriaId, null, 0, 50)
+                .enqueue(new Callback<PageResponse<ProdutoResponse>>() {
+                    @Override
+                    public void onResponse(Call<PageResponse<ProdutoResponse>> call,
+                                           Response<PageResponse<ProdutoResponse>> response) {
+                        if (response.isSuccessful() && response.body() != null
+                                && response.body().content != null) {
 
-        if (filtrados.isEmpty()) tvInfo.setText("Nenhum resultado encontrado");
-        else if (filtrados.size() == 1) tvInfo.setText("1 resultado");
-        else tvInfo.setText(filtrados.size() + " resultados");
+                            java.util.List<br.com.arthurbaby.models.Produto> produtos =
+                                    Conversor.paraProdutos(response.body().content);
+
+                            // Filtro local de preço/promoção
+                            java.util.List<br.com.arthurbaby.models.Produto> filtrados =
+                                    new java.util.ArrayList<>();
+                            for (br.com.arthurbaby.models.Produto p : produtos) {
+                                double preco = p.getPreco().doubleValue();
+                                if ("PROMOCAO".equals(filtroAtual) && preco >= 50) continue;
+                                if ("BARATOS".equals(filtroAtual) && preco > 50) continue;
+                                filtrados.add(p);
+                            }
+
+                            adapter = new ProdutoAdapter(filtrados, produto -> {
+                                DetalheProdutoFragment frag =
+                                        DetalheProdutoFragment.newInstance(produto);
+                                requireActivity().getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.frameContainer, frag)
+                                        .addToBackStack(null)
+                                        .commit();
+                            });
+                            rvResultados.setAdapter(adapter);
+
+                            if (filtrados.isEmpty()) tvInfo.setText("Nenhum resultado encontrado");
+                            else if (filtrados.size() == 1) tvInfo.setText("1 resultado");
+                            else tvInfo.setText(filtrados.size() + " resultados");
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    "Erro ao buscar produtos", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
+                        Toast.makeText(requireContext(),
+                                "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void pintarChip(TextView chip, boolean ativo) {

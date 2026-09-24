@@ -15,9 +15,18 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import br.com.arthurbaby.MainActivity;
 import br.com.arthurbaby.R;
+import br.com.arthurbaby.network.ApiService;
+import br.com.arthurbaby.network.RetrofitClient;
+import br.com.arthurbaby.network.TokenStorage;
+import br.com.arthurbaby.network.dto.AuthResponse;
+import br.com.arthurbaby.network.dto.CadastroRequest;
+import br.com.arthurbaby.network.dto.EnderecoRequest;
 import br.com.arthurbaby.utils.LoadingUtils;
 import br.com.arthurbaby.utils.MaskUtils;
 import br.com.arthurbaby.utils.ViaCepService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CadastroActivity extends AppCompatActivity {
 
@@ -51,34 +60,24 @@ public class CadastroActivity extends AppCompatActivity {
         cbTermos = findViewById(R.id.cbTermos);
         MaterialButton btnCadastrar = findViewById(R.id.btnCadastrar);
 
-        // Aplica máscaras
+        // Máscaras
         MaskUtils.aplicarMascaraCpf(etCpf);
         MaskUtils.aplicarMascaraTelefone(etTelefone);
         MaskUtils.aplicarMascaraCep(etCep);
 
-        // Busca automática de CEP quando o usuário terminar de digitar
+        // Busca automática de CEP
         etCep.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
                 String cep = s.toString().replaceAll("\\D", "");
-                if (cep.length() == 8) {
-                    buscarCep(cep);
-                }
+                if (cep.length() == 8) buscarCep(cep);
             }
         });
 
         btnCadastrar.setOnClickListener(v -> cadastrar());
     }
 
-    /**
-     * Busca o endereço no ViaCEP e preenche os campos.
-     */
     private void buscarCep(String cep) {
         ViaCepService.buscar(cep, new ViaCepService.Callback() {
             @Override
@@ -97,9 +96,6 @@ public class CadastroActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Valida os campos e simula o cadastro.
-     */
     private void cadastrar() {
         String nome = texto(etNome);
         String cpf = texto(etCpf);
@@ -114,85 +110,96 @@ public class CadastroActivity extends AppCompatActivity {
         String cidade = texto(etCidade);
         String uf = texto(etUf);
 
-        // Validações
-        if (TextUtils.isEmpty(nome)) {
-            etNome.setError("Informe seu nome");
-            return;
-        }
-        if (TextUtils.isEmpty(cpf)) {
-            etCpf.setError("Informe seu CPF");
-            return;
-        }
-        if (!MaskUtils.validarCpf(cpf)) {
-            etCpf.setError("CPF inválido");
-            return;
-        }
-        if (TextUtils.isEmpty(email)) {
-            etEmail.setError("Informe seu e-mail");
-            return;
-        }
-        if (TextUtils.isEmpty(telefone)) {
-            etTelefone.setError("Informe seu telefone");
-            return;
-        }
+        // Validações locais
+        if (TextUtils.isEmpty(nome)) { etNome.setError("Informe seu nome"); return; }
+        if (TextUtils.isEmpty(cpf)) { etCpf.setError("Informe seu CPF"); return; }
+        if (!MaskUtils.validarCpf(cpf)) { etCpf.setError("CPF inválido"); return; }
+        if (TextUtils.isEmpty(email)) { etEmail.setError("Informe seu e-mail"); return; }
+        if (TextUtils.isEmpty(telefone)) { etTelefone.setError("Informe seu telefone"); return; }
         if (TextUtils.isEmpty(senha) || senha.length() < 4) {
-            etSenha.setError("Senha deve ter ao menos 4 caracteres");
-            return;
+            etSenha.setError("Senha deve ter ao menos 4 caracteres"); return;
         }
-        if (TextUtils.isEmpty(cep)) {
-            etCep.setError("Informe seu CEP");
-            return;
-        }
-        if (TextUtils.isEmpty(logradouro)) {
-            etLogradouro.setError("Informe o logradouro");
-            return;
-        }
-        if (TextUtils.isEmpty(numero)) {
-            etNumero.setError("Informe o número");
-            return;
-        }
-        if (TextUtils.isEmpty(bairro)) {
-            etBairro.setError("Informe o bairro");
-            return;
-        }
-        if (TextUtils.isEmpty(cidade)) {
-            etCidade.setError("Informe a cidade");
-            return;
-        }
-        if (TextUtils.isEmpty(uf)) {
-            etUf.setError("Informe a UF");
-            return;
-        }
+        if (TextUtils.isEmpty(cep)) { etCep.setError("Informe seu CEP"); return; }
+        if (TextUtils.isEmpty(logradouro)) { etLogradouro.setError("Informe o logradouro"); return; }
+        if (TextUtils.isEmpty(numero)) { etNumero.setError("Informe o número"); return; }
+        if (TextUtils.isEmpty(bairro)) { etBairro.setError("Informe o bairro"); return; }
+        if (TextUtils.isEmpty(cidade)) { etCidade.setError("Informe a cidade"); return; }
+        if (TextUtils.isEmpty(uf)) { etUf.setError("Informe a UF"); return; }
         if (!cbTermos.isChecked()) {
             Toast.makeText(this, "Aceite os termos para continuar", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // MOCK: aqui entrará a chamada POST /api/auth/cadastro
+        // Monta o DTO
+        EnderecoRequest endereco = new EnderecoRequest(
+                cep, logradouro, numero, complemento, bairro, cidade, uf,
+                null,  // referência (opcional)
+                true   // principal
+        );
+
+        CadastroRequest request = new CadastroRequest(
+                nome, email, cpf, telefone, senha,
+                true, true,
+                endereco
+        );
+
+        // Chamada real
         LoadingUtils.mostrar(this);
 
-        new android.os.Handler().postDelayed(() -> {
-            LoadingUtils.esconder();
+        ApiService api = RetrofitClient.getApi(this);
+        api.cadastrar(request).enqueue(new Callback<AuthResponse>() {
+            @Override
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                LoadingUtils.esconder();
 
-            // Pega o primeiro nome para saudação
-            String primeiroNome = nome.split(" ")[0];
+                if (response.isSuccessful() && response.body() != null) {
+                    AuthResponse auth = response.body();
 
-            Toast.makeText(this,
-                    "Bem-vindo(a), " + primeiroNome + "!",
-                    Toast.LENGTH_SHORT).show();
+                    // Salva o token (login automático)
+                    TokenStorage.salvar(
+                            CadastroActivity.this,
+                            auth.token,
+                            auth.usuarioId,
+                            auth.nome,
+                            auth.perfil
+                    );
 
-            // Já entra direto na MainActivity (simula login automático)
-            Intent i = new Intent(CadastroActivity.this, MainActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(i);
-            finish();
+                    Toast.makeText(CadastroActivity.this,
+                            "Bem-vindo, " + auth.nome + "!",
+                            Toast.LENGTH_SHORT).show();
 
-        }, 900);
+                    Intent i = new Intent(CadastroActivity.this, MainActivity.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(i);
+                    finish();
+                } else {
+                    // Erro do backend — tenta ler a mensagem
+                    String msg = "Erro ao cadastrar";
+                    try {
+                        if (response.errorBody() != null) {
+                            String erroJson = response.errorBody().string();
+                            // Extrai o campo "erro" do JSON
+                            if (erroJson.contains("\"erro\"")) {
+                                int inicio = erroJson.indexOf("\"erro\"") + 8;
+                                int fim = erroJson.indexOf("\"", inicio);
+                                msg = erroJson.substring(inicio, fim);
+                            }
+                        }
+                    } catch (Exception ignored) {}
+                    Toast.makeText(CadastroActivity.this, msg, Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
+                LoadingUtils.esconder();
+                Toast.makeText(CadastroActivity.this,
+                        "Erro de conexão: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
-    /**
-     * Helper: pega o texto de um TextInputEditText sem risco de NPE.
-     */
     private String texto(TextInputEditText et) {
         return et.getText() != null ? et.getText().toString().trim() : "";
     }

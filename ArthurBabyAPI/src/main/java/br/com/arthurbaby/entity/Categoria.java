@@ -13,6 +13,7 @@ public class Categoria {
     @Column(nullable = false, unique = true, length = 100) private String nome;
     @Column(length = 500) private String descricao;
     @Column(length = 500) private String imagemUrl;
+    @Column(length = 50) private String icone;
     private int ordemExibicao;
     @Enumerated(EnumType.STRING) private CategoriaStatus status = CategoriaStatus.ATIVA;
     private LocalDateTime criadoEm;

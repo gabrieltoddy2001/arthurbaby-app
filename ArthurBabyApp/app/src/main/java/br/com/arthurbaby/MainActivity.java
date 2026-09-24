@@ -12,6 +12,7 @@ import br.com.arthurbaby.fragments.CategoriasFragment;
 import br.com.arthurbaby.fragments.HomeFragment;
 import br.com.arthurbaby.fragments.PerfilFragment;
 import br.com.arthurbaby.fragments.PesquisaFragment;
+import br.com.arthurbaby.repositories.FavoritoRepository;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Sincroniza favoritos com o backend (carrega do servidor para o cache local)
+        FavoritoRepository.getInstance().sincronizar(this);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
 

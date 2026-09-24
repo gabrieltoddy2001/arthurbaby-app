@@ -29,6 +29,7 @@ public class Produto {
     @Enumerated(EnumType.STRING) private ProdutoStatus status = ProdutoStatus.ATIVO;
     private boolean destaque;
     private boolean promocao;
+    @Column(precision = 3, scale = 1) private BigDecimal avaliacao;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)

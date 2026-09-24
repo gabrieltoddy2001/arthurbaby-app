@@ -12,7 +12,6 @@ public class CarrinhoRepository {
     private static CarrinhoRepository instance;
     private final List<ItemCarrinho> itens = new ArrayList<>();
 
-    // Config
     private static final double FRETE_PADRAO = 15.00;
     private static final double FRETE_GRATIS_ACIMA_DE = 200.00;
 
@@ -26,17 +25,21 @@ public class CarrinhoRepository {
     }
 
     public void adicionar(Produto produto, int quantidade) {
-        adicionar(produto, quantidade, null);
+        adicionar(produto, quantidade, null, null);
     }
 
     public void adicionar(Produto produto, int quantidade, Variacao variacao) {
+        adicionar(produto, quantidade, variacao, null);
+    }
+
+    public void adicionar(Produto produto, int quantidade, Variacao variacao, Long variacaoId) {
         for (ItemCarrinho item : itens) {
             if (item.getProduto().getId().equals(produto.getId())) {
                 item.setQuantidade(item.getQuantidade() + quantidade);
                 return;
             }
         }
-        itens.add(new ItemCarrinho(produto, quantidade, variacao));
+        itens.add(new ItemCarrinho(produto, quantidade, variacao, variacaoId));
     }
 
     public void remover(ItemCarrinho item) { itens.remove(item); }
@@ -60,11 +63,6 @@ public class CarrinhoRepository {
         return total;
     }
 
-    /**
-     * Frete calculado conforme a forma de recebimento:
-     * - Retirada na loja = R$ 0
-     * - Entrega = R$ 15 (grátis acima de R$ 200)
-     */
     public double getFrete() {
         if ("RETIRADA_LOJA".equals(formaRecebimento)) return 0;
         if (getSubtotal() >= FRETE_GRATIS_ACIMA_DE) return 0;

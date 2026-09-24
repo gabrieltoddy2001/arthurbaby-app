@@ -172,6 +172,7 @@
                     android:background="@color/cinza_borda"
                     android:layout_marginVertical="10dp" />
 
+                <!-- SUBTOTAL -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -190,6 +191,32 @@
                         android:textColor="@color/texto_primario" />
                 </LinearLayout>
 
+                <!-- DESCONTO (só aparece se > 0) -->
+                <LinearLayout
+                    android:id="@+id/rowDescontoConf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone">
+                    <TextView
+                        android:id="@+id/tvLabelDescontoConf"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Desconto"
+                        android:textColor="@color/verde_arthur"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tvDescontoConf"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="- R$ 0,00"
+                        android:textColor="@color/verde_arthur"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- FRETE -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -209,6 +236,7 @@
                         android:textColor="@color/texto_primario" />
                 </LinearLayout>
 
+                <!-- TOTAL -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

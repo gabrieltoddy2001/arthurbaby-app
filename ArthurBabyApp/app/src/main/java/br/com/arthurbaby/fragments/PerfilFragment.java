@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.activities.LoginActivity;
+import br.com.arthurbaby.network.TokenStorage;
+import br.com.arthurbaby.repositories.FavoritoRepository;
 
 public class PerfilFragment extends Fragment {
 
@@ -28,9 +30,22 @@ public class PerfilFragment extends Fragment {
         TextView tvNome = v.findViewById(R.id.tvNome);
         TextView tvEmail = v.findViewById(R.id.tvEmail);
 
-        // MOCK: dados do cliente logado
-        tvNome.setText("Adeilma Silva");
-        tvEmail.setText("cliente@arthurbaby.com");
+        // Dados reais do usuário logado
+        String nome = TokenStorage.getNome(requireContext());
+        String perfil = TokenStorage.getPerfil(requireContext());
+
+        if (nome != null && !nome.isEmpty()) {
+            tvNome.setText(nome);
+        } else {
+            tvNome.setText("Visitante");
+        }
+
+        // O back não retorna o email no login — usamos o perfil como subtítulo
+        if (perfil != null) {
+            tvEmail.setText(perfil);
+        } else {
+            tvEmail.setText("ArthurBaby");
+        }
 
         // Meus Pedidos
         v.findViewById(R.id.opMeusPedidos).setOnClickListener(x ->
@@ -77,11 +92,18 @@ public class PerfilFragment extends Fragment {
                         .commit()
         );
 
-        // Sair
+        // Sair — limpa tudo
         v.findViewById(R.id.opSair).setOnClickListener(x -> {
+            TokenStorage.limpar(requireContext());
+            FavoritoRepository.getInstance().limpar();
+
+            Toast.makeText(requireContext(), "Até logo!", Toast.LENGTH_SHORT).show();
+
             Intent i = new Intent(getActivity(), LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
+
+            if (getActivity() != null) getActivity().finish();
         });
 
         return v;
