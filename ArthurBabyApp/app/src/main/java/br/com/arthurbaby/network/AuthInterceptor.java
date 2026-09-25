@@ -18,14 +18,27 @@ public class AuthInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        String token = TokenStorage.getToken(context);
-
         Request original = chain.request();
+        String path = original.url().encodedPath();
+
+        // Rotas públicas — não precisam de token
+        boolean publica = path.contains("/api/auth/login")
+                || path.contains("/api/auth/cadastro")
+                || path.contains("/api/auth/recuperar-senha")
+                || path.contains("/api/auth/redefinir-senha")
+                || path.contains("/api/categorias")
+                || path.contains("/api/produtos")
+                || path.contains("/api/cupons/validar");
+
         Request.Builder builder = original.newBuilder()
                 .header("Accept", "application/json");
 
-        if (token != null && !token.isEmpty()) {
-            builder.header("Authorization", "Bearer " + token);
+        // Só adiciona o token se a rota NÃO for pública
+        if (!publica) {
+            String token = TokenStorage.getToken(context);
+            if (token != null && !token.isEmpty()) {
+                builder.header("Authorization", "Bearer " + token);
+            }
         }
 
         return chain.proceed(builder.build());

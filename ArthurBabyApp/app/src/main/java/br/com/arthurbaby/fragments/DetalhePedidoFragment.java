@@ -84,9 +84,6 @@ public class DetalhePedidoFragment extends Fragment {
         TextView tvStatus = v.findViewById(R.id.tvStatus);
         tvStatus.setText(pedido.getStatusAtual());
 
-        TextView tvTotal = v.findViewById(R.id.tvTotal);
-        tvTotal.setText("Total: " + nf.format(pedido.getTotal()));
-
         // Itens
         LinearLayout cItens = v.findViewById(R.id.containerItens);
         if (cItens != null) {
@@ -101,6 +98,39 @@ public class DetalhePedidoFragment extends Fragment {
                 cItens.addView(linha);
             }
         }
+
+        // Subtotal
+        TextView tvSub = v.findViewById(R.id.tvSubtotalDetalhe);
+        if (tvSub != null) tvSub.setText(nf.format(pedido.getSubtotal()));
+
+        // Desconto (só aparece se > 0)
+        LinearLayout rowDesc = v.findViewById(R.id.rowDescontoDetalhe);
+        TextView tvLabelDesc = v.findViewById(R.id.tvLabelDescontoDetalhe);
+        TextView tvDescV = v.findViewById(R.id.tvDescontoDetalhe);
+        if (rowDesc != null && tvDescV != null) {
+            if (pedido.getDesconto() > 0) {
+                rowDesc.setVisibility(View.VISIBLE);
+                String cupom = pedido.getCupom();
+                if (tvLabelDesc != null) {
+                    tvLabelDesc.setText(cupom != null && !cupom.isEmpty()
+                            ? "Desconto (" + cupom + ")"
+                            : "Desconto");
+                }
+                tvDescV.setText("- " + nf.format(pedido.getDesconto()));
+            } else {
+                rowDesc.setVisibility(View.GONE);
+            }
+        }
+
+        // Frete
+        TextView tvFreteV = v.findViewById(R.id.tvFreteDetalhe);
+        if (tvFreteV != null) {
+            tvFreteV.setText(pedido.getFrete() == 0 ? "Grátis" : nf.format(pedido.getFrete()));
+        }
+
+        // Total
+        TextView tvTotalV = v.findViewById(R.id.tvTotal);
+        if (tvTotalV != null) tvTotalV.setText(nf.format(pedido.getTotal()));
 
         // Histórico
         LinearLayout cHist = v.findViewById(R.id.containerHistorico);
