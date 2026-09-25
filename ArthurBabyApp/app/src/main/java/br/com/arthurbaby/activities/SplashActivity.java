@@ -9,7 +9,9 @@ import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import br.com.arthurbaby.MainActivity;
 import br.com.arthurbaby.R;
+import br.com.arthurbaby.network.TokenStorage;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -18,14 +20,22 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        // Animação de entrada
+        // Animação
         LinearLayout containerLogo = findViewById(R.id.containerLogo);
         Animation anim = AnimationUtils.loadAnimation(this, R.anim.splash_scale);
         containerLogo.startAnimation(anim);
 
-        // Depois de 2.4s vai para o Login
+        // Verifica se já tem token salvo
+        String token = TokenStorage.getToken(this);
+
         new Handler().postDelayed(() -> {
-            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+            if (token != null && !token.isEmpty()) {
+                // Já logado → vai direto para a Home
+                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+            } else {
+                // Não logado → tela de Login
+                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+            }
             finish();
         }, 2400);
     }
