@@ -3,24 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/branco">
+    android:background="@color/fundo_claro">
 
+    <!-- CABEÇALHO -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:background="@color/verde_arthur">
+        android:background="@color/branco">
 
         <TextView
             android:id="@+id/btnVoltar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="←"
-            android:textSize="28sp"
-            android:textColor="@color/branco"
-            android:paddingEnd="16dp" />
+            android:textSize="26sp"
+            android:textColor="@color/texto_primario"
+            android:paddingEnd="12dp" />
 
         <TextView
             android:layout_width="0dp"
@@ -29,17 +30,30 @@
             android:text="Endereços"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/branco" />
+            android:textColor="@color/texto_primario" />
     </LinearLayout>
 
+    <!-- PROGRESS BAR -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="60dp"
+        android:indeterminateTint="@color/verde_arthur"
+        android:visibility="visible" />
+
+    <!-- LISTA -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvEnderecos"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:padding="8dp"
-        android:clipToPadding="false" />
+        android:clipToPadding="false"
+        android:visibility="gone" />
 
+    <!-- BOTÃO NOVO -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnNovoEndereco"
         android:layout_width="match_parent"
@@ -47,5 +61,7 @@
         android:text="+ ADICIONAR ENDEREÇO"
         android:backgroundTint="@color/rosa_arthur"
         android:textColor="@color/branco"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"
+        android:visibility="gone" />
+
 </LinearLayout>

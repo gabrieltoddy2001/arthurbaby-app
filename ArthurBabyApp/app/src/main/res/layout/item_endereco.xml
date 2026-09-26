@@ -3,52 +3,79 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="3dp"
     app:cardBackgroundColor="@color/branco">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="14dp">
+        android:orientation="horizontal"
+        android:padding="16dp">
 
+        <!-- ÍCONE CIRCULAR -->
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_circulo_categoria_suave">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_localizacao"
+                app:tint="@color/rosa_arthur"
+                android:contentDescription="Endereço" />
+        </FrameLayout>
+
+        <!-- INFO -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvPrincipal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PRINCIPAL"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/branco"
+                    android:background="@drawable/bg_selo_principal"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="3dp"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/tvPrincipal"
+                android:id="@+id/tvResumo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Endereço"
+                android:textColor="@color/texto_primario"
+                android:textSize="14sp"
+                android:lineSpacingMultiplier="1.3"
+                android:layout_marginTop="6dp" />
+
+            <TextView
+                android:id="@+id/btnRemover"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PRINCIPAL"
-                android:textSize="11sp"
+                android:text="🗑️ Remover"
+                android:textColor="@color/vermelho_desconto"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                android:textColor="@color/branco"
-                android:background="@color/verde_arthur"
-                android:padding="4dp"
-                android:visibility="gone" />
+                android:paddingVertical="6dp"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvResumo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Endereço"
-            android:textColor="@color/texto_primario"
-            android:textSize="14sp"
-            android:lineSpacingMultiplier="1.2"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:id="@+id/btnRemover"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Remover"
-            android:textColor="@color/rosa_arthur"
-            android:textSize="13sp"
-            android:layout_marginTop="8dp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

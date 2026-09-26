@@ -6,8 +6,11 @@ public class ItemCarrinho implements Serializable {
 
     private Produto produto;
     private int quantidade;
-    private Variacao variacao;       // strings (tam, cor, modelo)
-    private Long variacaoId;         // ID real do back (para enviar no pedido)
+    private Variacao variacao;
+    private Long variacaoId;
+
+    /** Construtor vazio — necessário para o Gson. */
+    public ItemCarrinho() {}
 
     public ItemCarrinho(Produto produto, int quantidade) {
         this(produto, quantidade, null, null);
@@ -29,7 +32,10 @@ public class ItemCarrinho implements Serializable {
     public Variacao getVariacao() { return variacao; }
     public Long getVariacaoId() { return variacaoId; }
 
+    public void setProduto(Produto produto) { this.produto = produto; }
     public void setQuantidade(int quantidade) { this.quantidade = quantidade; }
+    public void setVariacao(Variacao variacao) { this.variacao = variacao; }
+    public void setVariacaoId(Long variacaoId) { this.variacaoId = variacaoId; }
 
     public double getSubtotal() {
         return produto.getPreco().doubleValue() * quantidade;

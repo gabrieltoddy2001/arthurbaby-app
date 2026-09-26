@@ -2,8 +2,10 @@ package br.com.arthurbaby;
 
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -12,19 +14,22 @@ import br.com.arthurbaby.fragments.CategoriasFragment;
 import br.com.arthurbaby.fragments.HomeFragment;
 import br.com.arthurbaby.fragments.PerfilFragment;
 import br.com.arthurbaby.fragments.PesquisaFragment;
+import br.com.arthurbaby.repositories.CarrinhoRepository;
 import br.com.arthurbaby.repositories.FavoritoRepository;
 
 public class MainActivity extends AppCompatActivity {
+
+    private BottomNavigationView bottomNav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Sincroniza favoritos com o backend (carrega do servidor para o cache local)
+        CarrinhoRepository.getInstance().carregar(this);
         FavoritoRepository.getInstance().sincronizar(this);
 
-        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav = findViewById(R.id.bottomNav);
 
         if (savedInstanceState == null) {
             trocarFragment(new HomeFragment());
@@ -43,9 +48,43 @@ public class MainActivity extends AppCompatActivity {
             if (fragment != null) trocarFragment(fragment);
             return true;
         });
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // 1) Se tem fragment empilhado, volta
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    getSupportFragmentManager().popBackStack();
+                    return;
+                }
+
+                // 2) Se não está na Home, vai pra Home
+                Fragment atual = getSupportFragmentManager()
+                        .findFragmentById(R.id.frameContainer);
+                if (!(atual instanceof HomeFragment)) {
+                    trocarFragment(new HomeFragment());
+                    bottomNav.setSelectedItemId(R.id.nav_home);
+                    return;
+                }
+
+                // 3) Já está na Home, fecha o app
+                setEnabled(false);
+                getOnBackPressedDispatcher().onBackPressed();
+            }
+        });
     }
 
+    /**
+     * Limpa a pilha inteira e troca o fragment.
+     * Isso garante que ao mudar de aba, não acumule lixo.
+     */
     private void trocarFragment(Fragment fragment) {
-        br.com.arthurbaby.utils.NavUtils.trocarSemEmpilhar(this, fragment);
+        getSupportFragmentManager().popBackStack(
+                null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frameContainer, fragment)
+                .commit();
     }
 }

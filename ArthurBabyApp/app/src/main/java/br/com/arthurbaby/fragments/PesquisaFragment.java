@@ -27,6 +27,7 @@ import br.com.arthurbaby.network.Conversor;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.dto.PageResponse;
 import br.com.arthurbaby.network.dto.ProdutoResponse;
+import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,6 +35,7 @@ import retrofit2.Response;
 public class PesquisaFragment extends Fragment {
 
     private RecyclerView rvResultados;
+    private View progressBar;
     private TextView tvInfo, chipTodas, chipPromocao, chipBaratos, chipLimpar;
     private EditText etBusca;
     private ProdutoAdapter adapter;
@@ -52,6 +54,7 @@ public class PesquisaFragment extends Fragment {
         etBusca = v.findViewById(R.id.etBusca);
         tvInfo = v.findViewById(R.id.tvResultadoInfo);
         rvResultados = v.findViewById(R.id.rvResultados);
+        progressBar = v.findViewById(R.id.progressBar);
         chipTodas = v.findViewById(R.id.chipTodas);
         chipPromocao = v.findViewById(R.id.chipPromocao);
         chipBaratos = v.findViewById(R.id.chipBaratos);
@@ -90,31 +93,26 @@ public class PesquisaFragment extends Fragment {
         pintarChip(chipTodas, "TODAS".equals(filtroAtual));
         pintarChip(chipPromocao, "PROMOCAO".equals(filtroAtual));
         pintarChip(chipBaratos, "BARATOS".equals(filtroAtual));
-
-        if ("PROMOCAO".equals(filtroAtual)) {
-            // Filtro de promoção (preço < 50 no front, até o back implementar)
-            buscarProdutos(termoAtual, null);
-        } else if ("BARATOS".equals(filtroAtual)) {
-            buscarProdutos(termoAtual, null);
-        } else {
-            buscarProdutos(termoAtual, null);
-        }
+        buscarProdutos(termoAtual, null);
     }
 
     private void buscarProdutos(String busca, Long categoriaId) {
+        LoadingView.mostrar(progressBar, rvResultados);
+
         ApiService api = RetrofitClient.getApi(requireContext());
         api.listarProdutos(busca, categoriaId, null, 0, 50)
                 .enqueue(new Callback<PageResponse<ProdutoResponse>>() {
                     @Override
                     public void onResponse(Call<PageResponse<ProdutoResponse>> call,
                                            Response<PageResponse<ProdutoResponse>> response) {
+                        LoadingView.esconder(progressBar, rvResultados);
+
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().content != null) {
 
                             java.util.List<br.com.arthurbaby.models.Produto> produtos =
                                     Conversor.paraProdutos(response.body().content);
 
-                            // Filtro local de preço/promoção
                             java.util.List<br.com.arthurbaby.models.Produto> filtrados =
                                     new java.util.ArrayList<>();
                             for (br.com.arthurbaby.models.Produto p : produtos) {
@@ -146,6 +144,7 @@ public class PesquisaFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
+                        LoadingView.esconder(progressBar, rvResultados);
                         Toast.makeText(requireContext(),
                                 "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }

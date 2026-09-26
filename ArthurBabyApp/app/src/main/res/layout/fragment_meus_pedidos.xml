@@ -34,22 +34,39 @@
             android:textColor="@color/texto_primario" />
     </LinearLayout>
 
-    <!-- ABAS -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabsPedidos"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/branco"
-        app:tabIndicatorColor="@color/rosa_arthur"
-        app:tabSelectedTextColor="@color/rosa_arthur"
-        app:tabTextColor="@color/cinza_medio"
-        app:tabMode="fixed"
-        app:tabGravity="fill" />
+    <!-- PROGRESS BAR -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="60dp"
+        android:indeterminateTint="@color/verde_arthur"
+        android:visibility="visible" />
 
-    <!-- VIEWPAGER -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPagerPedidos"
+    <!-- ABAS + VIEWPAGER (inicia escondido) -->
+    <LinearLayout
+        android:id="@+id/containerPedidos"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabsPedidos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/branco"
+            app:tabIndicatorColor="@color/rosa_arthur"
+            app:tabSelectedTextColor="@color/rosa_arthur"
+            app:tabTextColor="@color/cinza_medio"
+            app:tabMode="fixed"
+            app:tabGravity="fill" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPagerPedidos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
 </LinearLayout>

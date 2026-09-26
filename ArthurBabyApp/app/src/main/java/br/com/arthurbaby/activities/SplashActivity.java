@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import br.com.arthurbaby.MainActivity;
 import br.com.arthurbaby.R;
-import br.com.arthurbaby.network.TokenStorage;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -20,22 +19,13 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        // Animação
         LinearLayout containerLogo = findViewById(R.id.containerLogo);
         Animation anim = AnimationUtils.loadAnimation(this, R.anim.splash_scale);
         containerLogo.startAnimation(anim);
 
-        // Verifica se já tem token salvo
-        String token = TokenStorage.getToken(this);
-
+        // Sempre vai para a MainActivity (catálogo é público)
         new Handler().postDelayed(() -> {
-            if (token != null && !token.isEmpty()) {
-                // Já logado → vai direto para a Home
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
-            } else {
-                // Não logado → tela de Login
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-            }
+            startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
         }, 2400);
     }

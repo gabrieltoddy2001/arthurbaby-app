@@ -12,17 +12,18 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- ÍCONE DE SUCESSO -->
+        <!-- ÍCONE DE SUCESSO COM SOMBRA -->
         <FrameLayout
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/bg_circulo_verde">
+            android:layout_marginTop="32dp"
+            android:background="@drawable/bg_circulo_sucesso"
+            android:elevation="6dp">
 
             <ImageView
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_check_circle"
                 app:tint="@color/branco"
@@ -33,32 +34,66 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Pedido gerado com sucesso!"
-            android:textSize="22sp"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@color/verde_arthur"
+            android:textColor="@color/texto_primario"
             android:gravity="center"
-            android:layout_marginTop="20dp" />
+            android:layout_marginTop="24dp" />
 
         <TextView
-            android:id="@+id/tvNumeroPedido"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="#000000"
-            android:textSize="15sp"
-            android:textColor="@color/texto_primario"
+            android:text="Obrigada por escolher a ArthurBaby 💕"
+            android:textSize="14sp"
+            android:textColor="@color/cinza_medio"
             android:gravity="center"
             android:layout_marginTop="6dp" />
 
-        <TextView
-            android:id="@+id/tvObrigado"
+        <!-- CARD DO NÚMERO DO PEDIDO -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Você receberá atualizações sobre o pedido"
-            android:textColor="@color/cinza_medio"
-            android:textSize="13sp"
-            android:gravity="center"
-            android:lineSpacingMultiplier="1.3"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/branco">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Número do pedido"
+                    android:textSize="12sp"
+                    android:textColor="@color/cinza_texto" />
+
+                <TextView
+                    android:id="@+id/tvNumeroPedido"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="#000000"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/rosa_arthur"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvObrigado"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/cinza_medio"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:lineSpacingMultiplier="1.3"
+                    android:layout_marginTop="10dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <!-- O QUE ACONTECE AGORA -->
         <TextView
@@ -66,75 +101,90 @@
             android:layout_height="wrap_content"
             android:text="O que acontece agora?"
             android:textStyle="bold"
-            android:textColor="@color/verde_arthur"
+            android:textColor="@color/texto_primario"
             android:textSize="16sp"
-            android:layout_marginTop="32dp" />
+            android:layout_marginTop="28dp" />
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="12dp">
+            android:layout_marginTop="10dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/branco">
 
-            <View
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:background="@color/rosa_arthur" />
-
-            <TextView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="10dp"
-                android:text="Vamos analisar seu pedido"
-                android:textColor="@color/texto_primario"
-                android:textSize="14sp" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-            <View
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:background="@color/rosa_arthur" />
+                    <View
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/bg_circulo_item_resumo" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="10dp"
-                android:text="Vamos preparar seus produtos com carinho"
-                android:textColor="@color/texto_primario"
-                android:textSize="14sp" />
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="Vamos analisar seu pedido"
+                        android:textColor="@color/texto_primario"
+                        android:textSize="14sp" />
+                </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12dp">
 
-            <View
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:background="@color/rosa_arthur" />
+                    <View
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/bg_circulo_item_resumo" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="10dp"
-                android:text="Você receberá uma notificação quando estiver pronto"
-                android:textColor="@color/texto_primario"
-                android:textSize="14sp" />
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="Vamos preparar seus produtos com carinho"
+                        android:textColor="@color/texto_primario"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12dp">
+
+                    <View
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/bg_circulo_item_resumo" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:text="Você receberá uma notificação quando estiver pronto"
+                        android:textColor="@color/texto_primario"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <!-- RESUMO -->
         <TextView
@@ -142,23 +192,23 @@
             android:layout_height="wrap_content"
             android:text="Resumo"
             android:textStyle="bold"
-            android:textColor="@color/verde_arthur"
+            android:textColor="@color/texto_primario"
             android:textSize="16sp"
-            android:layout_marginTop="32dp" />
+            android:layout_marginTop="28dp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="1dp"
+            android:layout_marginTop="10dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp"
             app:cardBackgroundColor="@color/branco">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="14dp">
+                android:padding="16dp">
 
                 <LinearLayout
                     android:id="@+id/containerItens"
@@ -170,7 +220,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/cinza_borda"
-                    android:layout_marginVertical="10dp" />
+                    android:layout_marginVertical="12dp" />
 
                 <!-- SUBTOTAL -->
                 <LinearLayout
@@ -191,13 +241,13 @@
                         android:textColor="@color/texto_primario" />
                 </LinearLayout>
 
-                <!-- DESCONTO (só aparece se > 0) -->
+                <!-- DESCONTO -->
                 <LinearLayout
                     android:id="@+id/rowDescontoConf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="6dp"
                     android:visibility="gone">
                     <TextView
                         android:id="@+id/tvLabelDescontoConf"
@@ -221,7 +271,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="4dp">
+                    android:layout_marginTop="6dp">
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -236,19 +286,24 @@
                         android:textColor="@color/texto_primario" />
                 </LinearLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/cinza_borda"
+                    android:layout_marginVertical="12dp" />
+
                 <!-- TOTAL -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
+                    android:orientation="horizontal">
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Total"
                         android:textStyle="bold"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textColor="@color/texto_primario" />
                     <TextView
                         android:id="@+id/tvTotal"
@@ -256,12 +311,13 @@
                         android:layout_height="wrap_content"
                         android:text="R$ 0,00"
                         android:textStyle="bold"
-                        android:textSize="18sp"
+                        android:textSize="20sp"
                         android:textColor="@color/rosa_arthur" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- BOTÃO VOLTAR -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnVoltarHome"
             android:layout_width="match_parent"
@@ -269,6 +325,7 @@
             android:text="VOLTAR AO INÍCIO"
             android:backgroundTint="@color/rosa_arthur"
             android:textColor="@color/branco"
+            android:textStyle="bold"
             app:cornerRadius="28dp"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="20dp" />

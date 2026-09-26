@@ -75,6 +75,9 @@ public class CadastroActivity extends AppCompatActivity {
             }
         });
 
+// Botão voltar
+        findViewById(R.id.btnVoltarCad).setOnClickListener(x -> finish());
+
         btnCadastrar.setOnClickListener(v -> cadastrar());
     }
 

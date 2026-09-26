@@ -24,6 +24,8 @@ import br.com.arthurbaby.network.Conversor;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.FavoritoResponse;
+import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,6 +34,7 @@ public class FavoritosFragment extends Fragment {
 
     private RecyclerView rv;
     private TextView tvVazio;
+    private View progressBar;
 
     @Nullable
     @Override
@@ -46,7 +49,22 @@ public class FavoritosFragment extends Fragment {
 
         rv = v.findViewById(R.id.rvFavoritos);
         tvVazio = v.findViewById(R.id.tvVazio);
+        progressBar = v.findViewById(R.id.progressBar);
         rv.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+        // Visitante? Pede login
+        if (!AuthGuard.estaLogado(requireContext())) {
+            tvVazio.setText("Faça login para ver seus favoritos.");
+            tvVazio.setVisibility(View.VISIBLE);
+            rv.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+
+            v.setOnClickListener(x -> AuthGuard.mostrarDialogLogin(
+                    requireActivity(),
+                    "Entre para salvar seus produtos favoritos."));
+
+            return v;
+        }
 
         carregarFavoritos();
         return v;
@@ -55,17 +73,22 @@ public class FavoritosFragment extends Fragment {
     private void carregarFavoritos() {
         Long clienteId = TokenStorage.getUsuarioId(requireContext());
         if (clienteId == null) {
-            tvVazio.setText("Faça login para ver favoritos");
+            tvVazio.setText("Faça login para ver seus favoritos.");
             tvVazio.setVisibility(View.VISIBLE);
             rv.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
             return;
         }
+
+        LoadingView.mostrar(progressBar, rv);
 
         ApiService api = RetrofitClient.getApi(requireContext());
         api.listarFavoritos(clienteId).enqueue(new Callback<List<FavoritoResponse>>() {
             @Override
             public void onResponse(Call<List<FavoritoResponse>> call,
                                    Response<List<FavoritoResponse>> response) {
+                LoadingView.esconder(progressBar, rv);
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Produto> produtos = new ArrayList<>();
                     for (FavoritoResponse f : response.body()) {
@@ -98,6 +121,7 @@ public class FavoritosFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<FavoritoResponse>> call, Throwable t) {
+                LoadingView.esconder(progressBar, rv);
                 Toast.makeText(requireContext(),
                         "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
