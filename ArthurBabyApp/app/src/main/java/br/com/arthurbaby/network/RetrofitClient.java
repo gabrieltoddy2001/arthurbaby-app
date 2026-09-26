@@ -17,7 +17,7 @@ public class RetrofitClient {
      * - 10.0.2.2 = localhost do PC, visto de dentro do emulador Android
      * - localhost = quando usa adb reverse
      */
-    private static final String BASE_URL = "http://192.168.100.171:8080/";
+    private static final String BASE_URL = "http://localhost:8080/";
 
     private static Retrofit retrofit;
 
