@@ -2,14 +2,17 @@
 
 Backend Spring Boot para catalogo, clientes, favoritos, estoque e ordens de pedido.
 
+Requer JDK 25.
+
 ## Executar com MySQL (padrao)
 
-O perfil `mysql` e ativado por padrao (`application.properties`). Basta ter um MySQL local
-rodando com as credenciais abaixo (o banco `arthurbaby` e criado automaticamente se nao existir):
+O perfil `mysql` e ativado por padrao (`application.properties`). O banco `arthurbaby` e criado
+automaticamente se nao existir. Configure a senha do MySQL e o segredo JWT no ambiente antes de iniciar:
 
 - Host: `localhost:3306`
 - Usuario: `root`
-- Senha: `Admin321`
+- Senha: variavel `DB_PASSWORD`
+- Segredo JWT: variavel `JWT_SECRET` (use uma chave aleatoria com pelo menos 32 caracteres)
 
 ```bash
 mvn spring-boot:run
@@ -19,13 +22,13 @@ Se preferir, use o script `database/arthurbaby_schema.sql` para criar as tabelas
 antes de subir a aplicacao (veja o cabecalho do arquivo para detalhes). Isso e opcional: com
 `ddl-auto=update` a propria aplicacao cria/atualiza as tabelas ao iniciar.
 
-Variaveis opcionais:
+Variaveis de conexao opcionais:
 
 ```bash
 DB_URL=jdbc:mysql://localhost:3306/arthurbaby?createDatabaseIfNotExist=true
 DB_USER=root
-DB_PASSWORD=Admin321
-JWT_SECRET=troque-por-uma-chave-grande-em-producao
+DB_PASSWORD=sua-senha-do-mysql
+JWT_SECRET=sua-chave-aleatoria-com-pelo-menos-32-caracteres
 ```
 
 ## Executar em teste rapido com H2 (em memoria, sem MySQL)

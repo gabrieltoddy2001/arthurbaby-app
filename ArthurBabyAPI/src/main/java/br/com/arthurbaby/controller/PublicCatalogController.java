@@ -5,6 +5,10 @@ import br.com.arthurbaby.dto.ProdutoDetalheResponse;
 import br.com.arthurbaby.entity.*;
 import br.com.arthurbaby.repository.*;
 import br.com.arthurbaby.service.CatalogoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
+@Tag(name = "Catálogo", description = "Categorias, produtos e estoque. Endpoints públicos (não exigem token).")
 public class PublicCatalogController {
     private final ProdutoRepository produtos;
     private final ProdutoVariacaoRepository variacoes;
@@ -25,8 +30,18 @@ public class PublicCatalogController {
         this.movimentos = movimentos;
         this.catalogo = catalogo;
     }
-    @GetMapping("/api/categorias") public List<CategoriaResponse> categorias() { return catalogo.arvoreCategorias(); }
+    @GetMapping("/api/categorias")
+    @Operation(summary = "Listar categorias", description = "Retorna a árvore de categorias do catálogo, com as subcategorias aninhadas.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Árvore de categorias")
+    })
+    public List<CategoriaResponse> categorias() { return catalogo.arvoreCategorias(); }
     @GetMapping("/api/produtos")
+    @Operation(summary = "Listar produtos", description = "Retorna os produtos do catálogo de forma paginada, com filtros opcionais por texto (nome, código, SKU ou descrição), categoria, faixa de preço e promoção.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Página de produtos que atendem aos filtros"),
+            @ApiResponse(responseCode = "400", description = "Parâmetro de filtro ou de paginação com formato inválido")
+    })
     public Page<ProdutoResponse> produtos(@RequestParam(required = false) String q,
                                           @RequestParam(required = false) Long categoriaId,
                                           @RequestParam(required = false) BigDecimal precoMin,
@@ -48,13 +63,29 @@ public class PublicCatalogController {
         if (Boolean.TRUE.equals(promocao)) spec = spec.and((root, query, cb) -> cb.isTrue(root.get("promocao")));
         return produtos.findAll(spec, pageable).map(this::toResponse);
     }
-    @GetMapping("/api/produtos/{id}") public ProdutoDetalheResponse produto(@PathVariable Long id) {
+    @GetMapping("/api/produtos/{id}")
+    @Operation(summary = "Buscar produto por id", description = "Retorna os detalhes do produto identificado pelo id informado, incluindo imagens e variações.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Detalhes do produto"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
+    })
+    public ProdutoDetalheResponse produto(@PathVariable Long id) {
         return catalogo.detalhe(id);
     }
-    @GetMapping("/api/estoque/{produtoId}") public List<ProdutoVariacao> estoque(@PathVariable Long produtoId) {
+    @GetMapping("/api/estoque/{produtoId}")
+    @Operation(summary = "Consultar estoque do produto", description = "Retorna as variações (tamanho, cor, modelo) do produto informado com as quantidades em estoque.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Variações do produto com estoque (vazia se o produto não existir)")
+    })
+    public List<ProdutoVariacao> estoque(@PathVariable Long produtoId) {
         return variacoes.findByProdutoId(produtoId);
     }
-    @GetMapping("/api/estoque/{produtoId}/movimentacoes") public List<MovimentacaoEstoque> movimentacoes(@PathVariable Long produtoId) {
+    @GetMapping("/api/estoque/{produtoId}/movimentacoes")
+    @Operation(summary = "Listar movimentações de estoque", description = "Retorna o histórico de entradas e saídas de estoque do produto informado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Movimentações do produto (vazia se não houver)")
+    })
+    public List<MovimentacaoEstoque> movimentacoes(@PathVariable Long produtoId) {
         return movimentos.findByProdutoId(produtoId);
     }
 

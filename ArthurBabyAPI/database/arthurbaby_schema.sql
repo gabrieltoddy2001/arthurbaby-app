@@ -1,12 +1,4 @@
--- =====================================================================
--- ArthurBaby API — Script de criacao do banco de dados (MySQL 8+)
--- =====================================================================
--- Banco:   arthurbaby
--- Usuario: root
--- Senha:   Admin321
---
--- Este script e um espelho manual do modelo mapeado pelas entidades
--- JPA (br.com.arthurbaby.entity). Em desenvolvimento a aplicacao usa
+-- Credenciais devem ser configuradas no ambiente (DB_USER/DB_PASSWORD).
 -- spring.jpa.hibernate.ddl-auto=update (ver application-mysql.properties)
 -- e cria/atualiza as tabelas sozinha ao subir — ou seja, NAO e
 -- obrigatorio rodar este script para a API funcionar.
