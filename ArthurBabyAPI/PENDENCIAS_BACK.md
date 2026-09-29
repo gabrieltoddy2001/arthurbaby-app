@@ -267,3 +267,11 @@ List<Categoria> findByCategoriaPaiId(Long categoriaPaiId);
 ---
 
 *Documento gerado em 18/09/2025 — análise do front Android vs backend Spring Boot atual.*
+---
+
+## ✅ Status em 28/09/2026
+
+Todos os 15 itens estão atendidos no backend. Os itens 1, 4–14 já estavam implementados. Os demais foram refeitos ou concluídos junto com o PENDENCIAS_BACK2.md:
+- **2 (recuperar senha)**: agora usa a tabela `password_reset_token` (1h, uso único) e responde `200 {"mensagem": ...}`.
+- **3 (cupom)**: sistema de cupons dinâmico (`PERCENTUAL`, `VALOR_FIXO`, `FRETE_GRATIS`) + `POST /api/cupons/validar`. O desconto só vem de cupom; `desconto`/`frete` enviados são ignorados.
+- **15 (estoque)**: além dos métodos no service, há endpoints admin `POST /api/admin/estoque/variacoes/{id}/entrada|ajuste|estorno`.

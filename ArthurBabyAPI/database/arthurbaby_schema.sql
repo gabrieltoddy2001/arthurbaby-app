@@ -1,12 +1,4 @@
--- =====================================================================
--- ArthurBaby API — Script de criacao do banco de dados (MySQL 8+)
--- =====================================================================
--- Banco:   arthurbaby
--- Usuario: root
--- Senha:   Admin321
---
--- Este script e um espelho manual do modelo mapeado pelas entidades
--- JPA (br.com.arthurbaby.entity). Em desenvolvimento a aplicacao usa
+-- Credenciais devem ser configuradas no ambiente (DB_USER/DB_PASSWORD).
 -- spring.jpa.hibernate.ddl-auto=update (ver application-mysql.properties)
 -- e cria/atualiza as tabelas sozinha ao subir — ou seja, NAO e
 -- obrigatorio rodar este script para a API funcionar.
@@ -52,12 +44,25 @@ CREATE TABLE IF NOT EXISTS usuario (
     data_aceite_termo_uso                DATETIME      NULL,
     aceite_lgpd                          TINYINT(1)    NOT NULL DEFAULT 0,
     data_aceite_lgpd                     DATETIME      NULL,
-    token_recuperacao_senha              VARCHAR(100)  NULL,
-    token_recuperacao_senha_expira_em    DATETIME      NULL,
     criado_em                            DATETIME      NULL,
     atualizado_em                        DATETIME      NULL,
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- password_reset_token (token descartavel de recuperacao de senha, 1h)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS password_reset_token (
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token        VARCHAR(100)  NOT NULL,
+    usuario_id   BIGINT        NOT NULL,
+    expira_em    DATETIME      NOT NULL,
+    usado        TINYINT(1)    NOT NULL DEFAULT 0,
+    criado_em    DATETIME      NULL,
+    CONSTRAINT uk_password_reset_token UNIQUE (token),
+    CONSTRAINT fk_password_reset_token_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
+    INDEX idx_token_reset (token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
@@ -226,14 +231,20 @@ CREATE TABLE IF NOT EXISTS movimentacao_estoque (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
--- cupom (desconto percentual aplicado sobre o subtotal do pedido)
+-- cupom (PERCENTUAL: valor = %; VALOR_FIXO: valor = R$; FRETE_GRATIS: sem valor)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS cupom (
-    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    codigo                VARCHAR(50)   NOT NULL,
-    percentual_desconto   DECIMAL(5,2)  NOT NULL,
-    ativo                 TINYINT(1)    NOT NULL DEFAULT 1,
-    valido_ate            DATETIME      NULL,
+    id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    codigo                  VARCHAR(50)    NOT NULL,
+    tipo                    ENUM('PERCENTUAL', 'VALOR_FIXO', 'FRETE_GRATIS') NOT NULL,
+    valor                   DECIMAL(12,2)  NULL,
+    valor_minimo            DECIMAL(12,2)  NULL,
+    valor_maximo_desconto   DECIMAL(12,2)  NULL,
+    valido_de               DATETIME       NULL,
+    valido_ate              DATETIME       NULL,
+    ativo                   TINYINT(1)     NOT NULL DEFAULT 1,
+    descricao               VARCHAR(200)   NULL,
+    criado_em               DATETIME       NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_cupom_codigo UNIQUE (codigo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -384,7 +395,10 @@ SELECT (SELECT id FROM produto WHERE codigo = 'AB-001' LIMIT 1),
        10
 WHERE NOT EXISTS (SELECT 1 FROM produto_variacao WHERE sku = 'AB-001-RN-BR');
 
-INSERT IGNORE INTO cupom (codigo, percentual_desconto, ativo) VALUES ('ARTHUR10', 10.00, 1);
+INSERT IGNORE INTO cupom (codigo, tipo, valor, descricao, ativo) VALUES
+  ('ARTHUR10', 'PERCENTUAL', 10.00, '10% de desconto', 1),
+  ('FRETEGRATIS', 'FRETE_GRATIS', NULL, 'Frete gratis', 1),
+  ('BEMVINDO', 'VALOR_FIXO', 15.00, 'R$ 15 de desconto', 1);
 
 -- Subcategorias de exemplo (categoria "Enxoval")
 INSERT IGNORE INTO categoria (categoria_pai_id, nome, descricao, ordem_exibicao)

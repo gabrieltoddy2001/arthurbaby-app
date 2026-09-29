@@ -9,7 +9,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -21,35 +20,37 @@ public class PedidoService {
     private final UsuarioRepository usuarios;
     private final ProdutoRepository produtos;
     private final ProdutoVariacaoRepository variacoes;
-    private final CupomRepository cupons;
+    private final CupomService cupons;
+    private final FreteService frete;
     private final EstoqueService estoque;
     public PedidoService(PedidoRepository pedidos, UsuarioRepository usuarios, ProdutoRepository produtos,
-                         ProdutoVariacaoRepository variacoes, CupomRepository cupons, EstoqueService estoque) {
+                         ProdutoVariacaoRepository variacoes, CupomService cupons, FreteService frete,
+                         EstoqueService estoque) {
         this.pedidos = pedidos;
         this.usuarios = usuarios;
         this.produtos = produtos;
         this.variacoes = variacoes;
         this.cupons = cupons;
+        this.frete = frete;
         this.estoque = estoque;
     }
 
     /**
-     * O desconto e sempre global (nivel do pedido): itens nao carregam desconto proprio.
-     * subtotal = soma(valorUnitario x quantidade); total = subtotal - desconto + frete.
-     * Com cupom, o desconto e calculado aqui sobre o subtotal e o valor enviado pelo cliente e ignorado;
-     * sem cupom, vale o {@code desconto} informado na requisicao.
+     * Todos os valores monetarios sao calculados aqui; {@code desconto} e {@code frete} enviados pelo app sao ignorados.
+     * O desconto e global (nivel do pedido) e so existe via cupom cadastrado; itens nao carregam desconto proprio.
+     * subtotal = soma(valorUnitario x quantidade); frete pela {@link FreteService} (zero com cupom FRETE_GRATIS);
+     * total = subtotal - desconto + frete, nunca negativo.
      */
     @Transactional
     public PedidoResponse criar(PedidoRequest request) {
         if (request.itens() == null || request.itens().isEmpty()) throw new IllegalArgumentException("Pedido deve possuir pelo menos um item");
+        if (request.clienteId() == null) throw new IllegalArgumentException("Cliente e obrigatorio");
         Usuario cliente = usuarios.findById(request.clienteId()).orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado"));
         Pedido pedido = new Pedido();
         pedido.setNumeroPedido("AB" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")));
         pedido.setCliente(cliente);
         if (request.formaRecebimento() != null) pedido.setFormaRecebimento(request.formaRecebimento());
         pedido.setObservacao(request.observacao());
-        pedido.setFrete(nvl(request.frete()));
-        if (pedido.getFrete().signum() < 0) throw new IllegalArgumentException("Frete nao pode ser negativo");
         BigDecimal subtotal = BigDecimal.ZERO;
         for (PedidoItemRequest itemRequest : request.itens()) {
             Produto produto = produtos.findById(itemRequest.produtoId()).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
@@ -75,26 +76,22 @@ public class PedidoService {
             estoque.baixarEstoque(produto, variacao, quantidade, cliente, "Pedido " + pedido.getNumeroPedido());
         }
         pedido.setSubtotal(subtotal);
-        aplicarDesconto(pedido, request, subtotal);
-        pedido.setTotal(subtotal.subtract(pedido.getDesconto()).add(pedido.getFrete()));
+
+        BigDecimal desconto = BigDecimal.ZERO;
+        boolean freteGratis = false;
+        if (request.cupom() != null && !request.cupom().isBlank()) {
+            CupomService.Aplicacao aplicacao = cupons.aplicar(request.cupom(), subtotal);
+            pedido.setCupom(aplicacao.cupom().getCodigo());
+            desconto = aplicacao.desconto();
+            freteGratis = aplicacao.freteGratis();
+        }
+        pedido.setDesconto(desconto);
+        pedido.setFrete(freteGratis ? BigDecimal.ZERO : frete.calcular(pedido.getFormaRecebimento(), subtotal));
+
+        BigDecimal total = subtotal.subtract(desconto).add(pedido.getFrete());
+        pedido.setTotal(total.signum() < 0 ? BigDecimal.ZERO : total);
         registrarHistorico(pedido, null, PedidoStatus.PEDIDO_GERADO, cliente, "Pedido gerado");
         return PedidoResponse.de(pedidos.save(pedido));
-    }
-
-    private void aplicarDesconto(Pedido pedido, PedidoRequest request, BigDecimal subtotal) {
-        if (request.cupom() != null && !request.cupom().isBlank()) {
-            Cupom cupom = cupons.findByCodigoIgnoreCase(request.cupom().trim())
-                    .filter(Cupom::estaValido)
-                    .orElseThrow(() -> new IllegalArgumentException("Cupom invalido ou expirado"));
-            pedido.setCupom(cupom.getCodigo());
-            pedido.setDesconto(subtotal.multiply(cupom.getPercentualDesconto())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
-            return;
-        }
-        BigDecimal desconto = nvl(request.desconto());
-        if (desconto.signum() < 0) throw new IllegalArgumentException("Desconto nao pode ser negativo");
-        if (desconto.compareTo(subtotal) > 0) throw new IllegalArgumentException("Desconto nao pode ser maior que o subtotal");
-        pedido.setDesconto(desconto);
     }
 
     @Transactional(readOnly = true)
@@ -181,5 +178,4 @@ public class PedidoService {
         String modelo = variacao.getModelo() == null ? "" : " Modelo: " + variacao.getModelo().getNome();
         return (tamanho + cor + modelo).trim();
     }
-    private BigDecimal nvl(BigDecimal valor) { return valor == null ? BigDecimal.ZERO : valor; }
 }

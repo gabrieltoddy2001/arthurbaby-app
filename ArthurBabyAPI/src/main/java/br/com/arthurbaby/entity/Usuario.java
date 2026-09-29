@@ -2,6 +2,8 @@ package br.com.arthurbaby.entity;
 
 import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Enums.UsuarioStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter @Setter
 @Entity
+// Os getters de UserDetails nao fazem parte do JSON do usuario
+@JsonIgnoreProperties(value = {"password", "username", "authorities", "accountNonExpired", "accountNonLocked",
+        "credentialsNonExpired", "enabled"}, ignoreUnknown = true)
 public class Usuario implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,7 +28,8 @@ public class Usuario implements UserDetails {
     private String nomeCompleto;
     @Column(nullable = false, unique = true, length = 150)
     private String email;
-    @Column(nullable = false)
+    /** Hash BCrypt: aceito na entrada (CRUD admin), nunca devolvido em JSON. */
+    @Column(nullable = false) @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
     private String telefone;
     @Column(unique = true, length = 14)
@@ -36,9 +42,6 @@ public class Usuario implements UserDetails {
     private LocalDateTime dataAceiteTermoUso;
     private boolean aceiteLgpd;
     private LocalDateTime dataAceiteLgpd;
-    @Column(length = 100)
-    private String tokenRecuperacaoSenha;
-    private LocalDateTime tokenRecuperacaoSenhaExpiraEm;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)

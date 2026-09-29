@@ -32,18 +32,30 @@ import br.com.arthurbaby.repository.ProdutoRepository;
 import br.com.arthurbaby.repository.ProdutoVariacaoRepository;
 import br.com.arthurbaby.repository.TamanhoRepository;
 import br.com.arthurbaby.repository.UsuarioRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+/**
+ * CRUD generico do painel admin. As entidades nunca saem do servico: sao convertidas em mapas JSON
+ * dentro da transacao, entao colecoes lazy sao lidas enquanto a sessao do JPA esta aberta.
+ */
 @Service
 public class AdminCrudService {
+    private static final TypeReference<Map<String, Object>> JSON = new TypeReference<>() {};
+    private static final Pattern BCRYPT = Pattern.compile("^\\$2[aby]?\\$\\d{2}\\$.{53}$");
+
     private final Map<String, RecursoAdmin> recursos;
     private final ObjectMapper mapper;
+    private final PasswordEncoder encoder;
 
     public AdminCrudService(UsuarioRepository usuarios, EnderecoRepository enderecos, CategoriaRepository categorias,
                             MarcaRepository marcas, ProdutoRepository produtos, ProdutoImagemRepository imagens,
@@ -51,8 +63,9 @@ public class AdminCrudService {
                             ProdutoVariacaoRepository variacoes, MovimentacaoEstoqueRepository movimentos,
                             PedidoRepository pedidos, PedidoItemRepository itens,
                             PedidoStatusHistoricoRepository historicos, ConfiguracaoLojaRepository configs,
-                            FavoritoRepository favoritos, ObjectMapper mapper) {
+                            FavoritoRepository favoritos, ObjectMapper mapper, PasswordEncoder encoder) {
         this.mapper = mapper;
+        this.encoder = encoder;
         this.recursos = Map.ofEntries(
                 recurso("usuarios", usuarios, Usuario.class),
                 recurso("enderecos", enderecos, Endereco.class),
@@ -73,38 +86,62 @@ public class AdminCrudService {
         );
     }
 
-    public List<?> listar(String tipo) {
-        return recurso(tipo).repository().findAll();
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> listar(String tipo) {
+        return recurso(tipo).repository().findAll().stream().map(this::json).toList();
     }
 
-    public Object buscar(String tipo, Long id) {
-        return recurso(tipo).repository()
+    @Transactional(readOnly = true)
+    public Map<String, Object> buscar(String tipo, Long id) {
+        return json(recurso(tipo).repository()
                 .findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Registro nao encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Registro nao encontrado")));
     }
 
-    public Object criar(String tipo, Object body) {
+    @Transactional
+    public Map<String, Object> criar(String tipo, Object body) {
         RecursoAdmin recurso = recurso(tipo);
-        return recurso.repository().save(mapper.convertValue(body, recurso.entityClass()));
+        Object entity = mapper.convertValue(body, recurso.entityClass());
+        prepararUsuario(entity, null);
+        return json(recurso.repository().save(entity));
     }
 
-    public Object atualizar(String tipo, Long id, Object body) {
+    @Transactional
+    public Map<String, Object> atualizar(String tipo, Long id, Object body) {
         RecursoAdmin recurso = recurso(tipo);
-        recurso.repository()
+        Object existente = recurso.repository()
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Registro nao encontrado"));
 
         Object entity = mapper.convertValue(body, recurso.entityClass());
         new BeanWrapperImpl(entity).setPropertyValue("id", id);
-        return recurso.repository().save(entity);
+        prepararUsuario(entity, existente);
+        return json(recurso.repository().save(entity));
     }
 
+    @Transactional
     public void excluir(String tipo, Long id) {
         RecursoAdmin recurso = recurso(tipo);
         recurso.repository()
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Registro nao encontrado"));
         recurso.repository().deleteById(id);
+    }
+
+    private Map<String, Object> json(Object entity) {
+        return mapper.convertValue(entity, JSON);
+    }
+
+    /** Usuario criado/alterado pelo admin: senha em texto vira hash BCrypt; sem senha no corpo, mantem a atual. */
+    private void prepararUsuario(Object entity, Object existente) {
+        if (!(entity instanceof Usuario usuario)) return;
+        usuario.setEmail(AuthService.normalizarEmail(usuario.getEmail()));
+        String senha = usuario.getSenha();
+        if (senha == null || senha.isBlank()) {
+            if (existente instanceof Usuario atual) usuario.setSenha(atual.getSenha());
+        } else if (!BCRYPT.matcher(senha).matches()) {
+            usuario.setSenha(encoder.encode(senha));
+        }
     }
 
     private RecursoAdmin recurso(String tipo) {
