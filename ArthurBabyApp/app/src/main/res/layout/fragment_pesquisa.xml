@@ -145,12 +145,23 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="12dp" />
 
+    <!-- PROGRESS BAR -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="60dp"
+        android:indeterminateTint="@color/verde_arthur"
+        android:visibility="gone" />
+
     <!-- RESULTADOS -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvResultados"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingHorizontal="10dp"
-        android:clipToPadding="false" />
+        android:clipToPadding="false"
+        android:visibility="gone" />
 
 </LinearLayout>

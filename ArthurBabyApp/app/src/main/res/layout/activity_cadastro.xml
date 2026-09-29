@@ -3,234 +3,330 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/branco"
+    android:background="@color/branco_quente"
     android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Criar Conta"
-            android:textColor="@color/verde_arthur"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Preencha seus dados para começar"
-            android:textColor="@color/cinza_texto"
-            android:textSize="14sp"
-            android:layout_marginBottom="20dp" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Nome completo">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etNome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPersonName" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="CPF"
-            android:layout_marginTop="12dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCpf"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLength="14" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="E-mail"
-            android:layout_marginTop="12dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEmail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Telefone"
-            android:layout_marginTop="12dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTelefone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="phone"
-                android:maxLength="15" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Senha"
-            android:layout_marginTop="12dp"
-            app:passwordToggleEnabled="true">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSenhaCad"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <!-- SEÇÃO ENDEREÇO -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Endereço"
-            android:textColor="@color/verde_arthur"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="CEP">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etCep"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLength="9" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Logradouro (rua/avenida)"
-            android:layout_marginTop="12dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etLogradouro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
-
+        <!-- CABEÇALHO -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="12dp">
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:background="@drawable/bg_gradiente_header">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <TextView
+                android:id="@+id/btnVoltarCad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="←"
+                android:textSize="28sp"
+                android:textColor="@color/branco"
+                android:paddingEnd="12dp" />
+
+            <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="Número">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etNumero"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:layout_marginStart="8dp"
-                android:hint="Complemento">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etComplemento"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text" />
-            </com.google.android.material.textfield.TextInputLayout>
+                android:text="Criar Conta"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/branco" />
         </LinearLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Bairro"
-            android:layout_marginTop="12dp">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etBairro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="text" />
-        </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp">
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vamos criar sua conta 💕"
+                android:textColor="@color/texto_primario"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Preencha seus dados para começar"
+                android:textColor="@color/cinza_medio"
+                android:textSize="13sp"
+                android:layout_marginBottom="20dp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:hint="Cidade">
+                android:hint="Nome completo"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etCidade"
+                    android:id="@+id/etNome"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="CPF"
+                android:layout_marginTop="12dp"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCpf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="14" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="E-mail"
+                android:layout_marginTop="12dp"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Telefone"
+                android:layout_marginTop="12dp"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etTelefone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:maxLength="15" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Senha"
+                android:layout_marginTop="12dp"
+                app:passwordToggleEnabled="true"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSenhaCad"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- SEÇÃO ENDEREÇO -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Endereço"
+                android:textColor="@color/texto_primario"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="CEP"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCep"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:maxLength="9" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Logradouro (rua/avenida)"
+                android:layout_marginTop="12dp"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etLogradouro"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Número"
+                    app:boxStrokeColor="@color/rosa_arthur"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etNumero"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:layout_marginStart="8dp"
+                    android:hint="Complemento"
+                    app:boxStrokeColor="@color/rosa_arthur"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etComplemento"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:hint="UF">
+                android:hint="Bairro"
+                android:layout_marginTop="12dp"
+                app:boxStrokeColor="@color/rosa_arthur"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusBottomEnd="16dp">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etUf"
+                    android:id="@+id/etBairro"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapCharacters"
-                    android:maxLength="2" />
+                    android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:hint="Cidade"
+                    app:boxStrokeColor="@color/rosa_arthur"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCidade"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:hint="UF"
+                    app:boxStrokeColor="@color/rosa_arthur"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusBottomEnd="16dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etUf"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapCharacters"
+                        android:maxLength="2" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/cbTermos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Aceito os Termos de Uso e a LGPD"
+                android:buttonTint="@color/rosa_arthur"
+                android:layout_marginTop="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCadastrar"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="CRIAR CONTA"
+                android:textColor="@color/branco"
+                android:textStyle="bold"
+                android:backgroundTint="@color/rosa_arthur"
+                app:cornerRadius="28dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="24dp" />
+
         </LinearLayout>
-
-        <CheckBox
-            android:id="@+id/cbTermos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Aceito os Termos de Uso e a LGPD"
-            android:layout_marginTop="16dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCadastrar"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="CADASTRAR"
-            android:textColor="@color/branco"
-            android:backgroundTint="@color/rosa_arthur"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp" />
-
     </LinearLayout>
 </ScrollView>

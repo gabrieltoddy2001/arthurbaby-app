@@ -20,6 +20,7 @@ import br.com.arthurbaby.network.ApiService;
 import br.com.arthurbaby.network.Conversor;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.dto.CategoriaResponse;
+import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,6 +28,7 @@ import retrofit2.Response;
 public class CategoriasFragment extends Fragment {
 
     private RecyclerView rv;
+    private View progressBar;
     private CategoriaAdapter adapter;
 
     @Nullable
@@ -45,6 +47,7 @@ public class CategoriasFragment extends Fragment {
                         .commit());
 
         rv = v.findViewById(R.id.rvCategorias);
+        progressBar = v.findViewById(R.id.progressBar);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
         carregarCategorias();
@@ -52,17 +55,22 @@ public class CategoriasFragment extends Fragment {
     }
 
     private void carregarCategorias() {
+        LoadingView.mostrar(progressBar, rv);
+
         ApiService api = RetrofitClient.getApi(requireContext());
         api.listarCategorias().enqueue(new Callback<List<CategoriaResponse>>() {
             @Override
             public void onResponse(Call<List<CategoriaResponse>> call,
                                    Response<List<CategoriaResponse>> response) {
+                LoadingView.esconder(progressBar, rv);
+
                 if (response.isSuccessful() && response.body() != null) {
                     adapter = new CategoriaAdapter(
                             Conversor.paraCategorias(response.body()),
                             categoria -> {
-                                ProdutosCategoriaFragment frag = ProdutosCategoriaFragment.newInstance(
-                                        categoria.getId(), categoria.getNome());
+                                ProdutosCategoriaFragment frag =
+                                        ProdutosCategoriaFragment.newInstance(
+                                                categoria.getId(), categoria.getNome());
                                 requireActivity().getSupportFragmentManager()
                                         .beginTransaction()
                                         .replace(R.id.frameContainer, frag)
@@ -78,6 +86,7 @@ public class CategoriasFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CategoriaResponse>> call, Throwable t) {
+                LoadingView.esconder(progressBar, rv);
                 Toast.makeText(requireContext(),
                         "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

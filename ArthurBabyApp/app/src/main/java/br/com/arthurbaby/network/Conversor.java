@@ -116,6 +116,7 @@ public class Conversor {
     public static Pedido paraPedido(PedidoResponse r) {
         if (r == null) return null;
 
+        // Converte itens
         List<ItemCarrinho> itens = new ArrayList<>();
         if (r.itens != null) {
             for (PedidoItemResponse item : r.itens) {
@@ -132,6 +133,7 @@ public class Conversor {
             }
         }
 
+        // Converte histórico
         List<PedidoStatus> hist = new ArrayList<>();
         if (r.historico != null) {
             for (PedidoStatusHistoricoResponse h : r.historico) {
@@ -143,7 +145,13 @@ public class Conversor {
                 r.numero,
                 parseData(r.data),
                 r.status,
+                r.subtotal != null ? r.subtotal.doubleValue() : 0,
+                r.desconto != null ? r.desconto.doubleValue() : 0,
+                r.frete != null ? r.frete.doubleValue() : 0,
                 r.total != null ? r.total.doubleValue() : 0,
+                r.cupom,
+                r.formaRecebimento,
+                r.observacao,
                 itens,
                 hist
         );

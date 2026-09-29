@@ -6,37 +6,84 @@
     android:orientation="vertical"
     android:background="@color/fundo_claro">
 
-    <!-- CABEÇALHO -->
+    <!-- CABEÇALHO COM GRADIENTE -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:background="@color/branco">
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:background="@drawable/bg_gradiente_header">
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="ArthurBaby"
-            android:textColor="@color/rosa_arthur"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/tvSaudacao"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Olá! 💕"
+                android:textColor="@color/branco"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bem-vinda à ArthurBaby"
+                android:textColor="@color/branco"
+                android:textSize="13sp"
+                android:alpha="0.9"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Botão ENTRAR -->
+        <TextView
+            android:id="@+id/btnEntrarHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Entrar"
+            android:textColor="@color/rosa_arthur"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/bg_botao_branco"
+            android:visibility="gone" />
+
+        <!-- Coração -->
         <ImageView
             android:id="@+id/btnFavoritos"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:background="@drawable/bg_circulo_branco_suave"
             android:src="@drawable/ic_favorito"
             app:tint="@color/rosa_arthur"
-            android:contentDescription="Favoritos" />
+            android:contentDescription="Favoritos"
+            android:visibility="gone" />
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="60dp"
+        android:indeterminateTint="@color/verde_arthur"
+        android:visibility="visible" />
+
     <ScrollView
+        android:id="@+id/scrollConteudo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,16 +98,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:background="@color/superficie"
+                android:background="@drawable/bg_card_suave"
                 android:padding="14dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:elevation="2dp">
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_busca"
-                    app:tint="@color/cinza_medio"
+                    app:tint="@color/rosa_arthur"
                     android:contentDescription="Buscar" />
 
                 <TextView
@@ -72,19 +120,19 @@
                     android:layout_marginStart="10dp" />
             </LinearLayout>
 
-            <!-- BANNER -->
+            <!-- BANNER COM GRADIENTE -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="160dp"
+                    android:layout_height="180dp"
                     android:orientation="horizontal"
-                    android:background="@color/rosa_claro"
+                    android:background="@drawable/bg_gradiente_pessego"
                     android:padding="20dp"
                     android:gravity="center_vertical">
 
@@ -98,10 +146,19 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Conforto\ne carinho\npara o seu bebê"
-                            android:textColor="@color/texto_primario"
-                            android:textSize="18sp"
+                            android:textColor="@color/branco"
+                            android:textSize="19sp"
                             android:textStyle="bold"
                             android:lineSpacingMultiplier="1.2" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Feito com amor 💕"
+                            android:textColor="@color/branco"
+                            android:textSize="12sp"
+                            android:alpha="0.9"
+                            android:layout_marginTop="4dp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnBanner"
@@ -109,10 +166,11 @@
                             android:layout_height="wrap_content"
                             android:text="Ver mais"
                             android:textSize="12sp"
-                            android:backgroundTint="@color/rosa_arthur"
-                            android:textColor="@color/branco"
+                            android:backgroundTint="@color/branco"
+                            android:textColor="@color/rosa_escuro"
                             android:paddingHorizontal="16dp"
                             android:minHeight="36dp"
+                            app:cornerRadius="18dp"
                             android:layout_marginTop="12dp" />
                     </LinearLayout>
 

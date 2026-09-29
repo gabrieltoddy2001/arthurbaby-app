@@ -98,13 +98,23 @@ public class DetalheProdutoFragment extends Fragment {
                         | Paint.STRIKE_THRU_TEXT_FLAG);
             }
 
-            boolean fav = FavoritoRepository.getInstance().isFavorito(produto.getId());
-            atualizarCoracao(btnFav, fav);
-            btnFav.setOnClickListener(x -> {
-                boolean agora = FavoritoRepository.getInstance()
-                        .toggle(requireContext(), produto.getId(), () -> {});
-                atualizarCoracao(btnFav, agora);
-            });
+            // Visitante? Esconde o coração e mostra só quando logado
+            boolean logado = br.com.arthurbaby.utils.AuthGuard.estaLogado(requireContext());
+            btnFav.setVisibility(logado ? View.VISIBLE : View.GONE);
+
+            if (logado) {
+                boolean fav = FavoritoRepository.getInstance().isFavorito(produto.getId());
+                atualizarCoracao(btnFav, fav);
+                btnFav.setOnClickListener(x -> {
+                    boolean agora = FavoritoRepository.getInstance()
+                            .toggle(requireContext(), produto.getId(), () -> {});
+                    atualizarCoracao(btnFav, agora);
+                });
+            } else {
+                btnFav.setOnClickListener(x -> br.com.arthurbaby.utils.AuthGuard
+                        .mostrarDialogLogin(requireActivity(),
+                                "Entre para salvar seus favoritos."));
+            }
 
             // Busca detalhes atualizados no backend
             carregarProdutoBackend(v);

@@ -43,6 +43,9 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
+        // Visitante? Esconde o coração
+        boolean logado = br.com.arthurbaby.utils.AuthGuard.estaLogado(h.itemView.getContext());
+        h.btnFavorito.setVisibility(logado ? View.VISIBLE : View.GONE);
         Produto p = produtos.get(position);
         h.tvNome.setText(p.getNome());
 
@@ -63,10 +66,16 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
         atualizarCoracao(h.btnFavorito, fav);
 
         h.btnFavorito.setOnClickListener(v -> {
+            // Visitante? Pede login
+            if (!br.com.arthurbaby.utils.AuthGuard.estaLogado(v.getContext())) {
+                br.com.arthurbaby.utils.AuthGuard.mostrarDialogLogin(
+                        (android.app.Activity) v.getContext(),
+                        "Entre para salvar seus favoritos.");
+                return;
+            }
+
             boolean agora = FavoritoRepository.getInstance().toggle(
-                    v.getContext(), p.getId(), () -> {
-                        // callback pós-API
-                    });
+                    v.getContext(), p.getId(), () -> {});
             atualizarCoracao(h.btnFavorito, agora);
         });
 

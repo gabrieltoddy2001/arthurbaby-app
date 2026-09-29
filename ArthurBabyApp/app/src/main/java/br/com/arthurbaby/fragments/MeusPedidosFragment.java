@@ -25,6 +25,8 @@ import br.com.arthurbaby.network.Conversor;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.PedidoResponse;
+import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,6 +35,7 @@ public class MeusPedidosFragment extends Fragment {
 
     private TabLayout tabs;
     private ViewPager2 pager;
+    private View progressBar, containerPedidos;
 
     @Nullable
     @Override
@@ -47,6 +50,16 @@ public class MeusPedidosFragment extends Fragment {
 
         tabs = v.findViewById(R.id.tabsPedidos);
         pager = v.findViewById(R.id.viewPagerPedidos);
+        progressBar = v.findViewById(R.id.progressBar);
+        containerPedidos = v.findViewById(R.id.containerPedidos);
+
+        // Visitante? Pede login
+        if (!AuthGuard.estaLogado(requireContext())) {
+            AuthGuard.mostrarDialogLogin(requireActivity(),
+                    "Entre para ver seus pedidos.");
+            requireActivity().getSupportFragmentManager().popBackStack();
+            return v;
+        }
 
         carregarPedidos();
         return v;
@@ -55,16 +68,21 @@ public class MeusPedidosFragment extends Fragment {
     private void carregarPedidos() {
         Long clienteId = TokenStorage.getUsuarioId(requireContext());
         if (clienteId == null) {
-            Toast.makeText(requireContext(),
-                    "Faça login novamente", Toast.LENGTH_SHORT).show();
+            AuthGuard.mostrarDialogLogin(requireActivity(),
+                    "Entre para ver seus pedidos.");
+            requireActivity().getSupportFragmentManager().popBackStack();
             return;
         }
+
+        LoadingView.mostrar(progressBar, containerPedidos);
 
         ApiService api = RetrofitClient.getApi(requireContext());
         api.listarPedidosCliente(clienteId).enqueue(new Callback<List<PedidoResponse>>() {
             @Override
             public void onResponse(Call<List<PedidoResponse>> call,
                                    Response<List<PedidoResponse>> response) {
+                LoadingView.esconder(progressBar, containerPedidos);
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Pedido> todos = Conversor.paraPedidos(response.body());
 
@@ -94,6 +112,7 @@ public class MeusPedidosFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<PedidoResponse>> call, Throwable t) {
+                LoadingView.esconder(progressBar, containerPedidos);
                 Toast.makeText(requireContext(),
                         "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

@@ -11,31 +11,36 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- CABEÇALHO COM AVATAR CIRCULAR -->
+        <!-- CABEÇALHO COM GRADIENTE -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
             android:paddingVertical="32dp"
-            android:background="@color/branco">
+            android:background="@drawable/bg_gradiente_header">
 
+            <!-- AVATAR CIRCULAR COM ANEL -->
             <FrameLayout
-                android:layout_width="100dp"
-                android:layout_height="100dp">
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:background="@drawable/bg_avatar_anel"
+                android:elevation="6dp">
 
-                <View
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:background="@drawable/bg_avatar_circle" />
-
-                <ImageView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                <FrameLayout
+                    android:layout_width="94dp"
+                    android:layout_height="94dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_perfil"
-                    app:tint="@color/rosa_arthur"
-                    android:contentDescription="Avatar" />
+                    android:background="@drawable/bg_avatar_interno">
+
+                    <ImageView
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_perfil"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Avatar" />
+                </FrameLayout>
             </FrameLayout>
 
             <TextView
@@ -43,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Maria Silva"
-                android:textColor="@color/texto_primario"
+                android:textColor="@color/branco"
                 android:textStyle="bold"
                 android:textSize="20sp"
                 android:layout_marginTop="16dp" />
@@ -53,222 +58,276 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="maria@exemplo.com"
-                android:textColor="@color/cinza_medio"
+                android:textColor="@color/branco"
                 android:textSize="13sp"
+                android:alpha="0.9"
                 android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <!-- MENU -->
         <LinearLayout
-            android:id="@+id/opMeusPedidos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="18dp"
-            android:background="@color/branco"
-            android:layout_marginTop="12dp"
-            android:clickable="true"
-            android:focusable="true">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_pedidos"
-                app:tint="@color/verde_arthur"
-                android:contentDescription="Meus Pedidos" />
-
-            <TextView
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/opMeusPedidos"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"
-                android:text="Meus Pedidos"
-                android:textColor="@color/texto_primario"
-                android:textSize="15sp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true">
 
-            <TextView
-                android:layout_width="wrap_content"
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circulo_categoria_suave">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_pedidos"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Meus Pedidos" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Meus Pedidos"
+                    android:textColor="@color/texto_primario"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="22sp"
+                    android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/opEnderecos"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="›"
-                android:textSize="22sp"
-                android:textColor="@color/cinza_texto" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circulo_categoria_suave">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_localizacao"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Endereços" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Endereços"
+                    android:textColor="@color/texto_primario"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="22sp"
+                    android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/opFavoritos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circulo_categoria_suave">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_favorito"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Favoritos" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Favoritos"
+                    android:textColor="@color/texto_primario"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="22sp"
+                    android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/opAjuda"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circulo_categoria_suave">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_ajuda"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Ajuda" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Ajuda"
+                    android:textColor="@color/texto_primario"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="22sp"
+                    android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/opSobre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circulo_categoria_suave">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_info"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Sobre" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Sobre"
+                    android:textColor="@color/texto_primario"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="22sp"
+                    android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/opSair"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="20dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circulo_vermelho_suave">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_sair"
+                        app:tint="@color/vermelho_desconto"
+                        android:contentDescription="Sair" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Sair"
+                    android:textColor="@color/vermelho_desconto"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/opEnderecos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="18dp"
-            android:background="@color/branco"
-            android:layout_marginTop="1dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_localizacao"
-                app:tint="@color/verde_arthur"
-                android:contentDescription="Endereços" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"
-                android:text="Endereços"
-                android:textColor="@color/texto_primario"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textSize="22sp"
-                android:textColor="@color/cinza_texto" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/opFavoritos"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="18dp"
-            android:background="@color/branco"
-            android:layout_marginTop="1dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_favorito"
-                app:tint="@color/verde_arthur"
-                android:contentDescription="Favoritos" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"
-                android:text="Favoritos"
-                android:textColor="@color/texto_primario"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textSize="22sp"
-                android:textColor="@color/cinza_texto" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/opAjuda"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="18dp"
-            android:background="@color/branco"
-            android:layout_marginTop="1dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_ajuda"
-                app:tint="@color/verde_arthur"
-                android:contentDescription="Ajuda" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"
-                android:text="Ajuda"
-                android:textColor="@color/texto_primario"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textSize="22sp"
-                android:textColor="@color/cinza_texto" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/opSobre"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="18dp"
-            android:background="@color/branco"
-            android:layout_marginTop="1dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_info"
-                app:tint="@color/verde_arthur"
-                android:contentDescription="Sobre" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"
-                android:text="Sobre"
-                android:textColor="@color/texto_primario"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="›"
-                android:textSize="22sp"
-                android:textColor="@color/cinza_texto" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/opSair"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="18dp"
-            android:background="@color/branco"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="20dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_sair"
-                app:tint="@color/rosa_arthur"
-                android:contentDescription="Sair" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="14dp"
-                android:text="Sair"
-                android:textColor="@color/rosa_arthur"
-                android:textStyle="bold"
-                android:textSize="15sp" />
-        </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

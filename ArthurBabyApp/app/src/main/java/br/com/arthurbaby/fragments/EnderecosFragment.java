@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -28,6 +27,8 @@ import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.EnderecoRequest;
 import br.com.arthurbaby.network.dto.EnderecoResponse;
+import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,6 +37,7 @@ public class EnderecosFragment extends Fragment {
 
     private RecyclerView rv;
     private EnderecoAdapter adapter;
+    private View progressBar, btnNovo;
 
     @Nullable
     @Override
@@ -49,10 +51,19 @@ public class EnderecosFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack());
 
         rv = v.findViewById(R.id.rvEnderecos);
+        progressBar = v.findViewById(R.id.progressBar);
+        btnNovo = v.findViewById(R.id.btnNovoEndereco);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        v.findViewById(R.id.btnNovoEndereco).setOnClickListener(x ->
-                abrirDialogNovoEndereco());
+        // Visitante? Pede login
+        if (!AuthGuard.estaLogado(requireContext())) {
+            AuthGuard.mostrarDialogLogin(requireActivity(),
+                    "Entre para gerenciar seus endereços.");
+            requireActivity().getSupportFragmentManager().popBackStack();
+            return v;
+        }
+
+        btnNovo.setOnClickListener(x -> abrirDialogNovoEndereco());
 
         carregarEnderecos();
         return v;
@@ -62,11 +73,15 @@ public class EnderecosFragment extends Fragment {
         Long clienteId = TokenStorage.getUsuarioId(requireContext());
         if (clienteId == null) return;
 
+        LoadingView.mostrar(progressBar, rv, btnNovo);
+
         ApiService api = RetrofitClient.getApi(requireContext());
         api.listarEnderecos(clienteId).enqueue(new Callback<List<EnderecoResponse>>() {
             @Override
             public void onResponse(Call<List<EnderecoResponse>> call,
                                    Response<List<EnderecoResponse>> response) {
+                LoadingView.esconder(progressBar, rv, btnNovo);
+
                 if (response.isSuccessful() && response.body() != null) {
                     adapter = new EnderecoAdapter(
                             Conversor.paraEnderecos(response.body()),
@@ -80,6 +95,7 @@ public class EnderecosFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<EnderecoResponse>> call, Throwable t) {
+                LoadingView.esconder(progressBar, rv, btnNovo);
                 Toast.makeText(requireContext(),
                         "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -114,44 +130,33 @@ public class EnderecosFragment extends Fragment {
                 .show();
     }
 
-    /**
-     * Abre um dialog simples para cadastrar endereço.
-     * (Depois podemos trocar por uma tela cheia.)
-     */
     private void abrirDialogNovoEndereco() {
         LinearLayout container = new LinearLayout(getContext());
         container.setOrientation(LinearLayout.VERTICAL);
-        container.setPadding(40, 20, 40, 20);
+        container.setPadding(50, 30, 50, 10);
 
-        TextInputEditText etCep = new TextInputEditText(getContext());
-        etCep.setHint("CEP");
+        TextInputEditText etCep = criarCampo("CEP");
         container.addView(etCep);
 
-        TextInputEditText etLog = new TextInputEditText(getContext());
-        etLog.setHint("Logradouro");
+        TextInputEditText etLog = criarCampo("Logradouro");
         container.addView(etLog);
 
-        TextInputEditText etNum = new TextInputEditText(getContext());
-        etNum.setHint("Número");
+        TextInputEditText etNum = criarCampo("Número");
         container.addView(etNum);
 
-        TextInputEditText etComp = new TextInputEditText(getContext());
-        etComp.setHint("Complemento");
+        TextInputEditText etComp = criarCampo("Complemento (opcional)");
         container.addView(etComp);
 
-        TextInputEditText etBairro = new TextInputEditText(getContext());
-        etBairro.setHint("Bairro");
+        TextInputEditText etBairro = criarCampo("Bairro");
         container.addView(etBairro);
 
-        TextInputEditText etCidade = new TextInputEditText(getContext());
-        etCidade.setHint("Cidade");
+        TextInputEditText etCidade = criarCampo("Cidade");
         container.addView(etCidade);
 
-        TextInputEditText etUf = new TextInputEditText(getContext());
-        etUf.setHint("UF");
+        TextInputEditText etUf = criarCampo("UF");
         container.addView(etUf);
 
-        new AlertDialog.Builder(requireContext())
+        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle("Novo endereço")
                 .setView(container)
                 .setPositiveButton("Salvar", (d, w) -> {
@@ -183,6 +188,18 @@ public class EnderecosFragment extends Fragment {
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
+    }
+
+    private TextInputEditText criarCampo(String hint) {
+        TextInputEditText et = new TextInputEditText(getContext());
+        et.setHint(hint);
+        android.widget.LinearLayout.LayoutParams lp =
+                new android.widget.LinearLayout.LayoutParams(
+                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 8, 0, 8);
+        et.setLayoutParams(lp);
+        return et;
     }
 
     private String texto(TextInputEditText et) {

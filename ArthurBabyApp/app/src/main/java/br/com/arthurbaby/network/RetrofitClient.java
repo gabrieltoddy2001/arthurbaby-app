@@ -4,6 +4,7 @@ import android.content.Context;
 
 import java.util.concurrent.TimeUnit;
 
+import br.com.arthurbaby.utils.SessionExpiredHandler;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -14,21 +15,31 @@ public class RetrofitClient {
     /**
      * URL do backend.
      * - 10.0.2.2 = localhost do PC, visto de dentro do emulador Android
-     * - 8080 = porta do backend Spring Boot
+     * - localhost = quando usa adb reverse
      */
-    private static final String BASE_URL = "http://localhost:8080/";
+    private static final String BASE_URL = "http://192.168.100.171:8080/";
 
     private static Retrofit retrofit;
 
     public static Retrofit getInstance(Context context) {
         if (retrofit == null) {
 
-            // Log completo das requisições (útil pra debug)
+            // Log completo
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
+            // Interceptor que detecta 401 e força logout
+            okhttp3.Interceptor authCheck = chain -> {
+                okhttp3.Response response = chain.proceed(chain.request());
+                if (response.code() == 401) {
+                    SessionExpiredHandler.tratar(context.getApplicationContext());
+                }
+                return response;
+            };
+
             OkHttpClient client = new OkHttpClient.Builder()
                     .addInterceptor(new AuthInterceptor(context))
+                    .addInterceptor(authCheck)
                     .addInterceptor(logging)
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)

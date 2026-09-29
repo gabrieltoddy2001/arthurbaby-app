@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/branco">
-
+    android:background="@color/branco_quente">
 
     <!-- Curvas decorativas -->
     <View
@@ -33,12 +32,26 @@
         android:gravity="center"
         android:paddingHorizontal="32dp">
 
-        <ImageView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="fitCenter"
-            android:contentDescription="Logo ArthurBaby" />
+        <FrameLayout
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:background="@drawable/bg_avatar_anel"
+            android:elevation="6dp">
+
+            <FrameLayout
+                android:layout_width="112dp"
+                android:layout_height="112dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_avatar_interno">
+
+                <ImageView
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    android:layout_gravity="center"
+                    android:src="@mipmap/ic_launcher"
+                    android:contentDescription="Logo ArthurBaby" />
+            </FrameLayout>
+        </FrameLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,12 +61,12 @@
             android:textSize="26sp"
             android:textStyle="bold"
             android:letterSpacing="0.1"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="20dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Obrigado por usar nosso app!"
+            android:text="Obrigada por usar nosso app!"
             android:textColor="@color/cinza_medio"
             android:textSize="14sp"
             android:layout_marginTop="6dp" />
@@ -62,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sugira esse app para outras mamães 💕"
-            android:textColor="@color/verde_arthur"
+            android:textColor="@color/rosa_escuro"
             android:textSize="15sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -76,37 +89,55 @@
             android:gravity="center"
             android:layout_marginTop="20dp">
 
-            <ImageView
+            <FrameLayout
                 android:id="@+id/btnInstagram"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:background="@color/rosa_claro"
-                android:src="@drawable/ic_instagram"
-                app:tint="@color/rosa_arthur"
-                android:contentDescription="Instagram" />
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_circulo_categoria_suave"
+                android:elevation="2dp">
 
-            <ImageView
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_instagram"
+                    app:tint="@color/rosa_arthur"
+                    android:contentDescription="Instagram" />
+            </FrameLayout>
+
+            <FrameLayout
                 android:id="@+id/btnWhatsapp"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:background="@color/verde_claro"
-                android:src="@drawable/ic_whatsapp"
-                app:tint="@color/verde_arthur"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_circulo_verde_suave"
                 android:layout_marginStart="16dp"
-                android:contentDescription="WhatsApp" />
+                android:elevation="2dp">
 
-            <ImageView
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_whatsapp"
+                    app:tint="@color/verde_arthur"
+                    android:contentDescription="WhatsApp" />
+            </FrameLayout>
+
+            <FrameLayout
                 android:id="@+id/btnShopee"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
-                android:background="@color/superficie"
-                android:src="@drawable/ic_shopee"
-                app:tint="@color/cinza_medio"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_circulo_categoria_suave"
                 android:layout_marginStart="16dp"
-                android:contentDescription="Shopee" />
+                android:elevation="2dp">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_shopee"
+                    app:tint="@color/rosa_arthur"
+                    android:contentDescription="Shopee" />
+            </FrameLayout>
         </LinearLayout>
 
         <TextView
@@ -116,7 +147,6 @@
             android:textColor="@color/cinza_medio"
             android:textSize="13sp"
             android:layout_marginTop="12dp" />
-
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -128,6 +158,8 @@
         android:layout_marginBottom="32dp"
         android:text="VOLTAR AO INÍCIO"
         android:backgroundTint="@color/rosa_arthur"
-        android:textColor="@color/branco" />
+        android:textColor="@color/branco"
+        android:textStyle="bold"
+        app:cornerRadius="28dp" />
 
 </RelativeLayout>

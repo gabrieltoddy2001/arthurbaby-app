@@ -33,6 +33,7 @@ import br.com.arthurbaby.network.dto.PedidoItemRequest;
 import br.com.arthurbaby.network.dto.PedidoRequest;
 import br.com.arthurbaby.network.dto.PedidoResponse;
 import br.com.arthurbaby.repositories.CarrinhoRepository;
+import br.com.arthurbaby.utils.AuthGuard;
 import br.com.arthurbaby.utils.LoadingUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,6 +47,7 @@ public class CarrinhoFragment extends Fragment {
     private CarrinhoRepository repo;
     private double descontoAplicado = 0;
     private String cupomAplicado = null;
+    private boolean freteGratisPorCupom = false;
 
     @Nullable
     @Override
@@ -84,48 +86,66 @@ public class CarrinhoFragment extends Fragment {
             atualizarTotal();
         });
 
-        // Cupom
+        // CUPOM
         v.findViewById(R.id.btnAplicarCupom).setOnClickListener(x -> {
             String cupom = etCupom.getText().toString().trim().toUpperCase();
             if ("ARTHUR10".equals(cupom)) {
                 descontoAplicado = repo.getSubtotal() * 0.10;
                 cupomAplicado = cupom;
+                freteGratisPorCupom = false;
                 rowDesconto.setVisibility(View.VISIBLE);
                 NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
                 tvDesconto.setText("- " + nf.format(descontoAplicado));
                 Toast.makeText(requireContext(),
                         "Cupom aplicado! 10% de desconto", Toast.LENGTH_SHORT).show();
+            } else if ("FRETEGRATIS".equals(cupom)) {
+                descontoAplicado = 0;
+                cupomAplicado = cupom;
+                freteGratisPorCupom = true;
+                rowDesconto.setVisibility(View.GONE);
+                Toast.makeText(requireContext(),
+                        "Frete grátis aplicado!", Toast.LENGTH_SHORT).show();
             } else {
                 descontoAplicado = 0;
                 cupomAplicado = null;
+                freteGratisPorCupom = false;
                 rowDesconto.setVisibility(View.GONE);
                 Toast.makeText(requireContext(), "Cupom inválido", Toast.LENGTH_SHORT).show();
             }
             atualizarTotal();
         });
 
-        // Finalizar
+        // === FINALIZAR PEDIDO ===
         v.findViewById(R.id.btnFinalizar).setOnClickListener(x -> {
+
             if (repo.getItens().isEmpty()) {
                 Toast.makeText(requireContext(), "Carrinho vazio!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            // Visitante? Pede login
+            if (!AuthGuard.estaLogado(requireContext())) {
+                AuthGuard.mostrarDialogLogin(requireActivity(),
+                        "Entre para finalizar seu pedido. Seus itens foram salvos!");
+                return;
+            }
+
             Long clienteId = TokenStorage.getUsuarioId(requireContext());
             if (clienteId == null) {
-                Toast.makeText(requireContext(), "Faça login novamente", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(),
+                        "Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show();
+                AuthGuard.mostrarDialogLogin(requireActivity(), null);
                 return;
             }
 
             String observacao = etObservacao.getText().toString().trim();
             String forma = repo.getFormaRecebimento();
 
-            // Monta os itens do pedido
             List<PedidoItemRequest> itensReq = new ArrayList<>();
             for (ItemCarrinho item : repo.getItens()) {
                 itensReq.add(new PedidoItemRequest(
                         item.getProduto().getId(),
-                        null, // variacaoId (back ainda não tem)
+                        item.getVariacaoId(),
                         item.getQuantidade()
                 ));
             }
@@ -133,9 +153,9 @@ public class CarrinhoFragment extends Fragment {
             PedidoRequest request = new PedidoRequest(
                     clienteId,
                     forma,
-                    cupomAplicado,                              // ← campo novo
+                    cupomAplicado,
                     BigDecimal.valueOf(descontoAplicado),
-                    BigDecimal.valueOf(repo.getFrete()),
+                    BigDecimal.valueOf(freteGratisPorCupom ? 0 : repo.getFrete()),
                     observacao,
                     itensReq
             );
@@ -151,10 +171,8 @@ public class CarrinhoFragment extends Fragment {
                     if (response.isSuccessful() && response.body() != null) {
                         PedidoResponse pedido = response.body();
 
-                        // Limpa o carrinho
                         repo.limpar();
 
-                        // Abre a confirmação com o número real
                         ConfirmaPedidoFragment frag = ConfirmaPedidoFragment.newInstance(
                                 pedido.numero,
                                 forma,
@@ -163,7 +181,7 @@ public class CarrinhoFragment extends Fragment {
                                 pedido.subtotal != null ? pedido.subtotal.doubleValue() : 0,
                                 pedido.frete != null ? pedido.frete.doubleValue() : 0,
                                 pedido.desconto != null ? pedido.desconto.doubleValue() : descontoAplicado,
-                                cupomAplicado
+                                pedido.cupom != null ? pedido.cupom : cupomAplicado
                         );
                         requireActivity().getSupportFragmentManager()
                                 .beginTransaction()
@@ -202,7 +220,7 @@ public class CarrinhoFragment extends Fragment {
     private void atualizarTotal() {
         NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         double subtotal = repo.getSubtotal();
-        double frete = repo.getFrete();
+        double frete = freteGratisPorCupom ? 0 : repo.getFrete();
         double total = subtotal + frete - descontoAplicado;
 
         tvSubtotal.setText(nf.format(subtotal));
