@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+/** Prévia de cupom para o carrinho do app; o valor definitivo é recalculado ao criar o pedido. */
 @RestController
-@RequestMapping("/api/cupons")
+@RequestMapping(value = "/api/cupons", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Cupons", description = "Validação de cupons de desconto cadastrados pelo admin. Endpoint público.")
 public class CupomController {
     private final CupomService service;

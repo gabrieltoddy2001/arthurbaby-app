@@ -2,21 +2,27 @@ package br.com.arthurbaby.controller;
 
 import br.com.arthurbaby.dto.CategoriaResponse;
 import br.com.arthurbaby.dto.MovimentacaoEstoqueResponse;
-import br.com.arthurbaby.dto.ProdutoDetalheResponse;
 import br.com.arthurbaby.dto.ProdutoDetalheResponse.VariacaoResponse;
+import br.com.arthurbaby.dto.ProdutoDetalheResponse;
 import br.com.arthurbaby.dto.ProdutoResumoResponse;
 import br.com.arthurbaby.service.CatalogoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
 import java.math.BigDecimal;
 import java.util.List;
 
+/** Catálogo público consumido pela vitrine do app; nenhum endpoint exige token (ver SecurityConfig). */
 @RestController
+@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Catálogo", description = "Categorias, produtos e estoque. Endpoints públicos (não exigem token).")
 public class PublicCatalogController {
     private final CatalogoService catalogo;
@@ -35,12 +41,12 @@ public class PublicCatalogController {
             @ApiResponse(responseCode = "200", description = "Página de produtos que atendem aos filtros"),
             @ApiResponse(responseCode = "400", description = "Parâmetro de filtro ou de paginação com formato inválido")
     })
-    public Page<ProdutoResumoResponse> produtos(@RequestParam(required = false) String q,
-                                                @RequestParam(required = false) Long categoriaId,
-                                                @RequestParam(required = false) BigDecimal precoMin,
-                                                @RequestParam(required = false) BigDecimal precoMax,
-                                                @RequestParam(required = false) Boolean promocao,
-                                                Pageable pageable) {
+    public Page<ProdutoResumoResponse> produtos(@Parameter(description = "Texto buscado em nome, código, SKU ou descrição", example = "kit") @RequestParam(required = false) String q,
+                                                @Parameter(description = "Id da categoria (somente produtos diretamente nela)", example = "1") @RequestParam(required = false) Long categoriaId,
+                                                @Parameter(description = "Preço mínimo", example = "50.00") @RequestParam(required = false) BigDecimal precoMin,
+                                                @Parameter(description = "Preço máximo", example = "200.00") @RequestParam(required = false) BigDecimal precoMax,
+                                                @Parameter(description = "true = apenas produtos em promoção", example = "false") @RequestParam(required = false) Boolean promocao,
+                                                @ParameterObject Pageable pageable) {
         return catalogo.listarProdutos(q, categoriaId, precoMin, precoMax, promocao, pageable);
     }
     @GetMapping("/api/produtos/{id}")
@@ -49,7 +55,7 @@ public class PublicCatalogController {
             @ApiResponse(responseCode = "200", description = "Detalhes do produto"),
             @ApiResponse(responseCode = "404", description = "Produto não encontrado")
     })
-    public ProdutoDetalheResponse produto(@PathVariable Long id) {
+    public ProdutoDetalheResponse produto(@Parameter(description = "Id do produto", example = "1") @PathVariable Long id) {
         return catalogo.detalhe(id);
     }
     @GetMapping("/api/estoque/{produtoId}")
@@ -57,7 +63,7 @@ public class PublicCatalogController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Variações do produto com estoque (vazia se o produto não existir)")
     })
-    public List<VariacaoResponse> estoque(@PathVariable Long produtoId) {
+    public List<VariacaoResponse> estoque(@Parameter(description = "Id do produto", example = "1") @PathVariable Long produtoId) {
         return catalogo.estoque(produtoId);
     }
     @GetMapping("/api/estoque/{produtoId}/movimentacoes")
@@ -65,7 +71,7 @@ public class PublicCatalogController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Movimentações do produto (vazia se não houver)")
     })
-    public List<MovimentacaoEstoqueResponse> movimentacoes(@PathVariable Long produtoId) {
+    public List<MovimentacaoEstoqueResponse> movimentacoes(@Parameter(description = "Id do produto", example = "1") @PathVariable Long produtoId) {
         return catalogo.movimentacoes(produtoId);
     }
 }

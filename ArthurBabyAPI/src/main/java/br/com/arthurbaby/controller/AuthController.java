@@ -9,13 +9,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Endpoints de autenticação. Login, cadastro e recuperação de senha são públicos;
+ * {@code /me} exige o token JWT no cabeçalho Authorization.
+ */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(value = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Autenticação", description = "Login, cadastro de clientes e recuperação de senha (públicos) e dados do usuário logado (exige token).")
 public class AuthController {
+    /** Mensagem fixa para não revelar se o e-mail existe na base (evita enumeração de contas). */
     static final String MENSAGEM_RECUPERACAO = "Se o e-mail estiver cadastrado, você receberá um código.";
 
     private final AuthService auth;

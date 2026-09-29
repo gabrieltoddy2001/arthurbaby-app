@@ -8,18 +8,21 @@ import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** Perfil e endereços do cliente. Cada método chama {@link #verificarAcesso} antes de delegar ao serviço. */
 @RestController
-@RequestMapping("/api/clientes")
+@RequestMapping(value = "/api/clientes", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Clientes", description = "Perfil e endereços do cliente. Exige token; o cliente só acessa os próprios dados, administrador e vendedor acessam qualquer cliente.")
 public class ClienteController {
     private static final String OUTRO_CLIENTE = "Acesso negado: dados pertencem a outro cliente";
@@ -34,7 +37,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
-    public ClienteResponse buscar(@PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
+    public ClienteResponse buscar(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         return service.buscarPerfil(id);
     }
@@ -47,7 +50,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
-    public ClienteResponse atualizar(@PathVariable Long id, @RequestBody AtualizarClienteRequest request,
+    public ClienteResponse atualizar(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @RequestBody AtualizarClienteRequest request,
                                      @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         return service.atualizarPerfil(id, request);
@@ -61,7 +64,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
-    public void excluir(@PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
+    public void excluir(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         service.inativar(id);
     }
@@ -73,7 +76,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
-    public List<EnderecoResponse> listarEnderecos(@PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
+    public List<EnderecoResponse> listarEnderecos(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         return service.listarEnderecos(id);
     }
@@ -85,7 +88,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente ou endereço não encontrado")
     })
-    public EnderecoResponse buscarEndereco(@PathVariable Long id, @PathVariable Long enderecoId,
+    public EnderecoResponse buscarEndereco(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @Parameter(description = "Id do endereço", example = "7") @PathVariable Long enderecoId,
                                            @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         return service.buscarEndereco(id, enderecoId);
@@ -100,7 +103,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
-    public EnderecoResponse criarEndereco(@PathVariable Long id, @RequestBody EnderecoRequest request,
+    public EnderecoResponse criarEndereco(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @RequestBody EnderecoRequest request,
                                           @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         return service.criarEndereco(id, request);
@@ -114,7 +117,7 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente ou endereço não encontrado")
     })
-    public EnderecoResponse atualizarEndereco(@PathVariable Long id, @PathVariable Long enderecoId,
+    public EnderecoResponse atualizarEndereco(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @Parameter(description = "Id do endereço", example = "7") @PathVariable Long enderecoId,
                                               @RequestBody EnderecoRequest request,
                                               @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
@@ -129,12 +132,16 @@ public class ClienteController {
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente ou endereço não encontrado")
     })
-    public void excluirEndereco(@PathVariable Long id, @PathVariable Long enderecoId,
+    public void excluirEndereco(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @Parameter(description = "Id do endereço", example = "7") @PathVariable Long enderecoId,
                                 @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         service.excluirEndereco(id, enderecoId);
     }
 
+    /**
+     * Regra de acesso: administrador e vendedor acessam qualquer cliente;
+     * o cliente só acessa os próprios dados (id do token igual ao id da URL). Caso contrário, 403.
+     */
     private void verificarAcesso(Long id, Usuario logado) {
         boolean equipeLoja = logado.getPerfil() == Perfil.ADMINISTRADOR || logado.getPerfil() == Perfil.VENDEDOR;
         if (!equipeLoja && !logado.getId().equals(id)) {

@@ -9,11 +9,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+/** Cadastro de produto em uma chamada só (produto + imagens + variações), usado pelo painel admin. */
 @RestController
-@RequestMapping("/api/admin/produtos")
+@RequestMapping(value = "/api/admin/produtos", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Administração - Produtos", description = "Cadastro completo de produtos. Exige perfil ADMINISTRADOR ou VENDEDOR.")
 public class ProdutoAdminController {
     private final ProdutoAdminService service;

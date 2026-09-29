@@ -6,14 +6,20 @@ import br.com.arthurbaby.entity.Enums.MovimentoEstoqueTipo;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.service.EstoqueService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Operações manuais de estoque por variação. Todas delegam para {@link EstoqueService#movimentarVariacao},
+ * que atualiza o saldo e grava a movimentação com o usuário logado.
+ */
 @RestController
-@RequestMapping("/api/admin/estoque/variacoes/{variacaoId}")
+@RequestMapping(value = "/api/admin/estoque/variacoes/{variacaoId}", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Administração - Estoque", description = "Entrada, ajuste e estorno manuais de estoque por variação. Exige perfil ADMINISTRADOR ou VENDEDOR. "
         + "Cada operação gera uma movimentação registrada com o usuário logado.")
 public class EstoqueAdminController {
@@ -32,7 +38,7 @@ public class EstoqueAdminController {
             @ApiResponse(responseCode = "403", description = SEM_PERMISSAO),
             @ApiResponse(responseCode = "404", description = "Variação não encontrada")
     })
-    public MovimentacaoEstoqueResponse entrada(@PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
+    public MovimentacaoEstoqueResponse entrada(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                                @AuthenticationPrincipal Usuario logado) {
         return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.ENTRADA, request.quantidade(), logado, request.observacao());
     }
@@ -45,7 +51,7 @@ public class EstoqueAdminController {
             @ApiResponse(responseCode = "403", description = SEM_PERMISSAO),
             @ApiResponse(responseCode = "404", description = "Variação não encontrada")
     })
-    public MovimentacaoEstoqueResponse ajuste(@PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
+    public MovimentacaoEstoqueResponse ajuste(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                               @AuthenticationPrincipal Usuario logado) {
         return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.AJUSTE, request.quantidade(), logado, request.observacao());
     }
@@ -59,7 +65,7 @@ public class EstoqueAdminController {
             @ApiResponse(responseCode = "403", description = SEM_PERMISSAO),
             @ApiResponse(responseCode = "404", description = "Variação não encontrada")
     })
-    public MovimentacaoEstoqueResponse estorno(@PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
+    public MovimentacaoEstoqueResponse estorno(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                                @AuthenticationPrincipal Usuario logado) {
         return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.ESTORNO, request.quantidade(), logado, request.observacao());
     }
