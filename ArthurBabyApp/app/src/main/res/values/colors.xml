@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cores institucionais -->
+    <color name="verde_arthur">#37B6B0</color>
+    <color name="verde_claro">#A8DEDB</color>
+    <color name="verde_escuro">#2A8F8A</color>
+
+    <color name="rosa_arthur">#ED83A4</color>
+    <color name="rosa_claro">#FAD1DE</color>
+    <color name="rosa_escuro">#D56586</color>
+
+    <!-- Neutras -->
+    <color name="branco">#FFFFFF</color>
+    <color name="fundo_claro">#F7F9FC</color>
+    <color name="superficie">#F0F2F5</color>
+    <color name="cinza_borda">#E2E8F0</color>
+    <color name="cinza_texto">#64748B</color>
+    <color name="cinza_medio">#64748B</color>
+    <color name="texto_primario">#1E293B</color>
+    <color name="preto">#000000</color>
+
+    <!-- Estados -->
+    <color name="vermelho_desconto">#EF4444</color>
+    <color name="amarelo_estrela">#FFC107</color>
+
+    <!-- Corações / favoritos -->
+    <color name="coracao_ativo">#ED83A4</color>
+    <color name="coracao_inativo">#CBD5E1</color>
+
+    <!-- Cores por categoria -->
+    <color name="cat_enxoval">#37B6B0</color>
+    <color name="cat_roupas_bebe">#ED83A4</color>
+    <color name="cat_roupas_infantis">#FFC107</color>
+    <color name="cat_acessorios">#8B5CF6</color>
+    <color name="cat_higiene">#10B981</color>
+    <color name="cat_alimentacao">#F97316</color>
+    <color name="cat_quarto">#3B82F6</color>
+    <color name="cat_presentes">#EC4899</color>
+</resources>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/fundo_claro">
+
+    <!-- CABEÇALHO -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:background="@color/branco">
+
+        <TextView
+            android:id="@+id/btnVoltarBusca"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:textSize="26sp"
+            android:textColor="@color/texto_primario"
+            android:paddingEnd="12dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Buscar"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/texto_primario" />
+    </LinearLayout>
+
+    <!-- CAMPO DE BUSCA -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/branco"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@color/superficie"
+            android:padding="12dp">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_busca"
+                app:tint="@color/cinza_medio"
+                android:contentDescription="Buscar" />
+
+            <EditText
+                android:id="@+id/etBusca"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Buscar produtos..."
+                android:background="@android:color/transparent"
+                android:paddingStart="10dp"
+                android:textSize="14sp"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:singleLine="true" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CHIPS DE FILTRO -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/branco"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="12dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/chipTodas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Todas"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:background="@color/superficie"
+                android:textColor="@color/texto_primario"
+                android:textSize="13sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/chipPromocao"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Promoção"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:background="@color/superficie"
+                android:textColor="@color/texto_primario"
+                android:textSize="13sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/chipBaratos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Até R$ 50"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:background="@color/superficie"
+                android:textColor="@color/texto_primario"
+                android:textSize="13sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/chipLimpar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Limpar"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:background="@color/superficie"
+                android:textColor="@color/cinza_medio"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- INFO RESULTADOS -->
+    <TextView
+        android:id="@+id/tvResultadoInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Digite para buscar"
+        android:textColor="@color/cinza_medio"
+        android:textSize="13sp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp" />
+
+    <!-- RESULTADOS -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvResultados"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="10dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>

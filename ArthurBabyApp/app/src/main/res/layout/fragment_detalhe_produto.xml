@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/branco">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="100dp">
+
+            <!-- IMAGEM COM CORAÇÃO E VOLTAR -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="@color/rosa_claro">
+
+                <ImageView
+                    android:id="@+id/imgProduto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerInside"
+                    android:contentDescription="Imagem do produto" />
+
+                <!-- VOLTAR (cabeçalho branco com texto escuro) -->
+                <ImageView
+                    android:id="@+id/btnVoltar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="12dp"
+                    android:padding="8dp"
+                    android:background="@color/branco"
+                    android:src="@drawable/ic_busca"
+                    android:rotation="270"
+                    app:tint="@color/texto_primario"
+                    android:contentDescription="Voltar" />
+
+                <!-- CORAÇÃO -->
+                <ImageView
+                    android:id="@+id/btnFavoritoDetalhe"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="12dp"
+                    android:padding="8dp"
+                    android:background="@color/branco"
+                    android:src="@drawable/ic_favorito"
+                    app:tint="@color/coracao_inativo"
+                    android:contentDescription="Favorito" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/tvNome"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Produto"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/texto_primario" />
+
+                <TextView
+                    android:id="@+id/tvMarca"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Marca: ArthurBaby"
+                    android:textColor="@color/cinza_medio"
+                    android:textSize="13sp"
+                    android:layout_marginTop="4dp" />
+
+                <!-- ESTRELAS -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp">
+
+                    <TextView
+                        android:id="@+id/tvEstrelas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="★★★★★"
+                        android:textColor="@color/amarelo_estrela"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/tvAvaliacao"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(5.0)"
+                        android:textColor="@color/cinza_texto"
+                        android:textSize="13sp"
+                        android:layout_marginStart="6dp" />
+                </LinearLayout>
+
+                <!-- PREÇO -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:id="@+id/tvPreco"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="R$ 0,00"
+                        android:textSize="26sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/rosa_arthur" />
+
+                    <TextView
+                        android:id="@+id/tvPrecoAntigo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="@color/cinza_texto"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        android:layout_marginStart="10dp" />
+                </LinearLayout>
+
+                <!-- DESCRIÇÃO -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Descrição"
+                    android:textStyle="bold"
+                    android:textColor="@color/verde_arthur"
+                    android:layout_marginTop="20dp" />
+
+                <TextView
+                    android:id="@+id/tvDescricao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cinza_medio"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:layout_marginTop="6dp" />
+
+                <!-- COR -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cor"
+                    android:textStyle="bold"
+                    android:textColor="@color/verde_arthur"
+                    android:layout_marginTop="20dp" />
+
+                <LinearLayout
+                    android:id="@+id/containerCores"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp" />
+
+                <!-- TAMANHO -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tamanho"
+                    android:textStyle="bold"
+                    android:textColor="@color/verde_arthur"
+                    android:layout_marginTop="20dp" />
+
+                <LinearLayout
+                    android:id="@+id/containerTamanhos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp" />
+
+                <!-- MODELO -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Modelo"
+                    android:textStyle="bold"
+                    android:textColor="@color/verde_arthur"
+                    android:layout_marginTop="20dp" />
+
+                <LinearLayout
+                    android:id="@+id/containerModelos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp" />
+
+                <!-- QUANTIDADE -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quantidade"
+                    android:textStyle="bold"
+                    android:textColor="@color/verde_arthur"
+                    android:layout_marginTop="20dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp"
+                    android:background="@color/fundo_claro"
+                    android:padding="4dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMenos"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:text="-"
+                        android:textSize="20sp"
+                        android:backgroundTint="@color/branco"
+                        android:textColor="@color/texto_primario"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:padding="0dp" />
+
+                    <TextView
+                        android:id="@+id/tvQtd"
+                        android:layout_width="50dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/texto_primario" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMais"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:text="+"
+                        android:textSize="20sp"
+                        android:backgroundTint="@color/branco"
+                        android:textColor="@color/texto_primario"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:padding="0dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- BOTÃO FIXO NO RODAPÉ -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddCarrinho"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp"
+        android:text="ADICIONAR AO CARRINHO"
+        android:backgroundTint="@color/rosa_arthur"
+        android:textColor="@color/branco"
+        app:cornerRadius="28dp"
+        app:icon="@drawable/ic_carrinho"
+        app:iconTint="@color/branco"
+        app:iconGravity="textStart" />
+
+</RelativeLayout>

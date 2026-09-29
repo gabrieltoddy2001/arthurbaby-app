@@ -1,0 +1,21 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Senhas locais
+application-local.properties
+application-secret.properties

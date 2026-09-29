@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/fundo_claro">
+
+    <!-- CABEÇALHO -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:background="@color/branco">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Categorias"
+            android:textColor="@color/texto_primario"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_favorito"
+            app:tint="@color/rosa_arthur"
+            android:contentDescription="Favoritos" />
+    </LinearLayout>
+
+    <!-- BUSCA -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/branco"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@color/superficie"
+            android:padding="12dp">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_busca"
+                app:tint="@color/cinza_medio"
+                android:contentDescription="Buscar" />
+
+            <TextView
+                android:id="@+id/atalhoBuscaCat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Buscar produtos..."
+                android:textColor="@color/cinza_texto"
+                android:textSize="14sp"
+                android:layout_marginStart="10dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- LISTA -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCategorias"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>

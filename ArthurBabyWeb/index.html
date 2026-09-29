@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>ArthurBaby Admin</title>
+  <script>
+    // Redireciona: se já tem sessão → dashboard; senão → login
+    if (localStorage.getItem('ab_token')) {
+      window.location.href = 'dashboard.html';
+    } else {
+      window.location.href = 'login.html';
+    }
+  </script>
+</head>
+<body></body>
+</html>

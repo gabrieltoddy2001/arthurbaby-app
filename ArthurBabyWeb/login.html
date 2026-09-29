@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — ArthurBaby Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-box">
+      <h1>ArthurBaby</h1>
+      <p class="subtitulo">Painel Administrativo</p>
+
+      <div id="alerta" class="alert alert-erro hidden"></div>
+
+      <form id="form-login">
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" placeholder="admin@arthurbaby.com.br" required>
+        </div>
+        <div class="field">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" placeholder="••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-entrar">Entrar</button>
+      </form>
+
+      <p style="text-align:center; font-size:.8rem; color:#64748B; margin-top:1rem;">
+        <strong>Modo demonstração</strong><br>
+        admin@arthurbaby.com.br / 123456
+      </p>
+    </div>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    redirecionarSeLogado();
+
+    const form = document.getElementById('form-login');
+    const alerta = document.getElementById('alerta');
+    const btn = document.getElementById('btn-entrar');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alerta.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+
+      try {
+        const resp = await login(
+          document.getElementById('email').value.trim(),
+          document.getElementById('senha').value
+        );
+        salvarSessao(resp);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        alerta.textContent = err.message || 'Falha no login';
+        alerta.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    });
+  </script>
+</body>
+</html>
