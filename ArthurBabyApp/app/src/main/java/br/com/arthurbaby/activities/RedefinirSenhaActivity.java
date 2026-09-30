@@ -30,7 +30,7 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
         TextInputEditText etNovaSenha = findViewById(R.id.etNovaSenha);
         MaterialButton btnRedefinir = findViewById(R.id.btnRedefinir);
 
-        // Se o usuário chegou aqui com um token vindo de outra tela, preenche
+        // Se o app recebeu um token via Intent, preenche
         String tokenInicial = getIntent().getStringExtra("token");
         if (tokenInicial != null && !tokenInicial.isEmpty()) {
             etToken.setText(tokenInicial);

@@ -33,7 +33,8 @@ import retrofit2.Response;
 public class FavoritosFragment extends Fragment {
 
     private RecyclerView rv;
-    private TextView tvVazio;
+    private View tvVazio;
+    private TextView tvVazioTitulo;
     private View progressBar;
 
     @Nullable
@@ -49,12 +50,15 @@ public class FavoritosFragment extends Fragment {
 
         rv = v.findViewById(R.id.rvFavoritos);
         tvVazio = v.findViewById(R.id.tvVazio);
+        tvVazioTitulo = v.findViewById(R.id.tvVazioTitulo);
         progressBar = v.findViewById(R.id.progressBar);
         rv.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         // Visitante? Pede login
         if (!AuthGuard.estaLogado(requireContext())) {
-            tvVazio.setText("Faça login para ver seus favoritos.");
+            if (tvVazioTitulo != null) {
+                tvVazioTitulo.setText("Faça login para ver seus favoritos");
+            }
             tvVazio.setVisibility(View.VISIBLE);
             rv.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
@@ -73,7 +77,9 @@ public class FavoritosFragment extends Fragment {
     private void carregarFavoritos() {
         Long clienteId = TokenStorage.getUsuarioId(requireContext());
         if (clienteId == null) {
-            tvVazio.setText("Faça login para ver seus favoritos.");
+            if (tvVazioTitulo != null) {
+                tvVazioTitulo.setText("Faça login para ver seus favoritos");
+            }
             tvVazio.setVisibility(View.VISIBLE);
             rv.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
@@ -98,6 +104,9 @@ public class FavoritosFragment extends Fragment {
                     }
 
                     if (produtos.isEmpty()) {
+                        if (tvVazioTitulo != null) {
+                            tvVazioTitulo.setText("Você ainda não tem favoritos");
+                        }
                         tvVazio.setVisibility(View.VISIBLE);
                         rv.setVisibility(View.GONE);
                     } else {

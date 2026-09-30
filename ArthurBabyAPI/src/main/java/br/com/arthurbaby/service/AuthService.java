@@ -5,20 +5,14 @@ import br.com.arthurbaby.entity.Endereco;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.repository.UsuarioRepository;
 import br.com.arthurbaby.security.JwtService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.UUID;
 
 @Service
 public class AuthService {
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
-
     private final UsuarioRepository usuarios;
     private final PasswordEncoder encoder;
     private final JwtService jwt;
@@ -83,33 +77,6 @@ public class AuthService {
 
         usuarios.save(usuario);
         return new AuthResponse(jwt.gerarToken(usuario), usuario.getId(), usuario.getNomeCompleto(), usuario.getPerfil().name());
-    }
-
-    public void recuperarSenha(String email) {
-        String normalizado = normalizarEmail(email);
-        usuarios.findByEmail(normalizado).ifPresent(usuario -> {
-            String token = UUID.randomUUID().toString();
-            usuario.setTokenRecuperacaoSenha(token);
-            usuario.setTokenRecuperacaoSenhaExpiraEm(LocalDateTime.now().plusMinutes(30));
-            usuarios.save(usuario);
-            log.info("[DEV] Link de recuperacao de senha para {}: token={} (expira em 30 min)", usuario.getEmail(), token);
-        });
-        // Resposta identica exista ou nao o e-mail, para nao revelar quais e-mails estao cadastrados.
-    }
-
-    public void redefinirSenha(String token, String novaSenha) {
-        if (token == null || token.isBlank()) throw new IllegalArgumentException("Token invalido");
-        if (novaSenha == null || novaSenha.length() < 4) throw new IllegalArgumentException("Senha deve ter ao menos 4 caracteres");
-        Usuario usuario = usuarios.findByTokenRecuperacaoSenha(token)
-                .orElseThrow(() -> new NoSuchElementException("Token invalido ou expirado"));
-        if (usuario.getTokenRecuperacaoSenhaExpiraEm() == null
-                || usuario.getTokenRecuperacaoSenhaExpiraEm().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Token invalido ou expirado");
-        }
-        usuario.setSenha(encoder.encode(novaSenha));
-        usuario.setTokenRecuperacaoSenha(null);
-        usuario.setTokenRecuperacaoSenhaExpiraEm(null);
-        usuarios.save(usuario);
     }
 
     static String normalizarEmail(String email) {

@@ -1,10 +1,12 @@
 package br.com.arthurbaby.service;
 
+import br.com.arthurbaby.dto.MovimentacaoEstoqueResponse;
 import br.com.arthurbaby.entity.*;
 import br.com.arthurbaby.entity.Enums.MovimentoEstoqueTipo;
 import br.com.arthurbaby.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.NoSuchElementException;
 
 @Service
 public class EstoqueService {
@@ -25,39 +27,62 @@ public class EstoqueService {
         registrar(produto, variacao, usuario, MovimentoEstoqueTipo.SAIDA, quantidade, anterior, variacao.getEstoqueAtual(), observacao);
     }
     @Transactional
-    public void adicionarEstoque(Produto produto, ProdutoVariacao variacao, int quantidade, Usuario usuario, String observacao) {
+    public MovimentacaoEstoque adicionarEstoque(Produto produto, ProdutoVariacao variacao, int quantidade, Usuario usuario, String observacao) {
         if (variacao == null) throw new IllegalArgumentException("Variacao e obrigatoria para entrada de estoque");
         if (quantidade <= 0) throw new IllegalArgumentException("Quantidade deve ser maior que zero");
         int anterior = variacao.getEstoqueAtual();
         variacao.setEstoqueAtual(anterior + quantidade);
         variacoes.save(variacao);
-        registrar(produto, variacao, usuario, MovimentoEstoqueTipo.ENTRADA, quantidade, anterior, variacao.getEstoqueAtual(), observacao);
+        return registrar(produto, variacao, usuario, MovimentoEstoqueTipo.ENTRADA, quantidade, anterior, variacao.getEstoqueAtual(), observacao);
     }
     /** Correcao manual: define o estoque para {@code novaQuantidade}; a movimentacao guarda a diferenca absoluta. */
     @Transactional
-    public void ajustarEstoque(Produto produto, ProdutoVariacao variacao, int novaQuantidade, Usuario usuario, String observacao) {
+    public MovimentacaoEstoque ajustarEstoque(Produto produto, ProdutoVariacao variacao, int novaQuantidade, Usuario usuario, String observacao) {
         if (variacao == null) throw new IllegalArgumentException("Variacao e obrigatoria para ajuste de estoque");
         if (novaQuantidade < 0) throw new IllegalArgumentException("Estoque nao pode ser negativo");
         int anterior = variacao.getEstoqueAtual();
         variacao.setEstoqueAtual(novaQuantidade);
         variacoes.save(variacao);
-        registrar(produto, variacao, usuario, MovimentoEstoqueTipo.AJUSTE, Math.abs(novaQuantidade - anterior), anterior, novaQuantidade, observacao);
+        return registrar(produto, variacao, usuario, MovimentoEstoqueTipo.AJUSTE, Math.abs(novaQuantidade - anterior), anterior, novaQuantidade, observacao);
     }
     /** Devolve ao estoque os itens de um pedido cancelado. Itens sem variacao nao baixam estoque, portanto nao sao estornados. */
     @Transactional
     public void estornarEstoque(Pedido pedido, Usuario usuario, String observacao) {
         for (PedidoItem item : pedido.getItens()) {
-            ProdutoVariacao variacao = item.getVariacao();
-            if (variacao == null) continue;
-            int anterior = variacao.getEstoqueAtual();
-            variacao.setEstoqueAtual(anterior + item.getQuantidade());
-            variacoes.save(variacao);
-            registrar(item.getProduto(), variacao, usuario, MovimentoEstoqueTipo.ESTORNO, item.getQuantidade(),
-                    anterior, variacao.getEstoqueAtual(), observacao);
+            if (item.getVariacao() == null) continue;
+            estornarEstoque(item.getProduto(), item.getVariacao(), item.getQuantidade(), usuario, observacao);
         }
     }
-    public void registrar(Produto produto, ProdutoVariacao variacao, Usuario usuario, MovimentoEstoqueTipo tipo,
-                          int quantidade, Integer anterior, Integer posterior, String observacao) {
+    /** Devolucao manual ao estoque (ex.: troca/devolucao fora de um cancelamento de pedido). */
+    @Transactional
+    public MovimentacaoEstoque estornarEstoque(Produto produto, ProdutoVariacao variacao, int quantidade, Usuario usuario, String observacao) {
+        if (variacao == null) throw new IllegalArgumentException("Variacao e obrigatoria para estorno de estoque");
+        if (quantidade <= 0) throw new IllegalArgumentException("Quantidade deve ser maior que zero");
+        int anterior = variacao.getEstoqueAtual();
+        variacao.setEstoqueAtual(anterior + quantidade);
+        variacoes.save(variacao);
+        return registrar(produto, variacao, usuario, MovimentoEstoqueTipo.ESTORNO, quantidade, anterior, variacao.getEstoqueAtual(), observacao);
+    }
+
+    /** Operacao manual do painel admin sobre uma variacao (ENTRADA, AJUSTE ou ESTORNO); devolve a movimentacao registrada. */
+    @Transactional
+    public MovimentacaoEstoqueResponse movimentarVariacao(Long variacaoId, MovimentoEstoqueTipo tipo, Integer quantidade,
+                                                          Usuario usuario, String observacao) {
+        if (quantidade == null) throw new IllegalArgumentException("Quantidade e obrigatoria");
+        ProdutoVariacao variacao = variacoes.findById(variacaoId)
+                .orElseThrow(() -> new NoSuchElementException("Variacao nao encontrada"));
+        Produto produto = variacao.getProduto();
+        MovimentacaoEstoque mov = switch (tipo) {
+            case ENTRADA -> adicionarEstoque(produto, variacao, quantidade, usuario, observacao);
+            case AJUSTE -> ajustarEstoque(produto, variacao, quantidade, usuario, observacao);
+            case ESTORNO -> estornarEstoque(produto, variacao, quantidade, usuario, observacao);
+            default -> throw new IllegalArgumentException("Operacao de estoque nao suportada: " + tipo);
+        };
+        return MovimentacaoEstoqueResponse.de(mov);
+    }
+
+    public MovimentacaoEstoque registrar(Produto produto, ProdutoVariacao variacao, Usuario usuario, MovimentoEstoqueTipo tipo,
+                                         int quantidade, Integer anterior, Integer posterior, String observacao) {
         MovimentacaoEstoque mov = new MovimentacaoEstoque();
         mov.setProduto(produto);
         mov.setVariacao(variacao);
@@ -67,6 +92,6 @@ public class EstoqueService {
         mov.setEstoqueAnterior(anterior);
         mov.setEstoquePosterior(posterior);
         mov.setObservacao(observacao);
-        movimentos.save(mov);
+        return movimentos.save(mov);
     }
 }

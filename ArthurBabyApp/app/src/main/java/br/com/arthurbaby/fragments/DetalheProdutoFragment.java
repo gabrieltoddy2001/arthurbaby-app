@@ -1,5 +1,6 @@
 package br.com.arthurbaby.fragments;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
@@ -77,6 +78,7 @@ public class DetalheProdutoFragment extends Fragment {
         TextView tvAvaliacao = v.findViewById(R.id.tvAvaliacao);
         ImageView img = v.findViewById(R.id.imgProduto);
         ImageView btnFav = v.findViewById(R.id.btnFavoritoDetalhe);
+        ImageView btnCompartilhar = v.findViewById(R.id.btnCompartilhar);
 
         NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
@@ -114,6 +116,11 @@ public class DetalheProdutoFragment extends Fragment {
                 btnFav.setOnClickListener(x -> br.com.arthurbaby.utils.AuthGuard
                         .mostrarDialogLogin(requireActivity(),
                                 "Entre para salvar seus favoritos."));
+            }
+
+            // COMPARTILHAR (sempre visível, mesmo para visitante)
+            if (btnCompartilhar != null) {
+                btnCompartilhar.setOnClickListener(x -> compartilharProduto());
             }
 
             // Busca detalhes atualizados no backend
@@ -194,6 +201,28 @@ public class DetalheProdutoFragment extends Fragment {
     }
 
     /**
+     * Abre o menu de compartilhamento nativo do Android com texto pré-formatado.
+     */
+    private void compartilharProduto() {
+        if (produto == null) return;
+
+        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+        String preco = nf.format(produto.getPreco());
+
+        String texto = "Olha esse produto na ArthurBaby 💕\n\n"
+                + produto.getNome() + "\n"
+                + "Por apenas " + preco + "!\n\n"
+                + "Baixe o app: https://play.google.com/store/apps/details?id=br.com.arthurbaby";
+
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.putExtra(Intent.EXTRA_SUBJECT, produto.getNome() + " - ArthurBaby");
+        share.putExtra(Intent.EXTRA_TEXT, texto);
+
+        startActivity(Intent.createChooser(share, "Compartilhar produto"));
+    }
+
+    /**
      * Desenha as seções de Tamanho, Cor e Modelo com base nas variações reais.
      */
     private void desenharVariacoes(View v) {
@@ -220,7 +249,6 @@ public class DetalheProdutoFragment extends Fragment {
                     atualizarVariacaoIdSel();
                 }));
             }
-            // seleciona o primeiro
             if (tamSel == null) {
                 tamSel = tamanhos.get(0);
                 atualizarChips(cTam, tamSel);
@@ -289,7 +317,6 @@ public class DetalheProdutoFragment extends Fragment {
 
     private void esconderSecao(View root, View container) {
         if (container != null) container.setVisibility(View.GONE);
-        // Esconde o título acima
         if (root instanceof android.view.ViewGroup) {
             android.view.ViewGroup group = (android.view.ViewGroup) root;
             for (int i = 0; i < group.getChildCount(); i++) {

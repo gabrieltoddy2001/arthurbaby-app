@@ -15,9 +15,15 @@ import androidx.fragment.app.Fragment;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.activities.LoginActivity;
+import br.com.arthurbaby.network.ApiService;
+import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
+import br.com.arthurbaby.network.dto.UsuarioResponse;
 import br.com.arthurbaby.repositories.FavoritoRepository;
 import br.com.arthurbaby.utils.AuthGuard;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PerfilFragment extends Fragment {
 
@@ -37,7 +43,6 @@ public class PerfilFragment extends Fragment {
             tvNome.setText("Bem-vindo(a)!");
             tvEmail.setText("Entre para aproveitar tudo");
 
-            // Cada opção pede login
             v.findViewById(R.id.opMeusPedidos).setOnClickListener(x ->
                     AuthGuard.mostrarDialogLogin(requireActivity(),
                             "Entre para ver seus pedidos."));
@@ -50,7 +55,6 @@ public class PerfilFragment extends Fragment {
                     AuthGuard.mostrarDialogLogin(requireActivity(),
                             "Entre para ver seus favoritos."));
 
-            // Ajuda e Sobre continuam funcionando
             v.findViewById(R.id.opAjuda).setOnClickListener(x ->
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
@@ -67,23 +71,15 @@ public class PerfilFragment extends Fragment {
                             .commit()
             );
 
-            // "Sair" vira "Entrar" (defensivo)
             try {
                 LinearLayout opSair = v.findViewById(R.id.opSair);
                 if (opSair != null) {
-                    // Procura um TextView dentro do opSair
                     TextView tvSair = encontrarTextView(opSair);
-                    if (tvSair != null) {
-                        tvSair.setText("Entrar / Cadastrar");
-                    }
-
+                    if (tvSair != null) tvSair.setText("Entrar / Cadastrar");
                     opSair.setOnClickListener(x ->
                             startActivity(new Intent(getActivity(), LoginActivity.class)));
                 }
-            } catch (Exception e) {
-                // Se falhar, não quebra
-                android.util.Log.e("PERFIL_DEBUG", "Erro no opSair", e);
-            }
+            } catch (Exception ignored) {}
 
             return v;
         }
@@ -94,6 +90,9 @@ public class PerfilFragment extends Fragment {
 
         tvNome.setText(nome != null && !nome.isEmpty() ? nome : "Usuário");
         tvEmail.setText(perfil != null ? perfil : "ArthurBaby");
+
+        // Busca dados atualizados no backend
+        carregarPerfilBackend(tvNome, tvEmail);
 
         v.findViewById(R.id.opMeusPedidos).setOnClickListener(x ->
                 requireActivity().getSupportFragmentManager()
@@ -141,7 +140,6 @@ public class PerfilFragment extends Fragment {
 
             Toast.makeText(requireContext(), "Até logo!", Toast.LENGTH_SHORT).show();
 
-            // Volta para a Home
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.frameContainer, new HomeFragment())
@@ -152,15 +150,47 @@ public class PerfilFragment extends Fragment {
     }
 
     /**
-     * Procura recursivamente por um TextView dentro de um ViewGroup.
-     * Retorna null se não encontrar.
+     * Busca dados atualizados do usuário logado via GET /api/auth/me.
+     * PROTEÇÃO: verifica se o Fragment ainda está vivo antes de usar requireContext().
      */
+    private void carregarPerfilBackend(TextView tvNome, TextView tvEmail) {
+        ApiService api = RetrofitClient.getApi(requireContext());
+        api.buscarMeuPerfil().enqueue(new Callback<UsuarioResponse>() {
+            @Override
+            public void onResponse(Call<UsuarioResponse> call, Response<UsuarioResponse> response) {
+                // 🔴 PROTEÇÃO: verifica se o Fragment ainda está anexado
+                if (!isAdded() || getContext() == null) return;
+
+                if (response.isSuccessful() && response.body() != null) {
+                    UsuarioResponse u = response.body();
+
+                    if (u.nomeCompleto != null && !u.nomeCompleto.isEmpty()) {
+                        tvNome.setText(u.nomeCompleto);
+                        TokenStorage.salvar(
+                                getContext(),
+                                TokenStorage.getToken(getContext()),
+                                u.id, u.nomeCompleto, u.perfil);
+                    }
+
+                    if (u.email != null && !u.email.isEmpty()) {
+                        tvEmail.setText(u.email);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UsuarioResponse> call, Throwable t) {
+                // 🔴 PROTEÇÃO: verifica se o Fragment ainda está anexado
+                if (!isAdded() || getContext() == null) return;
+                // Silencioso — mantém os dados locais
+            }
+        });
+    }
+
     private TextView encontrarTextView(ViewGroup group) {
         for (int i = 0; i < group.getChildCount(); i++) {
             View filho = group.getChildAt(i);
-            if (filho instanceof TextView) {
-                return (TextView) filho;
-            }
+            if (filho instanceof TextView) return (TextView) filho;
             if (filho instanceof ViewGroup) {
                 TextView achado = encontrarTextView((ViewGroup) filho);
                 if (achado != null) return achado;

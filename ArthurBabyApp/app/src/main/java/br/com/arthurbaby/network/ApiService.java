@@ -15,6 +15,9 @@ import br.com.arthurbaby.network.dto.PedidoRequest;
 import br.com.arthurbaby.network.dto.PedidoResponse;
 import br.com.arthurbaby.network.dto.ProdutoResponse;
 import br.com.arthurbaby.network.dto.CancelamentoRequest;
+import br.com.arthurbaby.network.dto.UsuarioResponse;
+import br.com.arthurbaby.network.dto.CupomValidacaoRequest;
+import br.com.arthurbaby.network.dto.CupomValidacaoResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -42,6 +45,19 @@ public interface ApiService {
     @POST("api/auth/redefinir-senha")
     Call<Void> redefinirSenha(@Body RedefinirSenhaRequest request);
 
+    @GET("api/auth/me")
+    Call<br.com.arthurbaby.network.dto.UsuarioResponse> buscarMeuPerfil();
+
+    // ---------- CLIENTES ----------
+    @GET("api/clientes/{id}")
+    Call<br.com.arthurbaby.network.dto.UsuarioResponse> buscarCliente(
+            @Path("id") Long id);
+
+    @PUT("api/clientes/{id}")
+    Call<br.com.arthurbaby.network.dto.UsuarioResponse> atualizarCliente(
+            @Path("id") Long id,
+            @Body br.com.arthurbaby.network.dto.ClienteRequest request);
+
     // ---------- CATÁLOGO ----------
     @GET("api/categorias")
     Call<List<CategoriaResponse>> listarCategorias();
@@ -58,6 +74,10 @@ public interface ApiService {
     @GET("api/produtos/{id}")
     Call<ProdutoResponse> buscarProduto(@Path("id") Long id);
 
+    // ---------- CUPONS ----------
+    @POST("api/cupons/validar")
+    Call<CupomValidacaoResponse> validarCupom(@Body CupomValidacaoRequest request);
+
     // ---------- FAVORITOS ----------
     @GET("api/favoritos/cliente/{clienteId}")
     Call<List<FavoritoResponse>> listarFavoritos(@Path("clienteId") Long clienteId);
@@ -65,8 +85,9 @@ public interface ApiService {
     @POST("api/favoritos")
     Call<FavoritoResponse> adicionarFavorito(@Body FavoritoRequest request);
 
-    @DELETE("api/favoritos")
-    Call<Void> removerFavorito(@Body FavoritoRequest request);
+    @DELETE("api/favoritos/cliente/{clienteId}/produto/{produtoId}")
+    Call<Void> removerFavorito(@Path("clienteId") Long clienteId,
+                               @Path("produtoId") Long produtoId);
 
     // ---------- PEDIDOS ----------
     @POST("api/pedidos")

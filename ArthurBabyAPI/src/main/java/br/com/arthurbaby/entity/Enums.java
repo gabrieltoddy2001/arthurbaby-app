@@ -17,4 +17,5 @@ public final class Enums {
         SEPARANDO_PRODUTOS, PRONTO_PARA_RETIRADA, EM_TRANSPORTE, ENTREGUE, CANCELADO
     }
     public enum FormaRecebimento { RETIRADA_LOJA, ENTREGA }
+    public enum TipoCupom { PERCENTUAL, VALOR_FIXO, FRETE_GRATIS }
 }

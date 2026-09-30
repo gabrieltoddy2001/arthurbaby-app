@@ -98,12 +98,11 @@ public class FavoritoRepository {
                 }
             });
         } else {
-            api.removerFavorito(req).enqueue(new Callback<Void>() {
+            api.removerFavorito(clienteId, produtoId).enqueue(new Callback<Void>() {
                 @Override public void onResponse(Call<Void> call, Response<Void> response) {
                     if (onUpdate != null) onUpdate.run();
                 }
                 @Override public void onFailure(Call<Void> call, Throwable t) {
-                    // Reverte
                     idsFavoritos.add(produtoId);
                     if (onUpdate != null) onUpdate.run();
                 }

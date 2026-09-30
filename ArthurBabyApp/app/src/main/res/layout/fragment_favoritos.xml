@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/fundo_claro">
 
+    <!-- CABEÇALHO -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,25 +34,62 @@
             android:textColor="@color/texto_primario" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvVazio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Você ainda não tem favoritos."
-        android:textColor="@color/cinza_medio"
-        android:gravity="center"
-        android:paddingTop="60dp"
-        android:visibility="gone" />
-
+    <!-- PROGRESS BAR -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="60dp"
-        android:indeterminateTint="@color/verde_arthur"
+        android:indeterminateTint="@color/rosa_arthur"
         android:visibility="gone" />
 
+    <!-- ESTADO VAZIO -->
+    <LinearLayout
+        android:id="@+id/tvVazio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingTop="60dp"
+        android:paddingHorizontal="32dp"
+        android:visibility="gone">
+
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@drawable/bg_circulo_empty">
+
+            <ImageView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_favorito"
+                app:tint="@color/rosa_arthur"
+                android:contentDescription="Sem favoritos" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvVazioTitulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Você ainda não tem favoritos"
+            android:textColor="@color/texto_primario"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Toque no ♡ dos produtos que você mais gostou"
+            android:textColor="@color/cinza_medio"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="6dp" />
+    </LinearLayout>
+
+    <!-- LISTA -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFavoritos"
         android:layout_width="match_parent"

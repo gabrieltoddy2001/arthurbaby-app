@@ -50,7 +50,6 @@ public class RecuperarSenhaActivity extends AppCompatActivity {
                                         "Se o e-mail estiver cadastrado, você receberá o código.",
                                         Toast.LENGTH_LONG).show();
 
-                                // Abre a tela de redefinir senha
                                 startActivity(new Intent(RecuperarSenhaActivity.this,
                                         RedefinirSenhaActivity.class));
                                 finish();

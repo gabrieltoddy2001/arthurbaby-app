@@ -42,7 +42,8 @@ import retrofit2.Response;
 public class CarrinhoFragment extends Fragment {
 
     private RecyclerView rvCarrinho;
-    private TextView tvSubtotal, tvFrete, tvTotal, tvVazio, tvContador;
+    private TextView tvSubtotal, tvFrete, tvTotal, tvContador;
+    private View tvVazio;
     private ItemCarrinhoAdapter adapter;
     private CarrinhoRepository repo;
     private double descontoAplicado = 0;
@@ -86,33 +87,68 @@ public class CarrinhoFragment extends Fragment {
             atualizarTotal();
         });
 
-        // CUPOM
+        // CUPOM — via API (dinâmico)
         v.findViewById(R.id.btnAplicarCupom).setOnClickListener(x -> {
             String cupom = etCupom.getText().toString().trim().toUpperCase();
-            if ("ARTHUR10".equals(cupom)) {
-                descontoAplicado = repo.getSubtotal() * 0.10;
-                cupomAplicado = cupom;
-                freteGratisPorCupom = false;
-                rowDesconto.setVisibility(View.VISIBLE);
-                NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-                tvDesconto.setText("- " + nf.format(descontoAplicado));
-                Toast.makeText(requireContext(),
-                        "Cupom aplicado! 10% de desconto", Toast.LENGTH_SHORT).show();
-            } else if ("FRETEGRATIS".equals(cupom)) {
-                descontoAplicado = 0;
-                cupomAplicado = cupom;
-                freteGratisPorCupom = true;
-                rowDesconto.setVisibility(View.GONE);
-                Toast.makeText(requireContext(),
-                        "Frete grátis aplicado!", Toast.LENGTH_SHORT).show();
-            } else {
-                descontoAplicado = 0;
-                cupomAplicado = null;
-                freteGratisPorCupom = false;
-                rowDesconto.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), "Cupom inválido", Toast.LENGTH_SHORT).show();
+            if (cupom.isEmpty()) {
+                Toast.makeText(requireContext(), "Digite o cupom", Toast.LENGTH_SHORT).show();
+                return;
             }
-            atualizarTotal();
+
+            LoadingUtils.mostrar(requireContext());
+
+            ApiService api = RetrofitClient.getApi(requireContext());
+            api.validarCupom(new br.com.arthurbaby.network.dto.CupomValidacaoRequest(
+                            cupom, BigDecimal.valueOf(repo.getSubtotal())))
+                    .enqueue(new Callback<br.com.arthurbaby.network.dto.CupomValidacaoResponse>() {
+                        @Override
+                        public void onResponse(Call<br.com.arthurbaby.network.dto.CupomValidacaoResponse> call,
+                                               Response<br.com.arthurbaby.network.dto.CupomValidacaoResponse> response) {
+                            LoadingUtils.esconder();
+
+                            if (response.isSuccessful() && response.body() != null) {
+                                br.com.arthurbaby.network.dto.CupomValidacaoResponse c = response.body();
+
+                                if (c.valido) {
+                                    descontoAplicado = c.desconto != null ? c.desconto.doubleValue() : 0;
+                                    cupomAplicado = c.codigo;
+                                    freteGratisPorCupom = c.freteGratis;
+
+                                    if (descontoAplicado > 0) {
+                                        rowDesconto.setVisibility(View.VISIBLE);
+                                        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+                                        tvDesconto.setText("- " + nf.format(descontoAplicado));
+                                    } else {
+                                        rowDesconto.setVisibility(View.GONE);
+                                    }
+
+                                    String msg = c.descricao != null ? c.descricao : "Cupom aplicado!";
+                                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    descontoAplicado = 0;
+                                    cupomAplicado = null;
+                                    freteGratisPorCupom = false;
+                                    rowDesconto.setVisibility(View.GONE);
+
+                                    String motivo = c.motivo != null ? c.motivo : "Cupom inválido";
+                                    Toast.makeText(requireContext(), motivo, Toast.LENGTH_SHORT).show();
+                                }
+                                atualizarTotal();
+                            } else {
+                                Toast.makeText(requireContext(),
+                                        "Erro ao validar cupom", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<br.com.arthurbaby.network.dto.CupomValidacaoResponse> call,
+                                              Throwable t) {
+                            LoadingUtils.esconder();
+                            Toast.makeText(requireContext(),
+                                    "Erro de conexão: " + t.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
 
         // === FINALIZAR PEDIDO ===

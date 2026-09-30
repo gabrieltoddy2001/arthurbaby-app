@@ -5,10 +5,13 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +30,7 @@ import br.com.arthurbaby.network.Conversor;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.dto.PageResponse;
 import br.com.arthurbaby.network.dto.ProdutoResponse;
+import br.com.arthurbaby.utils.BuscaStorage;
 import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,6 +43,10 @@ public class PesquisaFragment extends Fragment {
     private TextView tvInfo, chipTodas, chipPromocao, chipBaratos, chipLimpar;
     private EditText etBusca;
     private ProdutoAdapter adapter;
+
+    private View containerHistorico;
+    private LinearLayout containerChipsHistorico;
+    private TextView btnLimparHistorico;
 
     private String filtroAtual = "TODAS";
     private String termoAtual = "";
@@ -60,18 +68,47 @@ public class PesquisaFragment extends Fragment {
         chipBaratos = v.findViewById(R.id.chipBaratos);
         chipLimpar = v.findViewById(R.id.chipLimpar);
 
+        containerHistorico = v.findViewById(R.id.containerHistorico);
+        containerChipsHistorico = v.findViewById(R.id.containerChipsHistorico);
+        btnLimparHistorico = v.findViewById(R.id.btnLimparHistorico);
+
         v.findViewById(R.id.btnVoltarBusca).setOnClickListener(x ->
                 requireActivity().getSupportFragmentManager().popBackStack());
 
         rvResultados.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        buscarProdutos(null, null);
+        // Busca via Enter/actionSearch
+        etBusca.setOnEditorActionListener((view, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String termo = etBusca.getText().toString().trim();
+                if (!termo.isEmpty()) {
+                    BuscaStorage.adicionar(requireContext(), termo);
+                    mostrarHistorico(false);
+                }
+                return true;
+            }
+            return false;
+        });
 
+        // Botão limpar histórico
+        btnLimparHistorico.setOnClickListener(x -> {
+            BuscaStorage.limpar(requireContext());
+            mostrarHistorico(false);
+        });
+
+        // Escuta digitação
         etBusca.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 termoAtual = s.toString();
-                aplicarFiltro();
+                if (termoAtual.trim().isEmpty()) {
+                    mostrarHistorico(true);
+                    rvResultados.setVisibility(View.GONE);
+                    tvInfo.setText("Digite para buscar");
+                } else {
+                    mostrarHistorico(false);
+                    aplicarFiltro();
+                }
             }
             @Override public void afterTextChanged(Editable s) {}
         });
@@ -83,10 +120,74 @@ public class PesquisaFragment extends Fragment {
             filtroAtual = "TODAS";
             etBusca.setText("");
             termoAtual = "";
+            mostrarHistorico(true);
+            rvResultados.setVisibility(View.GONE);
+            tvInfo.setText("Digite para buscar");
+        });
+
+        // Estado inicial
+        mostrarHistorico(true);
+        rvResultados.setVisibility(View.GONE);
+        tvInfo.setText("Digite para buscar");
+
+        return v;
+    }
+
+    /**
+     * Mostra ou esconde o bloco de buscas recentes.
+     */
+    private void mostrarHistorico(boolean mostrar) {
+        if (!mostrar) {
+            containerHistorico.setVisibility(View.GONE);
+            return;
+        }
+
+        List<String> historico = BuscaStorage.getHistorico(requireContext());
+
+        if (historico.isEmpty()) {
+            containerHistorico.setVisibility(View.GONE);
+            return;
+        }
+
+        containerHistorico.setVisibility(View.VISIBLE);
+        containerChipsHistorico.removeAllViews();
+
+        for (String termo : historico) {
+            TextView chip = criarChipHistorico(termo);
+            containerChipsHistorico.addView(chip);
+        }
+    }
+
+    /**
+     * Cria um chip clicável de busca recente.
+     */
+    private TextView criarChipHistorico(String termo) {
+        TextView chip = new TextView(getContext());
+        chip.setText(termo);
+        chip.setPadding(dp(16), dp(8), dp(16), dp(8));
+        chip.setTextSize(13f);
+        chip.setGravity(Gravity.CENTER);
+
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(20));
+        bg.setColor(0xFFF0F2F5);
+        chip.setBackground(bg);
+        chip.setTextColor(0xFF1E293B);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, dp(8), 0);
+        chip.setLayoutParams(lp);
+
+        chip.setOnClickListener(x -> {
+            etBusca.setText(termo);
+            etBusca.setSelection(termo.length());
+            mostrarHistorico(false);
             aplicarFiltro();
         });
 
-        return v;
+        return chip;
     }
 
     private void aplicarFiltro() {
@@ -110,10 +211,10 @@ public class PesquisaFragment extends Fragment {
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().content != null) {
 
-                            java.util.List<br.com.arthurbaby.models.Produto> produtos =
+                            List<br.com.arthurbaby.models.Produto> produtos =
                                     Conversor.paraProdutos(response.body().content);
 
-                            java.util.List<br.com.arthurbaby.models.Produto> filtrados =
+                            List<br.com.arthurbaby.models.Produto> filtrados =
                                     new java.util.ArrayList<>();
                             for (br.com.arthurbaby.models.Produto p : produtos) {
                                 double preco = p.getPreco().doubleValue();
@@ -123,6 +224,11 @@ public class PesquisaFragment extends Fragment {
                             }
 
                             adapter = new ProdutoAdapter(filtrados, produto -> {
+                                // Salva no histórico quando o usuário clica em um produto
+                                if (termoAtual != null && !termoAtual.trim().isEmpty()) {
+                                    BuscaStorage.adicionar(requireContext(), termoAtual);
+                                }
+
                                 DetalheProdutoFragment frag =
                                         DetalheProdutoFragment.newInstance(produto);
                                 requireActivity().getSupportFragmentManager()
@@ -162,5 +268,10 @@ public class PesquisaFragment extends Fragment {
             chip.setTextColor(0xFF1E293B);
         }
         chip.setBackground(bg);
+    }
+
+    private int dp(int valor) {
+        float densidade = getResources().getDisplayMetrics().density;
+        return (int) (valor * densidade + 0.5f);
     }
 }

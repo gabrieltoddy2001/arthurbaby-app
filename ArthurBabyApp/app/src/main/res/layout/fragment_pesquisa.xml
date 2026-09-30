@@ -134,6 +134,56 @@
         </LinearLayout>
     </HorizontalScrollView>
 
+    <!-- BUSCAS RECENTES (visível só quando o campo está vazio) -->
+    <LinearLayout
+        android:id="@+id/containerHistorico"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/branco"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Buscas recentes"
+                android:textColor="@color/texto_primario"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/btnLimparHistorico"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Limpar"
+                android:textColor="@color/rosa_arthur"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/containerChipsHistorico"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+    </LinearLayout>
+
     <!-- INFO RESULTADOS -->
     <TextView
         android:id="@+id/tvResultadoInfo"
@@ -159,8 +209,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvResultados"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingHorizontal="10dp"
+        android:paddingBottom="8dp"
         android:clipToPadding="false"
         android:visibility="gone" />
 

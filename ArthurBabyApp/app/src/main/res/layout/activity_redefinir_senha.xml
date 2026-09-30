@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/branco"
+    android:background="@color/branco_quente"
     android:fillViewport="true">
 
     <LinearLayout
@@ -33,7 +33,12 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Código / Token">
+            android:hint="Código / Token"
+            app:boxStrokeColor="@color/rosa_arthur"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etToken"
                 android:layout_width="match_parent"
@@ -47,7 +52,12 @@
             android:layout_height="wrap_content"
             android:hint="Nova senha"
             android:layout_marginTop="12dp"
-            app:passwordToggleEnabled="true">
+            app:passwordToggleEnabled="true"
+            app:boxStrokeColor="@color/rosa_arthur"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp">
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etNovaSenha"
                 android:layout_width="match_parent"
@@ -62,6 +72,7 @@
             android:text="REDEFINIR SENHA"
             android:backgroundTint="@color/rosa_arthur"
             android:textColor="@color/branco"
+            android:textStyle="bold"
             app:cornerRadius="28dp"
             android:layout_marginTop="24dp" />
 

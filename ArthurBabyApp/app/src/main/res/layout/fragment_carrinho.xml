@@ -50,15 +50,48 @@
         </LinearLayout>
     </LinearLayout>
 
-    <TextView
+    <LinearLayout
         android:id="@+id/tvVazio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Seu carrinho está vazio."
-        android:textColor="@color/cinza_medio"
+        android:orientation="vertical"
         android:gravity="center"
         android:paddingTop="60dp"
-        android:visibility="gone" />
+        android:paddingHorizontal="32dp"
+        android:visibility="gone">
+
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:background="@drawable/bg_circulo_empty">
+
+            <ImageView
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_carrinho"
+                app:tint="@color/rosa_arthur"
+                android:contentDescription="Carrinho vazio" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seu carrinho está vazio"
+            android:textColor="@color/texto_primario"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Que tal adicionar produtos do nosso catálogo?"
+            android:textColor="@color/cinza_medio"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="6dp" />
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
