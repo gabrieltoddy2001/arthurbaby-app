@@ -1,6 +1,6 @@
 package br.com.arthurbaby.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,8 @@ import lombok.Setter;
 public class Endereco {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(optional = false) @JsonIgnore
+    // WRITE_ONLY: aceito na entrada (CRUD admin envia { "id": N }), mas omitido na saida para evitar referencia circular no JSON
+    @ManyToOne(optional = false) @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Usuario usuario;
     private String cep;
     private String logradouro;

@@ -3,8 +3,6 @@ package br.com.arthurbaby.controller;
 import br.com.arthurbaby.service.AdminCrudService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,7 +14,8 @@ import java.util.List;
 /**
  * CRUD genérico do painel administrativo: uma única rota {@code /api/admin/{tipo}} atende todas as tabelas
  * da loja. O acesso é restrito aos perfis ADMINISTRADOR e VENDEDOR em {@code SecurityConfig}.
- * Como o corpo é livre ({@code Object}), os exemplos abaixo mostram o formato esperado para os tipos mais usados.
+ * Como o corpo é livre ({@code Object}), o Swagger mostra um exemplo por tipo, injetado por
+ * {@code OpenApiConfig#exemplosAdminCrud} a partir de {@code AdminCrudExemplos}.
  */
 @RestController
 @RequestMapping(value = "/api/admin", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -27,18 +26,9 @@ public class AdminCrudController {
             + "pedido-status-historicos, configuracoes-loja, favoritos.";
     private static final String SEM_PERMISSAO = "Acesso negado: apenas perfis ADMINISTRADOR ou VENDEDOR";
 
-    // Exemplos de corpo exibidos no Swagger (o mesmo JSON serve para criar e atualizar)
-    private static final String EXEMPLO_CATEGORIA = """
-            { "nome": "Bodies", "descricao": "Bodies de manga curta e longa", "icone": "bodies", "ordemExibicao": 11 }""";
-    private static final String EXEMPLO_COR = """
-            { "nome": "Lilás", "codigoHex": "#C8A2C8", "ordemExibicao": 6 }""";
-    private static final String EXEMPLO_TAMANHO = """
-            { "nome": "16", "ordemExibicao": 13 }""";
-    private static final String EXEMPLO_MARCA = """
-            { "nome": "ArthurBaby Premium" }""";
-
     private static final String CORPO = "Campos da entidade do tipo informado (os nomes seguem as colunas da tabela). "
-            + "Use o seletor Examples para ver o formato de cada tipo.";
+            + "Relacionamentos vão só com o id, ex.: \"produto\": { \"id\": 1 }. "
+            + "Use o seletor Examples para ver o formato de cada tipo (exemplos definidos em AdminCrudExemplos).";
 
     private final AdminCrudService adminCrudService;
 
@@ -78,12 +68,7 @@ public class AdminCrudController {
             @ApiResponse(responseCode = "409", description = "Registro duplicado (ex.: nome já cadastrado)")
     })
     public Object criar(@Parameter(description = "Tipo de recurso", example = "categorias") @PathVariable String tipo,
-                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = CORPO,
-                                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                                        @ExampleObject(name = "categorias", summary = "Categoria", value = EXEMPLO_CATEGORIA),
-                                        @ExampleObject(name = "cores", summary = "Cor", value = EXEMPLO_COR),
-                                        @ExampleObject(name = "tamanhos", summary = "Tamanho", value = EXEMPLO_TAMANHO),
-                                        @ExampleObject(name = "marcas", summary = "Marca", value = EXEMPLO_MARCA)}))
+                        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = CORPO)
                         @RequestBody Object body) {
         return adminCrudService.criar(tipo, body);
     }
@@ -98,13 +83,8 @@ public class AdminCrudController {
     })
     public Object atualizar(@Parameter(description = "Tipo de recurso", example = "categorias") @PathVariable String tipo,
                             @Parameter(description = "Id do registro", example = "1") @PathVariable Long id,
-                            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = CORPO,
-                                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, examples = {
-                                        @ExampleObject(name = "categorias", summary = "Categoria", value = EXEMPLO_CATEGORIA),
-                                        @ExampleObject(name = "cores", summary = "Cor", value = EXEMPLO_COR),
-                                        @ExampleObject(name = "tamanhos", summary = "Tamanho", value = EXEMPLO_TAMANHO),
-                                        @ExampleObject(name = "marcas", summary = "Marca", value = EXEMPLO_MARCA)}))
-                        @RequestBody Object body) {
+                            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = CORPO)
+                            @RequestBody Object body) {
         return adminCrudService.atualizar(tipo, id, body);
     }
 

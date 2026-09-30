@@ -1,11 +1,15 @@
 package br.com.arthurbaby.config;
 
 import br.com.arthurbaby.dto.ErroResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
@@ -112,6 +116,41 @@ public class OpenApiConfig {
                 respostas.putAll(ordenadas);
             }));
         };
+    }
+
+    /**
+     * Preenche o seletor "Examples" do corpo de POST e PUT em {@code /api/admin/{tipo}} com um exemplo
+     * para cada tipo aceito (ver {@link AdminCrudExemplos}). É feito aqui, e não com {@code @ExampleObject}
+     * no controller, para não repetir os 16 exemplos em duas anotações.
+     */
+    @Bean
+    OpenApiCustomizer exemplosAdminCrud(ObjectMapper mapper) {
+        // Converte cada JSON de texto em objeto: assim o Swagger UI mostra o exemplo formatado, não como string
+        Map<String, Example> exemplos = new LinkedHashMap<>();
+        AdminCrudExemplos.EXEMPLOS.forEach((tipo, exemplo) -> {
+            try {
+                exemplos.put(tipo, new Example()
+                        .summary(exemplo.resumo())
+                        .description(exemplo.descricao())
+                        .value(mapper.readTree(exemplo.json())));
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("Exemplo JSON invalido para o tipo " + tipo, e);
+            }
+        });
+
+        return openApi -> {
+            PathItem colecao = openApi.getPaths().get("/api/admin/{tipo}");
+            PathItem registro = openApi.getPaths().get("/api/admin/{tipo}/{id}");
+            if (colecao != null) aplicarExemplos(colecao.getPost(), exemplos);
+            if (registro != null) aplicarExemplos(registro.getPut(), exemplos);
+        };
+    }
+
+    /** Coloca os exemplos no corpo JSON da operação (se ela existir e tiver corpo). */
+    private static void aplicarExemplos(Operation operacao, Map<String, Example> exemplos) {
+        if (operacao == null || operacao.getRequestBody() == null || operacao.getRequestBody().getContent() == null) return;
+        MediaType json = operacao.getRequestBody().getContent().get(org.springframework.http.MediaType.APPLICATION_JSON_VALUE);
+        if (json != null) json.setExamples(new LinkedHashMap<>(exemplos));
     }
 
     /** Corpo {@code application/json} de erro com o exemplo correspondente ao código HTTP. */
