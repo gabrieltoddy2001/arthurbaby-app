@@ -14,89 +14,94 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="100dp">
+            android:paddingBottom="90dp">
 
-            <!-- IMAGEM DENTRO DE CARD -->
+            <!-- IMAGEM COM BARRA DE AÇÕES -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="320dp"
-                android:layout_margin="16dp"
+                android:layout_height="260dp"
                 android:background="@drawable/bg_imagem_produto">
 
                 <ImageView
                     android:id="@+id/imgProduto"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="24dp"
+                    android:layout_margin="16dp"
                     android:scaleType="centerInside"
                     android:contentDescription="Imagem do produto" />
 
-                <!-- VOLTAR -->
-                <ImageView
-                    android:id="@+id/btnVoltar"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="top|start"
-                    android:layout_margin="12dp"
-                    android:padding="10dp"
-                    android:background="@drawable/bg_circulo_branco_suave"
-                    android:src="@drawable/ic_busca"
-                    android:rotation="270"
-                    app:tint="@color/texto_primario"
-                    android:contentDescription="Voltar" />
+                <!-- BARRA DE AÇÕES NO TOPO -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
 
-                <!-- CORAÇÃO -->
-                <ImageView
-                    android:id="@+id/btnFavoritoDetalhe"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="top|end"
-                    android:layout_margin="12dp"
-                    android:padding="10dp"
-                    android:background="@drawable/bg_circulo_branco_suave"
-                    android:src="@drawable/ic_favorito"
-                    app:tint="@color/coracao_inativo"
-                    android:contentDescription="Favorito" />
+                    <ImageView
+                        android:id="@+id/btnVoltar"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_circulo_branco_suave"
+                        android:src="@drawable/ic_arrow_back"
+                        app:tint="@color/texto_primario"
+                        android:contentDescription="Voltar" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1" />
+
+                    <ImageView
+                        android:id="@+id/btnCompartilhar"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_circulo_branco_suave"
+                        android:src="@drawable/ic_compartilhar"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Compartilhar"
+                        android:layout_marginEnd="8dp" />
+
+                    <ImageView
+                        android:id="@+id/btnFavoritoDetalhe"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_circulo_branco_suave"
+                        android:src="@drawable/ic_favorito"
+                        app:tint="@color/coracao_inativo"
+                        android:contentDescription="Favorito" />
+                </LinearLayout>
             </FrameLayout>
-
-            <!-- COMPARTILHAR -->
-            <ImageView
-                android:id="@+id/btnCompartilhar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="top|end"
-                android:layout_marginTop="64dp"
-                android:layout_marginEnd="12dp"
-                android:padding="10dp"
-                android:background="@drawable/bg_circulo_branco_suave"
-                android:src="@drawable/ic_compartilhar"
-                app:tint="@color/rosa_arthur"
-                android:contentDescription="Compartilhar" />
 
             <!-- CARD DE INFORMAÇÕES -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="-24dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="3dp"
                 app:cardBackgroundColor="@color/branco">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="16dp">
 
                     <TextView
                         android:id="@+id/tvNome"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Produto"
-                        android:textSize="22sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
-                        android:textColor="@color/texto_primario" />
+                        android:textColor="@color/texto_primario"
+                        android:maxLines="2"
+                        android:ellipsize="end" />
 
                     <TextView
                         android:id="@+id/tvMarca"
@@ -104,16 +109,16 @@
                         android:layout_height="wrap_content"
                         android:text="Marca: ArthurBaby"
                         android:textColor="@color/cinza_medio"
-                        android:textSize="13sp"
-                        android:layout_marginTop="4dp" />
+                        android:textSize="12sp"
+                        android:layout_marginTop="2dp" />
 
-                    <!-- ESTRELAS -->
+                    <!-- ESTRELAS + PREÇO NA MESMA LINHA -->
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="10dp">
 
                         <TextView
                             android:id="@+id/tvEstrelas"
@@ -121,7 +126,7 @@
                             android:layout_height="wrap_content"
                             android:text="★★★★★"
                             android:textColor="@color/amarelo_estrela"
-                            android:textSize="16sp" />
+                            android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/tvAvaliacao"
@@ -129,29 +134,13 @@
                             android:layout_height="wrap_content"
                             android:text="(5.0)"
                             android:textColor="@color/cinza_texto"
-                            android:textSize="13sp"
-                            android:layout_marginStart="6dp" />
-                    </LinearLayout>
+                            android:textSize="12sp"
+                            android:layout_marginStart="4dp" />
 
-                    <!-- PREÇO DESTACADO -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/bg_circulo_preco"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="10dp"
-                        android:layout_marginTop="12dp">
-
-                        <TextView
-                            android:id="@+id/tvPreco"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="R$ 0,00"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/rosa_arthur" />
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
 
                         <TextView
                             android:id="@+id/tvPrecoAntigo"
@@ -159,9 +148,18 @@
                             android:layout_height="wrap_content"
                             android:text=""
                             android:textColor="@color/cinza_texto"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:visibility="gone"
-                            android:layout_marginStart="10dp" />
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:id="@+id/tvPreco"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="R$ 0,00"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/rosa_arthur" />
                     </LinearLayout>
 
                     <!-- DESCRIÇÃO -->
@@ -171,27 +169,27 @@
                         android:text="Descrição"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="15sp"
-                        android:layout_marginTop="20dp" />
+                        android:textSize="14sp"
+                        android:layout_marginTop="16dp" />
 
                     <TextView
                         android:id="@+id/tvDescricao"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textColor="@color/cinza_medio"
-                        android:textSize="14sp"
-                        android:lineSpacingMultiplier="1.4"
-                        android:layout_marginTop="6dp" />
+                        android:textSize="13sp"
+                        android:lineSpacingMultiplier="1.3"
+                        android:layout_marginTop="4dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- CARD DE VARIAÇÕES -->
+            <!-- CARD DE VARIAÇÕES (agrupado) -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
-                app:cardCornerRadius="24dp"
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/branco">
 
@@ -199,57 +197,63 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Escolha as opções"
+                        android:textStyle="bold"
+                        android:textColor="@color/texto_primario"
+                        android:textSize="14sp" />
 
                     <!-- COR -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Cor"
-                        android:textStyle="bold"
-                        android:textColor="@color/texto_primario"
-                        android:textSize="15sp" />
+                        android:textColor="@color/cinza_medio"
+                        android:textSize="13sp"
+                        android:layout_marginTop="14dp" />
 
                     <LinearLayout
                         android:id="@+id/containerCores"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="10dp" />
+                        android:layout_marginTop="6dp" />
 
                     <!-- TAMANHO -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tamanho"
-                        android:textStyle="bold"
-                        android:textColor="@color/texto_primario"
-                        android:textSize="15sp"
-                        android:layout_marginTop="20dp" />
+                        android:textColor="@color/cinza_medio"
+                        android:textSize="13sp"
+                        android:layout_marginTop="14dp" />
 
                     <LinearLayout
                         android:id="@+id/containerTamanhos"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="10dp" />
+                        android:layout_marginTop="6dp" />
 
                     <!-- MODELO -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Modelo"
-                        android:textStyle="bold"
-                        android:textColor="@color/texto_primario"
-                        android:textSize="15sp"
-                        android:layout_marginTop="20dp" />
+                        android:textColor="@color/cinza_medio"
+                        android:textSize="13sp"
+                        android:layout_marginTop="14dp" />
 
                     <LinearLayout
                         android:id="@+id/containerModelos"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="10dp" />
+                        android:layout_marginTop="6dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -258,8 +262,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
-                app:cardCornerRadius="24dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/branco">
 
@@ -267,7 +272,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="20dp"
+                    android:padding="16dp"
                     android:gravity="center_vertical">
 
                     <TextView
@@ -277,15 +282,14 @@
                         android:text="Quantidade"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="15sp" />
+                        android:textSize="14sp" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:background="@drawable/bg_contador_quantidade"
-                        android:padding="4dp">
+                        android:background="@drawable/bg_contador_quantidade">
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnMenos"
@@ -302,11 +306,11 @@
 
                         <TextView
                             android:id="@+id/tvQtd"
-                            android:layout_width="50dp"
+                            android:layout_width="44dp"
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:text="1"
-                            android:textSize="18sp"
+                            android:textSize="17sp"
                             android:textStyle="bold"
                             android:textColor="@color/texto_primario" />
 
@@ -337,7 +341,7 @@
         android:orientation="vertical"
         android:background="@color/branco"
         android:elevation="8dp"
-        android:padding="16dp">
+        android:padding="12dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddCarrinho"
@@ -347,6 +351,7 @@
             android:backgroundTint="@color/rosa_arthur"
             android:textColor="@color/branco"
             android:textStyle="bold"
+            android:textSize="14sp"
             app:cornerRadius="28dp"
             app:icon="@drawable/ic_carrinho"
             app:iconTint="@color/branco"
