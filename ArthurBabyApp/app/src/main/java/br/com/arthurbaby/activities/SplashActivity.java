@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import br.com.arthurbaby.MainActivity;
 import br.com.arthurbaby.R;
 
 public class SplashActivity extends AppCompatActivity {
@@ -18,14 +19,13 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        // Animação de entrada
         LinearLayout containerLogo = findViewById(R.id.containerLogo);
         Animation anim = AnimationUtils.loadAnimation(this, R.anim.splash_scale);
         containerLogo.startAnimation(anim);
 
-        // Depois de 2.4s vai para o Login
+        // Sempre vai para a MainActivity (catálogo é público)
         new Handler().postDelayed(() -> {
-            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+            startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();
         }, 2400);
     }

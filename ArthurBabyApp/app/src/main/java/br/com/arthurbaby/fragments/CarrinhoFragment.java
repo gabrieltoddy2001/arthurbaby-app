@@ -17,20 +17,40 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.NumberFormat;
-import java.util.Locale;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.adapters.ItemCarrinhoAdapter;
+import br.com.arthurbaby.models.ItemCarrinho;
+import br.com.arthurbaby.network.ApiService;
+import br.com.arthurbaby.network.RetrofitClient;
+import br.com.arthurbaby.network.TokenStorage;
+import br.com.arthurbaby.network.dto.CupomValidacaoRequest;
+import br.com.arthurbaby.network.dto.CupomValidacaoResponse;
+import br.com.arthurbaby.network.dto.PedidoItemRequest;
+import br.com.arthurbaby.network.dto.PedidoRequest;
+import br.com.arthurbaby.network.dto.PedidoResponse;
 import br.com.arthurbaby.repositories.CarrinhoRepository;
+import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.ErrorUtils;
+import br.com.arthurbaby.utils.LoadingUtils;
+import br.com.arthurbaby.utils.MoedaUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CarrinhoFragment extends Fragment {
 
     private RecyclerView rvCarrinho;
-    private TextView tvSubtotal, tvFrete, tvTotal, tvVazio, tvContador;
+    private TextView tvSubtotal, tvFrete, tvTotal, tvContador;
+    private View tvVazio;
     private ItemCarrinhoAdapter adapter;
     private CarrinhoRepository repo;
     private double descontoAplicado = 0;
+    private String cupomAplicado = null;
+    private boolean freteGratisPorCupom = false;
 
     @Nullable
     @Override
@@ -69,46 +89,153 @@ public class CarrinhoFragment extends Fragment {
             atualizarTotal();
         });
 
-        // Aplicar cupom
+        // CUPOM — via API (dinâmico)
         v.findViewById(R.id.btnAplicarCupom).setOnClickListener(x -> {
             String cupom = etCupom.getText().toString().trim().toUpperCase();
-            if ("ARTHUR10".equals(cupom)) {
-                descontoAplicado = repo.getSubtotal() * 0.10;
-                rowDesconto.setVisibility(View.VISIBLE);
-                NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-                tvDesconto.setText("- " + nf.format(descontoAplicado));
-                Toast.makeText(requireContext(), "Cupom aplicado! 10% de desconto",
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                descontoAplicado = 0;
-                rowDesconto.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), "Cupom inválido",
-                        Toast.LENGTH_SHORT).show();
+            if (cupom.isEmpty()) {
+                Toast.makeText(requireContext(), "Digite o cupom", Toast.LENGTH_SHORT).show();
+                return;
             }
-            atualizarTotal();
+
+            LoadingUtils.mostrar(requireContext());
+
+            ApiService api = RetrofitClient.getApi(requireContext());
+            api.validarCupom(new CupomValidacaoRequest(
+                            cupom, BigDecimal.valueOf(repo.getSubtotal())))
+                    .enqueue(new Callback<CupomValidacaoResponse>() {
+                        @Override
+                        public void onResponse(Call<CupomValidacaoResponse> call,
+                                               Response<CupomValidacaoResponse> response) {
+                            LoadingUtils.esconder();
+
+                            if (response.isSuccessful() && response.body() != null) {
+                                CupomValidacaoResponse c = response.body();
+
+                                if (c.valido) {
+                                    descontoAplicado = c.desconto != null ? c.desconto.doubleValue() : 0;
+                                    cupomAplicado = c.codigo;
+                                    freteGratisPorCupom = c.freteGratis;
+
+                                    if (descontoAplicado > 0) {
+                                        rowDesconto.setVisibility(View.VISIBLE);
+                                        tvDesconto.setText("- " + MoedaUtils.formatar(descontoAplicado));
+                                    } else {
+                                        rowDesconto.setVisibility(View.GONE);
+                                    }
+
+                                    String msg = c.descricao != null ? c.descricao : "Cupom aplicado!";
+                                    Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    descontoAplicado = 0;
+                                    cupomAplicado = null;
+                                    freteGratisPorCupom = false;
+                                    rowDesconto.setVisibility(View.GONE);
+
+                                    String motivo = c.motivo != null ? c.motivo : "Cupom inválido";
+                                    Toast.makeText(requireContext(), motivo, Toast.LENGTH_SHORT).show();
+                                }
+                                atualizarTotal();
+                            } else {
+                                Toast.makeText(requireContext(),
+                                        "Erro ao validar cupom", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<CupomValidacaoResponse> call, Throwable t) {
+                            LoadingUtils.esconder();
+                            Toast.makeText(requireContext(),
+                                    "Erro de conexão: " + t.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
 
-        // Finalizar
+        // === FINALIZAR PEDIDO ===
         v.findViewById(R.id.btnFinalizar).setOnClickListener(x -> {
+
             if (repo.getItens().isEmpty()) {
                 Toast.makeText(requireContext(), "Carrinho vazio!", Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            if (!AuthGuard.estaLogado(requireContext())) {
+                AuthGuard.mostrarDialogLogin(requireActivity(),
+                        "Entre para finalizar seu pedido. Seus itens foram salvos!");
+                return;
+            }
+
+            Long clienteId = TokenStorage.getUsuarioId(requireContext());
+            if (clienteId == null) {
+                Toast.makeText(requireContext(),
+                        "Sessão expirada. Faça login novamente.", Toast.LENGTH_LONG).show();
+                AuthGuard.mostrarDialogLogin(requireActivity(), null);
+                return;
+            }
+
             String observacao = etObservacao.getText().toString().trim();
             String forma = repo.getFormaRecebimento();
 
-            br.com.arthurbaby.utils.LoadingUtils.mostrar(requireContext());
+            List<PedidoItemRequest> itensReq = new ArrayList<>();
+            for (ItemCarrinho item : repo.getItens()) {
+                itensReq.add(new PedidoItemRequest(
+                        item.getProduto().getId(),
+                        item.getVariacaoId(),
+                        item.getQuantidade()
+                ));
+            }
 
-            new android.os.Handler().postDelayed(() -> {
-                br.com.arthurbaby.utils.LoadingUtils.esconder();
+            PedidoRequest request = new PedidoRequest(
+                    clienteId,
+                    forma,
+                    cupomAplicado,
+                    BigDecimal.valueOf(descontoAplicado),
+                    BigDecimal.valueOf(freteGratisPorCupom ? 0 : repo.getFrete()),
+                    observacao,
+                    itensReq
+            );
 
-                ConfirmaPedidoFragment frag = ConfirmaPedidoFragment.newInstance(forma, observacao);
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.frameContainer, frag)
-                        .addToBackStack(null)
-                        .commit();
-            }, 900);
+            LoadingUtils.mostrar(requireContext());
+
+            ApiService api = RetrofitClient.getApi(requireContext());
+            api.criarPedido(request).enqueue(new Callback<PedidoResponse>() {
+                @Override
+                public void onResponse(Call<PedidoResponse> call, Response<PedidoResponse> response) {
+                    LoadingUtils.esconder();
+
+                    if (response.isSuccessful() && response.body() != null) {
+                        PedidoResponse pedido = response.body();
+
+                        repo.limpar();
+
+                        ConfirmaPedidoFragment frag = ConfirmaPedidoFragment.newInstance(
+                                pedido.numero,
+                                forma,
+                                observacao,
+                                pedido.total != null ? pedido.total.doubleValue() : 0,
+                                pedido.subtotal != null ? pedido.subtotal.doubleValue() : 0,
+                                pedido.frete != null ? pedido.frete.doubleValue() : 0,
+                                pedido.desconto != null ? pedido.desconto.doubleValue() : descontoAplicado,
+                                pedido.cupom != null ? pedido.cupom : cupomAplicado
+                        );
+                        requireActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.frameContainer, frag)
+                                .addToBackStack(null)
+                                .commit();
+                    } else {
+                        Toast.makeText(requireContext(),
+                                ErrorUtils.extrairMensagem(response), Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<PedidoResponse> call, Throwable t) {
+                    LoadingUtils.esconder();
+                    Toast.makeText(requireContext(),
+                            "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
         });
 
         atualizarTotal();
@@ -116,14 +243,13 @@ public class CarrinhoFragment extends Fragment {
     }
 
     private void atualizarTotal() {
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         double subtotal = repo.getSubtotal();
-        double frete = repo.getFrete();
+        double frete = freteGratisPorCupom ? 0 : repo.getFrete();
         double total = subtotal + frete - descontoAplicado;
 
-        tvSubtotal.setText(nf.format(subtotal));
-        tvFrete.setText(frete == 0 ? "Grátis" : nf.format(frete));
-        tvTotal.setText(nf.format(total));
+        tvSubtotal.setText(MoedaUtils.formatar(subtotal));
+        tvFrete.setText(frete == 0 ? "Grátis" : MoedaUtils.formatar(frete));
+        tvTotal.setText(MoedaUtils.formatar(total));
         tvVazio.setVisibility(repo.getItens().isEmpty() ? View.VISIBLE : View.GONE);
         tvContador.setText(repo.getTotalItens() + (repo.getTotalItens() == 1 ? " item" : " itens"));
         adapter.notifyDataSetChanged();

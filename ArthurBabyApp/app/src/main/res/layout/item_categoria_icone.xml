@@ -9,14 +9,15 @@
     android:focusable="true">
 
     <FrameLayout
+        android:id="@+id/frameIcone"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:background="@color/branco">
+        android:background="@drawable/bg_circulo_categoria">
 
         <ImageView
             android:id="@+id/imgIcone"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_cat_enxoval"
             android:contentDescription="Categoria" />

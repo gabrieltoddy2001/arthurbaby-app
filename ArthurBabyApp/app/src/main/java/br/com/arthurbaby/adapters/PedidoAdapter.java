@@ -9,13 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.models.Pedido;
+import br.com.arthurbaby.utils.MoedaUtils;
 
 public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.VH> {
 
@@ -42,15 +42,13 @@ public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         Pedido p = pedidos.get(position);
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR"));
 
-        h.tvNumero.setText("Pedido #" + p.getNumero());
+        h.tvNumero.setText("Pedido #" + p.getNumeroPedido());
         h.tvStatus.setText(rotuloStatus(p.getStatusAtual()));
         h.tvData.setText(sdf.format(p.getData()));
-        h.tvTotal.setText(nf.format(p.getTotal()));
+        h.tvTotal.setText(MoedaUtils.formatar(p.getTotal()));
 
-        // Cor do status
         int cor = corStatus(p.getStatusAtual());
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(20f);
@@ -77,12 +75,12 @@ public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.VH> {
 
     private int corStatus(String status) {
         switch (status) {
-            case "ENTREGUE": return 0xFF10B981;       // verde
+            case "ENTREGUE": return 0xFF10B981;
             case "EM_TRANSPORTE":
-            case "SEPARANDO_PRODUTOS": return 0xFF3B82F6; // azul
+            case "SEPARANDO_PRODUTOS": return 0xFF3B82F6;
             case "AGUARDANDO_CONFIRMACAO":
-            case "EM_ANALISE": return 0xFFFFC107;      // amarelo
-            case "CANCELADO": return 0xFFEF4444;       // vermelho
+            case "EM_ANALISE": return 0xFFFFC107;
+            case "CANCELADO": return 0xFFEF4444;
             case "CONFIRMADO":
             case "PRONTO_PARA_RETIRADA": return 0xFF37B6B0;
             default: return 0xFF94A3B8;

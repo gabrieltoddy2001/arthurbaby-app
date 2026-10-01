@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
+    android:layout_margin="8dp"
     android:clickable="true"
     android:focusable="true"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="2dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="3dp"
     app:cardBackgroundColor="@color/branco">
 
     <FrameLayout
@@ -22,16 +22,16 @@
             <ImageView
                 android:id="@+id/imgProduto"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="160dp"
                 android:scaleType="centerCrop"
-                android:background="@color/rosa_claro"
+                android:background="@color/rosa_suave"
                 android:contentDescription="Imagem do produto" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="10dp">
+                android:padding="12dp">
 
                 <TextView
                     android:id="@+id/tvNome"
@@ -41,9 +41,9 @@
                     android:maxLines="2"
                     android:ellipsize="end"
                     android:textColor="@color/texto_primario"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.1" />
 
-                <!-- ESTRELAS -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -68,13 +68,12 @@
                         android:layout_marginStart="4dp" />
                 </LinearLayout>
 
-                <!-- PREÇO -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="4dp">
+                    android:layout_marginTop="6dp">
 
                     <TextView
                         android:id="@+id/tvPreco"
@@ -83,7 +82,7 @@
                         android:text="R$ 0,00"
                         android:textColor="@color/rosa_arthur"
                         android:textStyle="bold"
-                        android:textSize="15sp" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/tvPrecoAntigo"
@@ -101,12 +100,12 @@
         <!-- CORAÇÃO -->
         <ImageView
             android:id="@+id/btnFavorito"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_gravity="top|end"
-            android:layout_margin="6dp"
-            android:padding="6dp"
-            android:background="@color/branco"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            android:background="@drawable/bg_circulo_branco_suave"
             android:src="@drawable/ic_favorito"
             app:tint="@color/coracao_inativo"
             android:contentDescription="Favorito" />
@@ -120,11 +119,11 @@
             android:textSize="10sp"
             android:textStyle="bold"
             android:textColor="@color/branco"
-            android:background="@color/rosa_arthur"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="3dp"
+            android:background="@drawable/bg_selo_promo"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
             android:layout_gravity="top|start"
-            android:layout_margin="6dp"
+            android:layout_margin="8dp"
             android:visibility="gone" />
 
         <!-- SELO ESGOTADO -->
@@ -136,11 +135,11 @@
             android:textSize="10sp"
             android:textStyle="bold"
             android:textColor="@color/branco"
-            android:background="@color/cinza_medio"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="3dp"
+            android:background="@drawable/bg_selo_esgotado"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
             android:layout_gravity="bottom|start"
-            android:layout_margin="6dp"
+            android:layout_margin="8dp"
             android:visibility="gone" />
     </FrameLayout>
 </androidx.cardview.widget.CardView>

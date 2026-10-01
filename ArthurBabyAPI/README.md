@@ -2,17 +2,30 @@
 
 Backend Spring Boot para catalogo, clientes, favoritos, estoque e ordens de pedido.
 
-Requer JDK 21 (Spring Boot 3.5).
+## Pre-requisitos
+
+- **JDK 21** (o projeto compila com Java 21; versoes mais novas como 25 nao sao suportadas pelo Lombok/Spring desta versao)
+- **Maven 3.9+** (ou o Maven embutido do IntelliJ)
+- **MySQL 8** rodando em `localhost:3306` (ou use o modo H2 mais abaixo, que nao precisa de MySQL)
+
+### Abrindo no IntelliJ
+
+1. `File > Open` e selecione a pasta `ArthurBabyAPI` (a que tem o `pom.xml`).
+2. `File > Project Structure > Project > SDK`: escolha um **JDK 21**.
+3. Na aba **Maven** (lateral direita), clique em **Reload All Maven Projects** para baixar as dependencias.
+4. Rode a classe `ArthurBabyApplication`.
+
+> Erro `package org.springframework... does not exist` ao compilar significa que as dependencias
+> do Maven nao foram carregadas: refaca o passo 3 (e confira o JDK do passo 2).
 
 ## Executar com MySQL (padrao)
 
-O perfil `mysql` e ativado por padrao (`application.properties`). O banco `arthurbaby` e criado
-automaticamente se nao existir. Configure a senha do MySQL e o segredo JWT no ambiente antes de iniciar:
+O perfil `mysql` e ativado por padrao (`application.properties`). Basta ter um MySQL local
+rodando com as credenciais abaixo (o banco `arthurbaby` e criado automaticamente se nao existir):
 
 - Host: `localhost:3306`
 - Usuario: `root`
-- Senha: variavel `DB_PASSWORD`
-- Segredo JWT: variavel `JWT_SECRET` (use uma chave aleatoria com pelo menos 32 caracteres)
+- Senha: `Admin321`
 
 ```bash
 mvn spring-boot:run
@@ -22,13 +35,13 @@ Se preferir, use o script `database/arthurbaby_schema.sql` para criar as tabelas
 antes de subir a aplicacao (veja o cabecalho do arquivo para detalhes). Isso e opcional: com
 `ddl-auto=update` a propria aplicacao cria/atualiza as tabelas ao iniciar.
 
-Variaveis de conexao opcionais:
+Variaveis opcionais:
 
 ```bash
 DB_URL=jdbc:mysql://localhost:3306/arthurbaby?createDatabaseIfNotExist=true
 DB_USER=root
-DB_PASSWORD=sua-senha-do-mysql
-JWT_SECRET=sua-chave-aleatoria-com-pelo-menos-32-caracteres
+DB_PASSWORD=Admin321
+JWT_SECRET=troque-por-uma-chave-grande-em-producao
 ```
 
 ## Executar em teste rapido com H2 (em memoria, sem MySQL)
@@ -47,16 +60,15 @@ Console H2: http://localhost:8080/h2-console
 
 ## Usuarios iniciais
 
-- Admin: `admin@arthurbaby.com.br` / `123456`
-- Vendedor: `vendedor@arthurbaby.com.br` / `123456`
-- Cliente: `ana.souza@email.com` / `123456`
+- Admin: `admin@arthurbaby.com.br` / `admin123`
+- Cliente: `cliente@teste.com` / `cliente123`
 
 ## Fluxo minimo de teste
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login ^
   -H "Content-Type: application/json" ^
-  -d "{\"login\":\"admin@arthurbaby.com.br\",\"senha\":\"123456\"}"
+  -d "{\"login\":\"admin@arthurbaby.com.br\",\"senha\":\"admin123\"}"
 ```
 
 Use o campo `token` retornado:
@@ -87,8 +99,7 @@ curl -X POST http://localhost:8080/api/auth/cadastro ^
 
 curl -X POST http://localhost:8080/api/auth/recuperar-senha ^
   -H "Content-Type: application/json" -d "{\"email\":\"maria@teste.com\"}"
-# Responde 200 {"mensagem": "Se o e-mail estiver cadastrado, voce recebera um codigo."} -- nunca o token.
-# O token (tabela password_reset_token, valido por 1h, uso unico) e logado no console: [RECUPERAR-SENHA][DEV].
+# O token de redefinicao e logado no console da aplicacao (simulacao de e-mail em dev).
 
 curl -X POST http://localhost:8080/api/auth/redefinir-senha ^
   -H "Content-Type: application/json" -d "{\"token\":\"TOKEN_DO_LOG\",\"novaSenha\":\"novaSenha123\"}"
@@ -126,14 +137,10 @@ Pedidos (todas as respostas usam `PedidoResponse`: `numero`, `status`, `data`, `
 `cupom`, `desconto`, `frete`, `total`, `historico`...):
 
 ```bash
-# Previa do cupom (publico) -> {valido, codigo, tipo, descricao, desconto, freteGratis, motivo}
-curl -X POST http://localhost:8080/api/cupons/validar -H "Content-Type: application/json" ^
-  -d "{\"codigo\":\"ARTHUR10\",\"subtotal\":149.90}"
-
-# Criar pedido com cupom (desconto e frete sao calculados pelo servidor)
+# Criar pedido com cupom (ARTHUR10 = 10% sobre o subtotal)
 curl -X POST http://localhost:8080/api/pedidos ^
   -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" ^
-  -d "{\"clienteId\":2,\"formaRecebimento\":\"ENTREGA\",\"cupom\":\"ARTHUR10\",\"itens\":[{\"produtoId\":1,\"variacaoId\":1,\"quantidade\":2}]}"
+  -d "{\"clienteId\":2,\"formaRecebimento\":\"ENTREGA\",\"cupom\":\"ARTHUR10\",\"frete\":15.00,\"itens\":[{\"produtoId\":1,\"variacaoId\":1,\"quantidade\":2}]}"
 
 # Buscar por numero do pedido (ex.: AB20250918143025)
 curl http://localhost:8080/api/pedidos/numero/NUMERO_DO_PEDIDO -H "Authorization: Bearer SEU_TOKEN"
@@ -143,31 +150,11 @@ curl -X PUT http://localhost:8080/api/pedidos/NUMERO_DO_PEDIDO/cancelar ^
   -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" -d "{\"motivo\":\"Cliente desistiu\"}"
 ```
 
-Valores do pedido: **tudo e recalculado no servidor**; os campos `desconto` e `frete` enviados pelo app sao ignorados.
-
-- `subtotal = soma(valorUnitario x quantidade)`; o desconto e global (nivel do pedido) e so existe via cupom.
-- Cupons ficam na tabela `cupom` (admin gerencia via `/api/admin/...` ou SQL): `PERCENTUAL` (valor = %),
-  `VALOR_FIXO` (valor = R$) e `FRETE_GRATIS`; opcionais `valorMinimo`, `valorMaximoDesconto`, `validoDe`, `validoAte`, `ativo`.
-  Seed: `ARTHUR10` (10%), `FRETEGRATIS`, `BEMVINDO` (R$ 15). Cupom inexistente/nao aplicavel no pedido retorna `400`.
-- Frete: retirada na loja = 0; entrega = R$ 15,00, gratis a partir de R$ 200,00 de subtotal ou com cupom `FRETE_GRATIS`
-  (configuravel em `app.frete.valor-entrega` e `app.frete.gratis-a-partir-de`).
-- `total = subtotal - desconto + frete`, nunca negativo. Cliente so cria pedido para si mesmo (`403`).
+Regras de desconto: o desconto e **global** (nivel do pedido); os itens nao tem desconto proprio.
+`subtotal = soma(valorUnitario x quantidade)` e `total = subtotal - desconto + frete`.
+Com `cupom`, o desconto e calculado pelo servidor sobre o subtotal (o `desconto` enviado e ignorado);
+cupom inexistente, inativo ou expirado retorna `400`. Sem cupom, vale o `desconto` informado
+(nao pode ser negativo nem maior que o subtotal).
 
 Cancelamento: exige motivo, nao permite cancelar pedido ja cancelado ou entregue, registra o historico e estorna
 o estoque (`MovimentacaoEstoque` do tipo `ESTORNO`). Cliente so ve/cancela os proprios pedidos (`403` caso contrario).
-
-## Outros endpoints
-
-- `GET /api/auth/me` (token): dados do usuario logado `{id, nomeCompleto, email, cpf, telefone, perfil, status}`.
-- Favoritos (token, cliente so acessa os proprios): `GET /api/favoritos/cliente/{id}` -> `[{id, produto:{...,marca, imagens}, criadoEm}]`,
-  `POST /api/favoritos`, `DELETE /api/favoritos` (corpo) ou `DELETE /api/favoritos/cliente/{id}/produto/{produtoId}` (sem corpo, para Retrofit).
-- `POST /api/admin/produtos/completo`: cria produto + imagens + variacoes numa transacao; estoque inicial vira movimentacao `ENTRADA`.
-- Estoque manual (admin/vendedor), corpo `{quantidade, observacao}`:
-  `POST /api/admin/estoque/variacoes/{variacaoId}/entrada` (soma), `/ajuste` (define o total) e `/estorno` (devolve).
-
-Regra geral: controllers nunca devolvem entidades JPA; o CRUD generico `/api/admin/{tipo}` converte para JSON
-dentro da transacao e nunca expoe a senha (hash) do usuario. Erros sempre saem como `{ "erro": ..., "codigo": ... }`
-(400, 401, 403, 404, 405, 409, 415, 500).
-
-Migracoes automaticas no boot (`SchemaMigration`): converte o cupom antigo (`percentual_desconto`) para `tipo/valor`
-e alinha a FK de `password_reset_token` com `usuario.id BIGINT UNSIGNED` em bancos criados pelo `arthurbaby_bd.sql`.

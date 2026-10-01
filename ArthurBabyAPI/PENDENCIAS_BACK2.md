@@ -792,27 +792,17 @@ public void estornarEstoque(Produto produto, ProdutoVariacao variacao,
 
 | \# | Pendência | Prioridade | Status | 
  | ----- | ----- | ----- | ----- | 
-| 1 | Erro 500 nos favoritos | 🔴 Crítica | ✅ | 
-| 2 | Bug do recuperar senha | 🔴 Crítica | ✅ | 
-| 3 | Sistema de cupons | 🔴 Crítica | ✅ | 
-| 4 | Recalcular no back | 🔴 Crítica | ✅ | 
-| 5 | Seed (modelos, imagens, avaliação) | 🟡 Importante | ✅ | 
-| 6 | GET /api/auth/me | 🟡 Importante | ✅ | 
-| 7 | Tratamento 401/403/404/500 | 🟡 Importante | ✅ | 
-| 8 | Cadastro completo de produto | 🟢 Desejável | ✅ | 
-| 9 | Normalizar e-mail | 🟢 Desejável | ✅ | 
-| 10 | Endpoints de estoque | 🟢 Desejável | ✅ | 
+| 1 | Erro 500 nos favoritos | 🔴 Crítica | ⏳ | 
+| 2 | Bug do recuperar senha | 🔴 Crítica | ⏳ | 
+| 3 | Sistema de cupons | 🔴 Crítica | ⏳ | 
+| 4 | Recalcular no back | 🔴 Crítica | ⏳ | 
+| 5 | Seed (modelos, imagens, avaliação) | 🟡 Importante | ⏳ | 
+| 6 | GET /api/auth/me | 🟡 Importante | ⏳ | 
+| 7 | Tratamento 401/403/404/500 | 🟡 Importante | ⏳ | 
+| 8 | Cadastro completo de produto | 🟢 Desejável | ⏳ | 
+| 9 | Normalizar e-mail | 🟢 Desejável | ⏳ | 
+| 10 | Endpoints de estoque | 🟢 Desejável | ⏳ | 
 
 > **Nota:** Prioridades 1 e 4 são as mais urgentes — bloqueiam funcionalidades do app e representam falha de segurança.
 >
 > *Documento consolidado em 24/09/2026 — Pendências finais após integração completa.*
-
-> **Status 28/09/2026 — todas as 10 pendências implementadas** (JDK 21, Spring Boot 3.5.16, 48 testes passando, validado no MySQL local).
-> Diferenças em relação ao texto acima:
-> - 1: favoritos devolvem `{id, produto, criadoEm}`, e `produto` usa o mesmo formato da listagem (`marca`, `avaliacao`, `imagens`). Também foram convertidos para DTO `/api/estoque/{id}`, `/api/estoque/{id}/movimentacoes` e `/api/admin/{tipo}` (este último converte para JSON dentro da transação e nunca expõe `senha`). Cliente só acessa os próprios favoritos (403), e foi criado `DELETE /api/favoritos/cliente/{id}/produto/{produtoId}` porque o Retrofit não envia corpo em DELETE.
-> - 2: token válido por 1h e de uso único; uma nova solicitação invalida os tokens pendentes. `redefinir-senha` retorna 400 para token inválido, usado ou expirado.
-> - 4: frete configurável (`app.frete.valor-entrega`, `app.frete.gratis-a-partir-de`). Cliente só cria pedido para si mesmo (403).
-> - 5: o seed garante os modelos Padrão/Premium/Deluxe e o produto AB-001 completo. Se o catálogo não tiver nenhuma imagem, completa os produtos existentes (imagem placeholder, avaliação 5.0, modelo padrão).
-> - 6: `GET /api/auth/me` devolve também `status`.
-> - 7: também trata 405, 409, 415, parâmetro ausente e parâmetro com tipo errado (antes, rota inexistente e outros casos caíam em 500).
-> - 10: `POST /api/admin/estoque/variacoes/{variacaoId}/entrada|ajuste|estorno` com `{quantidade, observacao}`.

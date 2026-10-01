@@ -13,6 +13,16 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import br.com.arthurbaby.MainActivity;
 import br.com.arthurbaby.R;
+import br.com.arthurbaby.network.ApiService;
+import br.com.arthurbaby.network.RetrofitClient;
+import br.com.arthurbaby.network.TokenStorage;
+import br.com.arthurbaby.network.dto.AuthRequest;
+import br.com.arthurbaby.network.dto.AuthResponse;
+import br.com.arthurbaby.utils.ErrorUtils;
+import br.com.arthurbaby.utils.LoadingUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -53,14 +63,46 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // Simula chamada à API
-        br.com.arthurbaby.utils.LoadingUtils.mostrar(this);
+        LoadingUtils.mostrar(this);
 
-        new android.os.Handler().postDelayed(() -> {
-            br.com.arthurbaby.utils.LoadingUtils.esconder();
-            Toast.makeText(this, "Login realizado (mock)", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
-        }, 900);
+        ApiService api = RetrofitClient.getApi(this);
+        api.login(new AuthRequest(login, senha))
+                .enqueue(new Callback<AuthResponse>() {
+                    @Override
+                    public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
+                        LoadingUtils.esconder();
+
+                        if (response.isSuccessful() && response.body() != null) {
+                            AuthResponse auth = response.body();
+
+                            TokenStorage.salvar(
+                                    LoginActivity.this,
+                                    auth.token,
+                                    auth.usuarioId,
+                                    auth.nome,
+                                    auth.perfil
+                            );
+
+                            Toast.makeText(LoginActivity.this,
+                                    "Bem-vindo, " + auth.nome + "!",
+                                    Toast.LENGTH_SHORT).show();
+
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(LoginActivity.this,
+                                    ErrorUtils.extrairMensagem(response),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<AuthResponse> call, Throwable t) {
+                        LoadingUtils.esconder();
+                        Toast.makeText(LoginActivity.this,
+                                "Erro de conexão: " + t.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 }

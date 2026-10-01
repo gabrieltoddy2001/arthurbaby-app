@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — ArthurBaby Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app"></div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/layout.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!montarLayout('Dashboard', 'dashboard')) return;
+      await carregarDashboard();
+    });
+
+    async function carregarDashboard() {
+      const conteudo = document.getElementById('conteudo');
+      conteudo.innerHTML = '<div class="loading">Carregando indicadores...</div>';
+
+      try {
+        const [produtos, pedidos, usuarios, movimentacoes] = await Promise.all([
+          adminApi.listar('produtos'),
+          adminApi.listar('pedidos'),
+          adminApi.listar('usuarios'),
+          adminApi.listar('movimentacoes'),
+        ]);
+
+        renderDashboard(produtos, pedidos, usuarios, movimentacoes);
+      } catch (err) {
+        conteudo.innerHTML = `<div class="alert alert-erro">Erro: ${err.message}</div>`;
+      }
+    }
+
+    function renderDashboard(produtos, pedidos, usuarios, movimentacoes) {
+      const conteudo = document.getElementById('conteudo');
+
+      /* ===== KPIs ===== */
+      const produtosAtivos = produtos.filter(p => p.status === 'ATIVO').length;
+      const pedidosValidos = pedidos.filter(p => p.status !== 'CANCELADO');
+      const faturamento = pedidosValidos.reduce((s, p) => s + p.total, 0);
+      const clientesAtivos = usuarios.filter(u => u.perfil === 'CLIENTE' && u.status === 'ATIVO').length;
+      const pedidosPendentes = pedidos.filter(p =>
+        ['RASCUNHO', 'PEDIDO_GERADO', 'EM_ANALISE', 'AGUARDANDO_CONFIRMACAO'].includes(p.status)
+      ).length;
+
+      /* ===== Estoque baixo ===== */
+      const estoqueAtual = {};
+      movimentacoes.forEach(m => {
+        estoqueAtual[m.produtoId] = m.estoquePosterior ?? 0;
+      });
+      const produtosCriticos = produtos
+        .map(p => ({ p, atual: estoqueAtual[p.id] ?? 0, minimo: p.estoqueMinimo || 0 }))
+        .filter(({ atual, minimo }) => atual <= minimo)
+        .sort((a, b) => a.atual - b.atual)
+        .slice(0, 5);
+
+      /* ===== Últimos pedidos ===== */
+      const ultimosPedidos = [...pedidos]
+        .sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm))
+        .slice(0, 5);
+
+      /* ===== Pedidos por status ===== */
+      const porStatus = {};
+      pedidos.forEach(p => {
+        porStatus[p.status] = (porStatus[p.status] || 0) + 1;
+      });
+      const maxStatus = Math.max(...Object.values(porStatus), 1);
+      const statusOrdem = [
+        'PEDIDO_GERADO', 'EM_ANALISE', 'AGUARDANDO_CONFIRMACAO', 'CONFIRMADO',
+        'SEPARANDO_PRODUTOS', 'PRONTO_PARA_RETIRADA', 'EM_TRANSPORTE',
+        'ENTREGUE', 'CANCELADO',
+      ];
+
+      conteudo.innerHTML = `
+        <!-- ===== KPIs ===== -->
+        <div class="cards-kpi">
+          <div class="kpi-card" style="border-left:4px solid var(--verde);">
+            <div class="kpi-label">Produtos ativos</div>
+            <div class="kpi-valor" style="color:var(--verde-escuro);">${produtosAtivos}</div>
+            <div style="font-size:.8rem;color:var(--texto-secundario);margin-top:.25rem;">
+              de ${produtos.length} cadastrados
+            </div>
+          </div>
+          <div class="kpi-card" style="border-left:4px solid #F59E0B;">
+            <div class="kpi-label">Pedidos</div>
+            <div class="kpi-valor" style="color:#F59E0B;">${pedidos.length}</div>
+            <div style="font-size:.8rem;color:var(--texto-secundario);margin-top:.25rem;">
+              ${pedidosPendentes} pendente${pedidosPendentes === 1 ? '' : 's'}
+            </div>
+          </div>
+          <div class="kpi-card" style="border-left:4px solid var(--rosa);">
+            <div class="kpi-label">Faturamento</div>
+            <div class="kpi-valor" style="color:var(--rosa-escuro);font-size:1.35rem;">
+              R$ ${formatarPreco(faturamento)}
+            </div>
+            <div style="font-size:.8rem;color:var(--texto-secundario);margin-top:.25rem;">
+              ${pedidosValidos.length} pedido${pedidosValidos.length === 1 ? '' : 's'} válido${pedidosValidos.length === 1 ? '' : 's'}
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Clientes ativos</div>
+            <div class="kpi-valor">${clientesAtivos}</div>
+            <div style="font-size:.8rem;color:var(--texto-secundario);margin-top:.25rem;">
+              cadastrados no sistema
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 2 colunas: Pedidos por status + Estoque baixo ===== -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+
+          <!-- Pedidos por status -->
+          <div class="card">
+            <h3 class="secao-titulo">📦 Pedidos por status</h3>
+            ${Object.keys(porStatus).length === 0
+              ? '<p style="color:var(--texto-secundario);font-size:.9rem;">Nenhum pedido cadastrado.</p>'
+              : statusOrdem.filter(s => porStatus[s]).map(s => {
+                  const qtd = porStatus[s];
+                  const pct = (qtd / maxStatus) * 100;
+                  return `
+                    <div style="margin-bottom:.75rem;">
+                      <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.25rem;">
+                        <span><span class="badge ${badgeStatus(s)}" style="font-size:.7rem;">${s}</span></span>
+                        <strong>${qtd}</strong>
+                      </div>
+                      <div style="height:6px;background:var(--superficie);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:var(--verde);"></div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+          </div>
+
+          <!-- Estoque baixo -->
+          <div class="card">
+            <h3 class="secao-titulo">⚠️ Estoque baixo</h3>
+            ${produtosCriticos.length === 0
+              ? '<p style="color:var(--verde-escuro);font-size:.9rem;">✅ Tudo em ordem! Nenhum produto crítico.</p>'
+              : produtosCriticos.map(({ p, atual, minimo }) => `
+                  <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--borda);font-size:.9rem;">
+                    <div>
+                      <strong>${escapeHtml(p.nome)}</strong>
+                      <div style="font-size:.75rem;color:var(--texto-secundario);">${escapeHtml(p.codigo)}</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <span class="badge ${atual === 0 ? 'badge-inativo' : 'badge-esgotado'}">
+                        ${atual} / ${minimo}
+                      </span>
+                    </div>
+                  </div>
+                `).join('')}
+            <div style="margin-top:.75rem;text-align:right;">
+              <a href="relatorios.html" style="font-size:.85rem;">Ver relatório completo →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Últimos pedidos ===== -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+            <h3 class="secao-titulo" style="margin:0;">🧾 Últimos pedidos</h3>
+            <a href="pedidos.html" style="font-size:.85rem;">Ver todos →</a>
+          </div>
+          ${ultimosPedidos.length === 0
+            ? '<p style="color:var(--texto-secundario);font-size:.9rem;">Nenhum pedido cadastrado.</p>'
+            : `<table class="tabela tabela-mini">
+                <thead>
+                  <tr>
+                    <th>Número</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th class="text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${ultimosPedidos.map(p => `
+                    <tr>
+                      <td><strong>${escapeHtml(p.numeroPedido)}</strong></td>
+                      <td>${escapeHtml(p.clienteNome)}</td>
+                      <td>${formatarData(p.criadoEm)}</td>
+                      <td><span class="badge ${badgeStatus(p.status)}">${p.status}</span></td>
+                      <td class="text-right"><strong>R$ ${formatarPreco(p.total)}</strong></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>`}
+        </div>
+
+        <!-- ===== Atalhos rápidos ===== -->
+        <div class="card">
+          <h3 class="secao-titulo">⚡ Atalhos rápidos</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;">
+            <a href="produto-form.html" class="atalho">
+              <span style="font-size:1.5rem;">📦</span>
+              <span>Novo produto</span>
+            </a>
+            <a href="categorias.html" class="atalho">
+              <span style="font-size:1.5rem;">📂</span>
+              <span>Gerenciar categorias</span>
+            </a>
+            <a href="pedidos.html" class="atalho">
+              <span style="font-size:1.5rem;">🧾</span>
+              <span>Ver pedidos</span>
+            </a>
+            <a href="estoque.html" class="atalho">
+              <span style="font-size:1.5rem;">📊</span>
+              <span>Movimentar estoque</span>
+            </a>
+            <a href="relatorios.html" class="atalho">
+              <span style="font-size:1.5rem;">📈</span>
+              <span>Relatórios</span>
+            </a>
+            <a href="configuracoes.html" class="atalho">
+              <span style="font-size:1.5rem;">⚙️</span>
+              <span>Configurações</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ===== Helpers ===== */
+    function formatarPreco(v) {
+      return Number(v || 0).toFixed(2).replace('.', ',');
+    }
+    function formatarData(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      });
+    }
+    function badgeStatus(status) {
+      if (status === 'CANCELADO') return 'badge-inativo';
+      if (status === 'ENTREGUE') return 'badge-ativo';
+      if (status === 'PEDIDO_GERADO' || status === 'EM_ANALISE' || status === 'AGUARDANDO_CONFIRMACAO') return 'badge-esgotado';
+      return 'badge-ativo';
+    }
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
+    }
+  </script>
+</body>
+</html>

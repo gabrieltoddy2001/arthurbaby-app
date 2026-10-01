@@ -61,6 +61,14 @@ public class DataInitializer {
                     categorias.save(sub);
                 }
             }
+            // Bancos criados antes da coluna "icone" existir têm categorias com icone nulo: o app ficaria sem ícone.
+            // Preenche só as categorias de primeiro nível ainda sem ícone (não sobrescreve o que o admin definiu).
+            for (Categoria c : categorias.findAll()) {
+                if (c.getCategoriaPai() == null && (c.getIcone() == null || c.getIcone().isBlank())) {
+                    c.setIcone(iconeDe(c.getNome()));
+                    categorias.save(c);
+                }
+            }
             garantirCupom(cupons, "ARTHUR10", TipoCupom.PERCENTUAL, "10.00", "10% de desconto");
             garantirCupom(cupons, "FRETEGRATIS", TipoCupom.FRETE_GRATIS, null, "Frete gratis");
             garantirCupom(cupons, "BEMVINDO", TipoCupom.VALOR_FIXO, "15.00", "R$ 15 de desconto");
@@ -116,7 +124,8 @@ public class DataInitializer {
                 img.setPrincipal(true); img.setOrdemExibicao(1);
                 imagens.save(img);
             }
-            if (p.getAvaliacao() == null) { p.setAvaliacao(new BigDecimal("5.0")); produtos.save(p); }
+            // Nulo ou 0 (valor padrão de bancos antigos) vira 5.0 para o app exibir as estrelas
+            if (p.getAvaliacao() == null || p.getAvaliacao().signum() == 0) { p.setAvaliacao(new BigDecimal("5.0")); produtos.save(p); }
         }
     }
 

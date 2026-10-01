@@ -23,13 +23,6 @@
             android:textColor="@color/texto_primario"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_favorito"
-            app:tint="@color/rosa_arthur"
-            android:contentDescription="Favoritos" />
     </LinearLayout>
 
     <!-- BUSCA -->
@@ -68,12 +61,23 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- LISTA -->
+    <!-- PROGRESS BAR (inicia VISÍVEL) -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="60dp"
+        android:indeterminateTint="@color/verde_arthur"
+        android:visibility="visible" />
+
+    <!-- LISTA (inicia ESCONDIDA) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCategorias"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
-        android:clipToPadding="false" />
+        android:clipToPadding="false"
+        android:visibility="gone" />
 
 </LinearLayout>
