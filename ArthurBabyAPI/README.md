@@ -158,3 +158,29 @@ cupom inexistente, inativo ou expirado retorna `400`. Sem cupom, vale o `descont
 
 Cancelamento: exige motivo, nao permite cancelar pedido ja cancelado ou entregue, registra o historico e estorna
 o estoque (`MovimentacaoEstoque` do tipo `ESTORNO`). Cliente so ve/cancela os proprios pedidos (`403` caso contrario).
+
+## Painel admin: estoque e auditoria
+
+O estoque fica em cada **variacao** do produto (tamanho/cor/modelo). O saldo do produto e a soma das variacoes.
+
+```bash
+# Historico de movimentacoes (mais recente primeiro, com nome do produto e do usuario)
+curl http://localhost:8080/api/admin/movimentacoes -H "Authorization: Bearer SEU_TOKEN"
+
+# Movimentar uma variacao: entrada | saida | ajuste | estorno
+# (no ajuste, "quantidade" e o NOVO saldo total, ex.: contagem do inventario)
+curl -X POST http://localhost:8080/api/admin/estoque/variacoes/1/entrada \
+  -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" \
+  -d '{"quantidade": 5, "observacao": "Chegou do fornecedor"}'
+
+# Auditoria (log de acoes do painel) - usa o CRUD generico, tipo "auditoria"
+curl http://localhost:8080/api/admin/auditoria -H "Authorization: Bearer SEU_TOKEN"
+```
+
+A tabela `auditoria` e criada sozinha ao subir a API (`ddl-auto=update`), nao precisa rodar SQL.
+
+### Dicas se o painel mostrar "Erro ao listar ..."
+
+- **Reinicie a API depois de puxar mudancas** (Stop + Run no IntelliJ). A API que ja estava rodando
+  continua com o codigo antigo e responde `400 Tipo de recurso invalido`.
+- No navegador, recarregue com **Ctrl+F5** para nao usar os arquivos JS antigos do cache.

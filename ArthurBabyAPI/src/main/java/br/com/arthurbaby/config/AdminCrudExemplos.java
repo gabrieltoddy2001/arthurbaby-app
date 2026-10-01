@@ -240,6 +240,16 @@ public final class AdminCrudExemplos {
                   "cliente": { "id": 3 },
                   "produto": { "id": 1 }
                 }""");
+        add("auditoria", "Auditoria",
+                "Registro de ação feita no painel. A data é preenchida pelo servidor.",
+                """
+                {
+                  "usuario": "Administrador ArthurBaby",
+                  "acao": "RESETAR_SENHA",
+                  "entidade": "Usuario",
+                  "entidadeId": 5,
+                  "descricao": "Resetou a senha do cliente Juliana Costa"
+                }""");
     }
 
     private static void add(String tipo, String resumo, String descricao, String json) {

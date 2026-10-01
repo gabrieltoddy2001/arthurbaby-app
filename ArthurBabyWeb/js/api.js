@@ -132,4 +132,26 @@ const adminApi = {
     const resp = await apiFetch(`/admin/${tipo}/${id}`, { method: 'DELETE' });
     if (!resp.ok) throw new Error('Erro ao excluir');
   },
+
+  // operacao: 'entrada' | 'saida' | 'ajuste' | 'estorno'. No ajuste, quantidade = novo saldo da variação.
+  movimentarEstoque: async (variacaoId, operacao, body) => {
+    const resp = await apiFetch(`/admin/estoque/variacoes/${variacaoId}/${operacao}`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+    if (!resp.ok) {
+      let msg = 'Erro ao registrar movimentação';
+      try {
+        const erro = await resp.json();
+        msg = erro.erro || msg;
+      } catch (_) {}
+      throw new Error(msg);
+    }
+    return resp.json();
+  },
 };
+
+/* O estoque fica nas variações do produto; o saldo do produto é a soma delas. */
+function estoqueProduto(produto) {
+  return (produto.variacoes || []).reduce((s, v) => s + (v.estoqueAtual || 0), 0);
+}

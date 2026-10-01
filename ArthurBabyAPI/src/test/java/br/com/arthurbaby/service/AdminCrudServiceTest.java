@@ -55,6 +55,7 @@ class AdminCrudServiceTest {
                 mock(br.com.arthurbaby.repository.PedidoStatusHistoricoRepository.class),
                 mock(br.com.arthurbaby.repository.ConfiguracaoLojaRepository.class),
                 mock(br.com.arthurbaby.repository.FavoritoRepository.class),
+                mock(br.com.arthurbaby.repository.AuditoriaRepository.class),
                 mapper, encoder);
     }
 

@@ -1,11 +1,13 @@
 package br.com.arthurbaby.service;
 
+import br.com.arthurbaby.dto.MovimentacaoEstoqueAdminResponse;
 import br.com.arthurbaby.dto.MovimentacaoEstoqueResponse;
 import br.com.arthurbaby.entity.*;
 import br.com.arthurbaby.entity.Enums.MovimentoEstoqueTipo;
 import br.com.arthurbaby.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -17,14 +19,14 @@ public class EstoqueService {
         this.movimentos = movimentos;
     }
     @Transactional
-    public void baixarEstoque(Produto produto, ProdutoVariacao variacao, int quantidade, Usuario usuario, String observacao) {
-        if (variacao == null) return;
+    public MovimentacaoEstoque baixarEstoque(Produto produto, ProdutoVariacao variacao, int quantidade, Usuario usuario, String observacao) {
+        if (variacao == null) return null;
         if (quantidade <= 0) throw new IllegalArgumentException("Quantidade deve ser maior que zero");
         int anterior = variacao.getEstoqueAtual();
         if (anterior < quantidade) throw new IllegalArgumentException("Estoque insuficiente para SKU " + variacao.getSku());
         variacao.setEstoqueAtual(anterior - quantidade);
         variacoes.save(variacao);
-        registrar(produto, variacao, usuario, MovimentoEstoqueTipo.SAIDA, quantidade, anterior, variacao.getEstoqueAtual(), observacao);
+        return registrar(produto, variacao, usuario, MovimentoEstoqueTipo.SAIDA, quantidade, anterior, variacao.getEstoqueAtual(), observacao);
     }
     @Transactional
     public MovimentacaoEstoque adicionarEstoque(Produto produto, ProdutoVariacao variacao, int quantidade, Usuario usuario, String observacao) {
@@ -64,7 +66,13 @@ public class EstoqueService {
         return registrar(produto, variacao, usuario, MovimentoEstoqueTipo.ESTORNO, quantidade, anterior, variacao.getEstoqueAtual(), observacao);
     }
 
-    /** Operacao manual do painel admin sobre uma variacao (ENTRADA, AJUSTE ou ESTORNO); devolve a movimentacao registrada. */
+    /** Historico completo para o painel admin, da movimentacao mais recente para a mais antiga. */
+    @Transactional(readOnly = true)
+    public List<MovimentacaoEstoqueAdminResponse> listarMovimentacoes() {
+        return movimentos.findAllByOrderByCriadoEmDesc().stream().map(MovimentacaoEstoqueAdminResponse::de).toList();
+    }
+
+    /** Operacao manual do painel admin sobre uma variacao (ENTRADA, SAIDA, AJUSTE ou ESTORNO); devolve a movimentacao registrada. */
     @Transactional
     public MovimentacaoEstoqueResponse movimentarVariacao(Long variacaoId, MovimentoEstoqueTipo tipo, Integer quantidade,
                                                           Usuario usuario, String observacao) {
@@ -74,6 +82,7 @@ public class EstoqueService {
         Produto produto = variacao.getProduto();
         MovimentacaoEstoque mov = switch (tipo) {
             case ENTRADA -> adicionarEstoque(produto, variacao, quantidade, usuario, observacao);
+            case SAIDA -> baixarEstoque(produto, variacao, quantidade, usuario, observacao);
             case AJUSTE -> ajustarEstoque(produto, variacao, quantidade, usuario, observacao);
             case ESTORNO -> estornarEstoque(produto, variacao, quantidade, usuario, observacao);
             default -> throw new IllegalArgumentException("Operacao de estoque nao suportada: " + tipo);

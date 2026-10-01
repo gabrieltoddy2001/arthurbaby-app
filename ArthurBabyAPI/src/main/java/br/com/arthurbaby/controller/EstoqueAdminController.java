@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping(value = "/api/admin/estoque/variacoes/{variacaoId}", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Administração - Estoque", description = "Entrada, ajuste e estorno manuais de estoque por variação. Exige perfil ADMINISTRADOR ou VENDEDOR. "
+@Tag(name = "Administração - Estoque", description = "Entrada, saída, ajuste e estorno manuais de estoque por variação. Exige perfil ADMINISTRADOR ou VENDEDOR. "
         + "Cada operação gera uma movimentação registrada com o usuário logado.")
 public class EstoqueAdminController {
     private static final String SEM_PERMISSAO = "Acesso negado: apenas perfis ADMINISTRADOR ou VENDEDOR";
@@ -41,6 +41,19 @@ public class EstoqueAdminController {
     public MovimentacaoEstoqueResponse entrada(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                                @AuthenticationPrincipal Usuario logado) {
         return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.ENTRADA, request.quantidade(), logado, request.observacao());
+    }
+
+    @PostMapping("/saida")
+    @Operation(summary = "Saída de estoque", description = "Subtrai \"quantidade\" unidades do estoque da variação (ex.: perda, avaria, venda fora do site).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Movimentação de SAIDA registrada"),
+            @ApiResponse(responseCode = "400", description = "Quantidade ausente, menor/igual a zero ou maior que o estoque atual"),
+            @ApiResponse(responseCode = "403", description = SEM_PERMISSAO),
+            @ApiResponse(responseCode = "404", description = "Variação não encontrada")
+    })
+    public MovimentacaoEstoqueResponse saida(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
+                                             @AuthenticationPrincipal Usuario logado) {
+        return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.SAIDA, request.quantidade(), logado, request.observacao());
     }
 
     @PostMapping("/ajuste")
