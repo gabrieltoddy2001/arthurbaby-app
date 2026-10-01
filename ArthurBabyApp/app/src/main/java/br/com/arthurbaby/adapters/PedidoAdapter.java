@@ -9,13 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.models.Pedido;
+import br.com.arthurbaby.utils.MoedaUtils;
 
 public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.VH> {
 
@@ -42,15 +42,13 @@ public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         Pedido p = pedidos.get(position);
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR"));
 
         h.tvNumero.setText("Pedido #" + p.getNumeroPedido());
         h.tvStatus.setText(rotuloStatus(p.getStatusAtual()));
         h.tvData.setText(sdf.format(p.getData()));
-        h.tvTotal.setText(nf.format(p.getTotal()));
+        h.tvTotal.setText(MoedaUtils.formatar(p.getTotal()));
 
-        // Cor do status
         int cor = corStatus(p.getStatusAtual());
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(20f);

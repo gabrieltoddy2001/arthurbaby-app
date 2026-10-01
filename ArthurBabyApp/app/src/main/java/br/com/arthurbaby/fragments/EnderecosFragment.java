@@ -28,6 +28,7 @@ import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.EnderecoRequest;
 import br.com.arthurbaby.network.dto.EnderecoResponse;
 import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,7 +56,6 @@ public class EnderecosFragment extends Fragment {
         btnNovo = v.findViewById(R.id.btnNovoEndereco);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Visitante? Pede login
         if (!AuthGuard.estaLogado(requireContext())) {
             AuthGuard.mostrarDialogLogin(requireActivity(),
                     "Entre para gerenciar seus endereços.");
@@ -64,7 +64,6 @@ public class EnderecosFragment extends Fragment {
         }
 
         btnNovo.setOnClickListener(x -> abrirDialogNovoEndereco());
-
         carregarEnderecos();
         return v;
     }
@@ -89,7 +88,7 @@ public class EnderecosFragment extends Fragment {
                     rv.setAdapter(adapter);
                 } else {
                     Toast.makeText(requireContext(),
-                            "Erro ao carregar endereços", Toast.LENGTH_SHORT).show();
+                            ErrorUtils.extrairMensagem(response), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -118,6 +117,10 @@ public class EnderecosFragment extends Fragment {
                                         Toast.makeText(requireContext(),
                                                 "Endereço removido", Toast.LENGTH_SHORT).show();
                                         carregarEnderecos();
+                                    } else {
+                                        Toast.makeText(requireContext(),
+                                                ErrorUtils.extrairMensagem(response),
+                                                Toast.LENGTH_SHORT).show();
                                     }
                                 }
                                 @Override public void onFailure(Call<Void> call, Throwable t) {
@@ -133,30 +136,37 @@ public class EnderecosFragment extends Fragment {
     private void abrirDialogNovoEndereco() {
         LinearLayout container = new LinearLayout(getContext());
         container.setOrientation(LinearLayout.VERTICAL);
-        container.setPadding(50, 30, 50, 10);
+        container.setPadding(40, 20, 40, 20);
 
-        TextInputEditText etCep = criarCampo("CEP");
+        TextInputEditText etCep = new TextInputEditText(getContext());
+        etCep.setHint("CEP");
         container.addView(etCep);
 
-        TextInputEditText etLog = criarCampo("Logradouro");
+        TextInputEditText etLog = new TextInputEditText(getContext());
+        etLog.setHint("Logradouro");
         container.addView(etLog);
 
-        TextInputEditText etNum = criarCampo("Número");
+        TextInputEditText etNum = new TextInputEditText(getContext());
+        etNum.setHint("Número");
         container.addView(etNum);
 
-        TextInputEditText etComp = criarCampo("Complemento (opcional)");
+        TextInputEditText etComp = new TextInputEditText(getContext());
+        etComp.setHint("Complemento");
         container.addView(etComp);
 
-        TextInputEditText etBairro = criarCampo("Bairro");
+        TextInputEditText etBairro = new TextInputEditText(getContext());
+        etBairro.setHint("Bairro");
         container.addView(etBairro);
 
-        TextInputEditText etCidade = criarCampo("Cidade");
+        TextInputEditText etCidade = new TextInputEditText(getContext());
+        etCidade.setHint("Cidade");
         container.addView(etCidade);
 
-        TextInputEditText etUf = criarCampo("UF");
+        TextInputEditText etUf = new TextInputEditText(getContext());
+        etUf.setHint("UF");
         container.addView(etUf);
 
-        new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        new AlertDialog.Builder(requireContext())
                 .setTitle("Novo endereço")
                 .setView(container)
                 .setPositiveButton("Salvar", (d, w) -> {
@@ -177,7 +187,8 @@ public class EnderecosFragment extends Fragment {
                                 carregarEnderecos();
                             } else {
                                 Toast.makeText(requireContext(),
-                                        "Erro ao salvar", Toast.LENGTH_SHORT).show();
+                                        ErrorUtils.extrairMensagem(response),
+                                        Toast.LENGTH_SHORT).show();
                             }
                         }
                         @Override public void onFailure(Call<EnderecoResponse> call, Throwable t) {
@@ -188,18 +199,6 @@ public class EnderecosFragment extends Fragment {
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
-    }
-
-    private TextInputEditText criarCampo(String hint) {
-        TextInputEditText et = new TextInputEditText(getContext());
-        et.setHint(hint);
-        android.widget.LinearLayout.LayoutParams lp =
-                new android.widget.LinearLayout.LayoutParams(
-                        android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
-                        android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
-        lp.setMargins(0, 8, 0, 8);
-        et.setLayoutParams(lp);
-        return et;
     }
 
     private String texto(TextInputEditText et) {

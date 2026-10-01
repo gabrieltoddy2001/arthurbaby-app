@@ -14,6 +14,7 @@ import br.com.arthurbaby.R;
 import br.com.arthurbaby.network.ApiService;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.dto.RecuperarSenhaRequest;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -55,7 +56,7 @@ public class RecuperarSenhaActivity extends AppCompatActivity {
                                 finish();
                             } else {
                                 Toast.makeText(RecuperarSenhaActivity.this,
-                                        "Erro ao solicitar recuperação",
+                                        ErrorUtils.extrairMensagem(response),
                                         Toast.LENGTH_LONG).show();
                             }
                         }

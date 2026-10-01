@@ -18,10 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.adapters.ItemCarrinhoAdapter;
@@ -29,12 +27,16 @@ import br.com.arthurbaby.models.ItemCarrinho;
 import br.com.arthurbaby.network.ApiService;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
+import br.com.arthurbaby.network.dto.CupomValidacaoRequest;
+import br.com.arthurbaby.network.dto.CupomValidacaoResponse;
 import br.com.arthurbaby.network.dto.PedidoItemRequest;
 import br.com.arthurbaby.network.dto.PedidoRequest;
 import br.com.arthurbaby.network.dto.PedidoResponse;
 import br.com.arthurbaby.repositories.CarrinhoRepository;
 import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
+import br.com.arthurbaby.utils.MoedaUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -98,16 +100,16 @@ public class CarrinhoFragment extends Fragment {
             LoadingUtils.mostrar(requireContext());
 
             ApiService api = RetrofitClient.getApi(requireContext());
-            api.validarCupom(new br.com.arthurbaby.network.dto.CupomValidacaoRequest(
+            api.validarCupom(new CupomValidacaoRequest(
                             cupom, BigDecimal.valueOf(repo.getSubtotal())))
-                    .enqueue(new Callback<br.com.arthurbaby.network.dto.CupomValidacaoResponse>() {
+                    .enqueue(new Callback<CupomValidacaoResponse>() {
                         @Override
-                        public void onResponse(Call<br.com.arthurbaby.network.dto.CupomValidacaoResponse> call,
-                                               Response<br.com.arthurbaby.network.dto.CupomValidacaoResponse> response) {
+                        public void onResponse(Call<CupomValidacaoResponse> call,
+                                               Response<CupomValidacaoResponse> response) {
                             LoadingUtils.esconder();
 
                             if (response.isSuccessful() && response.body() != null) {
-                                br.com.arthurbaby.network.dto.CupomValidacaoResponse c = response.body();
+                                CupomValidacaoResponse c = response.body();
 
                                 if (c.valido) {
                                     descontoAplicado = c.desconto != null ? c.desconto.doubleValue() : 0;
@@ -116,8 +118,7 @@ public class CarrinhoFragment extends Fragment {
 
                                     if (descontoAplicado > 0) {
                                         rowDesconto.setVisibility(View.VISIBLE);
-                                        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-                                        tvDesconto.setText("- " + nf.format(descontoAplicado));
+                                        tvDesconto.setText("- " + MoedaUtils.formatar(descontoAplicado));
                                     } else {
                                         rowDesconto.setVisibility(View.GONE);
                                     }
@@ -141,8 +142,7 @@ public class CarrinhoFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFailure(Call<br.com.arthurbaby.network.dto.CupomValidacaoResponse> call,
-                                              Throwable t) {
+                        public void onFailure(Call<CupomValidacaoResponse> call, Throwable t) {
                             LoadingUtils.esconder();
                             Toast.makeText(requireContext(),
                                     "Erro de conexão: " + t.getMessage(),
@@ -159,7 +159,6 @@ public class CarrinhoFragment extends Fragment {
                 return;
             }
 
-            // Visitante? Pede login
             if (!AuthGuard.estaLogado(requireContext())) {
                 AuthGuard.mostrarDialogLogin(requireActivity(),
                         "Entre para finalizar seu pedido. Seus itens foram salvos!");
@@ -225,18 +224,8 @@ public class CarrinhoFragment extends Fragment {
                                 .addToBackStack(null)
                                 .commit();
                     } else {
-                        String msg = "Erro ao criar pedido";
-                        try {
-                            if (response.errorBody() != null) {
-                                String erroJson = response.errorBody().string();
-                                if (erroJson.contains("\"erro\"")) {
-                                    int inicio = erroJson.indexOf("\"erro\"") + 8;
-                                    int fim = erroJson.indexOf("\"", inicio);
-                                    msg = erroJson.substring(inicio, fim);
-                                }
-                            }
-                        } catch (Exception ignored) {}
-                        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(),
+                                ErrorUtils.extrairMensagem(response), Toast.LENGTH_LONG).show();
                     }
                 }
 
@@ -254,14 +243,13 @@ public class CarrinhoFragment extends Fragment {
     }
 
     private void atualizarTotal() {
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         double subtotal = repo.getSubtotal();
         double frete = freteGratisPorCupom ? 0 : repo.getFrete();
         double total = subtotal + frete - descontoAplicado;
 
-        tvSubtotal.setText(nf.format(subtotal));
-        tvFrete.setText(frete == 0 ? "Grátis" : nf.format(frete));
-        tvTotal.setText(nf.format(total));
+        tvSubtotal.setText(MoedaUtils.formatar(subtotal));
+        tvFrete.setText(frete == 0 ? "Grátis" : MoedaUtils.formatar(frete));
+        tvTotal.setText(MoedaUtils.formatar(total));
         tvVazio.setVisibility(repo.getItens().isEmpty() ? View.VISIBLE : View.GONE);
         tvContador.setText(repo.getTotalItens() + (repo.getTotalItens() == 1 ? " item" : " itens"));
         adapter.notifyDataSetChanged();

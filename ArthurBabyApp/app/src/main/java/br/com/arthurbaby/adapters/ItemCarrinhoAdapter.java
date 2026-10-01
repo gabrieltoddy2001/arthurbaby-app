@@ -10,12 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.models.ItemCarrinho;
+import br.com.arthurbaby.utils.MoedaUtils;
 
 public class ItemCarrinhoAdapter extends RecyclerView.Adapter<ItemCarrinhoAdapter.VH> {
 
@@ -42,11 +41,8 @@ public class ItemCarrinhoAdapter extends RecyclerView.Adapter<ItemCarrinhoAdapte
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         ItemCarrinho item = itens.get(position);
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
         h.tvNome.setText(item.getProduto().getNome());
-        h.tvPreco.setText(nf.format(item.getProduto().getPreco()));
-        h.tvQtd.setText(String.valueOf(item.getQuantidade()));
 
         if (item.getVariacao() != null) {
             h.tvVariacao.setVisibility(View.VISIBLE);
@@ -55,10 +51,11 @@ public class ItemCarrinhoAdapter extends RecyclerView.Adapter<ItemCarrinhoAdapte
             h.tvVariacao.setVisibility(View.GONE);
         }
 
-        // Imagem — cor da categoria como placeholder
+        h.tvPreco.setText(MoedaUtils.formatar(item.getProduto().getPreco()));
+        h.tvQtd.setText(String.valueOf(item.getQuantidade()));
+
         h.img.setBackgroundColor(0xFFFAD1DE);
 
-        // Botão remover vermelho
         h.btnRemover.setImageResource(R.drawable.ic_sair);
         h.btnRemover.setColorFilter(ContextCompat.getColor(
                 h.itemView.getContext(), R.color.vermelho_desconto));

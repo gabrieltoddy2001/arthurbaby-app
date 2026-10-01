@@ -15,6 +15,7 @@ import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.ClienteRequest;
 import br.com.arthurbaby.network.dto.UsuarioResponse;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
 import br.com.arthurbaby.utils.MaskUtils;
 import retrofit2.Call;
@@ -64,6 +65,9 @@ public class EditarPerfilActivity extends AppCompatActivity {
                     if (u.email != null) etEmail.setText(u.email);
                     if (u.telefone != null) etTelefone.setText(u.telefone);
                     if (u.cpf != null) etCpf.setText(u.cpf);
+                } else {
+                    Toast.makeText(EditarPerfilActivity.this,
+                            ErrorUtils.extrairMensagem(response), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -104,7 +108,6 @@ public class EditarPerfilActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     UsuarioResponse u = response.body();
 
-                    // Atualiza o TokenStorage com o novo nome
                     TokenStorage.salvar(
                             EditarPerfilActivity.this,
                             TokenStorage.getToken(EditarPerfilActivity.this),
@@ -114,18 +117,8 @@ public class EditarPerfilActivity extends AppCompatActivity {
                             "Dados atualizados!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    String msg = "Erro ao salvar";
-                    try {
-                        if (response.errorBody() != null) {
-                            String erroJson = response.errorBody().string();
-                            if (erroJson.contains("\"erro\"")) {
-                                int inicio = erroJson.indexOf("\"erro\"") + 8;
-                                int fim = erroJson.indexOf("\"", inicio);
-                                msg = erroJson.substring(inicio, fim);
-                            }
-                        }
-                    } catch (Exception ignored) {}
-                    Toast.makeText(EditarPerfilActivity.this, msg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditarPerfilActivity.this,
+                            ErrorUtils.extrairMensagem(response), Toast.LENGTH_LONG).show();
                 }
             }
 

@@ -14,6 +14,7 @@ import br.com.arthurbaby.R;
 import br.com.arthurbaby.network.ApiService;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.dto.RedefinirSenhaRequest;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,7 +31,6 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
         TextInputEditText etNovaSenha = findViewById(R.id.etNovaSenha);
         MaterialButton btnRedefinir = findViewById(R.id.btnRedefinir);
 
-        // Se o app recebeu um token via Intent, preenche
         String tokenInicial = getIntent().getStringExtra("token");
         if (tokenInicial != null && !tokenInicial.isEmpty()) {
             etToken.setText(tokenInicial);
@@ -71,7 +71,7 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
                                 finish();
                             } else {
                                 Toast.makeText(RedefinirSenhaActivity.this,
-                                        "Código inválido ou expirado",
+                                        ErrorUtils.extrairMensagem(response),
                                         Toast.LENGTH_LONG).show();
                             }
                         }

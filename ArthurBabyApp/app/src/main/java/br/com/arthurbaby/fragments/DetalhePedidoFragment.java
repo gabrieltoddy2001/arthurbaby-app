@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
@@ -23,11 +22,12 @@ import br.com.arthurbaby.models.ItemCarrinho;
 import br.com.arthurbaby.models.Pedido;
 import br.com.arthurbaby.models.PedidoStatus;
 import br.com.arthurbaby.network.ApiService;
-import br.com.arthurbaby.network.Conversor;
 import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.dto.CancelamentoRequest;
 import br.com.arthurbaby.network.dto.PedidoResponse;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
+import br.com.arthurbaby.utils.MoedaUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -58,24 +58,13 @@ public class DetalhePedidoFragment extends Fragment {
         }
         if (pedido == null) return v;
 
-        // Mostra imediatamente os dados do Bundle
         preencherUI(v);
-
-        // Botão voltar
-        v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
-
-        // Busca dados atualizados no backend
         carregarPedidoAtualizado(v);
 
         return v;
     }
 
-    /**
-     * Preenche a UI com o pedido atual.
-     */
     private void preencherUI(View v) {
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR"));
 
         TextView tvTitulo = v.findViewById(R.id.tvTitulo);
@@ -84,14 +73,16 @@ public class DetalhePedidoFragment extends Fragment {
         TextView tvStatus = v.findViewById(R.id.tvStatus);
         tvStatus.setText(pedido.getStatusAtual());
 
-        // Itens
+        TextView tvTotal = v.findViewById(R.id.tvTotal);
+        tvTotal.setText("Total: " + MoedaUtils.formatar(pedido.getTotal()));
+
         LinearLayout cItens = v.findViewById(R.id.containerItens);
         if (cItens != null) {
             cItens.removeAllViews();
             for (ItemCarrinho item : pedido.getItens()) {
                 TextView linha = new TextView(getContext());
                 linha.setText(item.getQuantidade() + "x  " + item.getProduto().getNome()
-                        + "  —  " + nf.format(item.getSubtotal()));
+                        + "  —  " + MoedaUtils.formatar(item.getSubtotal()));
                 linha.setTextColor(0xFF000000);
                 linha.setTextSize(14f);
                 linha.setPadding(0, 6, 0, 6);
@@ -99,40 +90,6 @@ public class DetalhePedidoFragment extends Fragment {
             }
         }
 
-        // Subtotal
-        TextView tvSub = v.findViewById(R.id.tvSubtotalDetalhe);
-        if (tvSub != null) tvSub.setText(nf.format(pedido.getSubtotal()));
-
-        // Desconto (só aparece se > 0)
-        LinearLayout rowDesc = v.findViewById(R.id.rowDescontoDetalhe);
-        TextView tvLabelDesc = v.findViewById(R.id.tvLabelDescontoDetalhe);
-        TextView tvDescV = v.findViewById(R.id.tvDescontoDetalhe);
-        if (rowDesc != null && tvDescV != null) {
-            if (pedido.getDesconto() > 0) {
-                rowDesc.setVisibility(View.VISIBLE);
-                String cupom = pedido.getCupom();
-                if (tvLabelDesc != null) {
-                    tvLabelDesc.setText(cupom != null && !cupom.isEmpty()
-                            ? "Desconto (" + cupom + ")"
-                            : "Desconto");
-                }
-                tvDescV.setText("- " + nf.format(pedido.getDesconto()));
-            } else {
-                rowDesc.setVisibility(View.GONE);
-            }
-        }
-
-        // Frete
-        TextView tvFreteV = v.findViewById(R.id.tvFreteDetalhe);
-        if (tvFreteV != null) {
-            tvFreteV.setText(pedido.getFrete() == 0 ? "Grátis" : nf.format(pedido.getFrete()));
-        }
-
-        // Total
-        TextView tvTotalV = v.findViewById(R.id.tvTotal);
-        if (tvTotalV != null) tvTotalV.setText(nf.format(pedido.getTotal()));
-
-        // Histórico
         LinearLayout cHist = v.findViewById(R.id.containerHistorico);
         if (cHist != null) {
             cHist.removeAllViews();
@@ -146,7 +103,6 @@ public class DetalhePedidoFragment extends Fragment {
             }
         }
 
-        // Botão cancelar
         com.google.android.material.button.MaterialButton btnCancelar =
                 v.findViewById(R.id.btnCancelarPedido);
         if (btnCancelar != null) {
@@ -164,9 +120,6 @@ public class DetalhePedidoFragment extends Fragment {
         }
     }
 
-    /**
-     * Busca o pedido atualizado no backend e atualiza a UI.
-     */
     private void carregarPedidoAtualizado(View v) {
         ApiService api = RetrofitClient.getApi(requireContext());
         api.buscarPedidoPorNumero(pedido.getNumeroPedido())
@@ -174,8 +127,11 @@ public class DetalhePedidoFragment extends Fragment {
                     @Override
                     public void onResponse(Call<PedidoResponse> call,
                                            Response<PedidoResponse> response) {
+                        if (!isAdded() || getContext() == null) return;
+
                         if (response.isSuccessful() && response.body() != null) {
-                            Pedido atualizado = Conversor.paraPedido(response.body());
+                            Pedido atualizado = br.com.arthurbaby.network.Conversor
+                                    .paraPedido(response.body());
                             if (atualizado != null) {
                                 pedido = atualizado;
                                 preencherUI(v);
@@ -185,7 +141,7 @@ public class DetalhePedidoFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PedidoResponse> call, Throwable t) {
-                        // Silencioso — mantém os dados do Bundle
+                        // Silencioso
                     }
                 });
     }
@@ -228,18 +184,8 @@ public class DetalhePedidoFragment extends Fragment {
                                     "Pedido cancelado", Toast.LENGTH_SHORT).show();
                             requireActivity().getSupportFragmentManager().popBackStack();
                         } else {
-                            String msg = "Erro ao cancelar pedido";
-                            try {
-                                if (response.errorBody() != null) {
-                                    String erroJson = response.errorBody().string();
-                                    if (erroJson.contains("\"erro\"")) {
-                                        int inicio = erroJson.indexOf("\"erro\"") + 8;
-                                        int fim = erroJson.indexOf("\"", inicio);
-                                        msg = erroJson.substring(inicio, fim);
-                                    }
-                                }
-                            } catch (Exception ignored) {}
-                            Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+                            Toast.makeText(requireContext(),
+                                    ErrorUtils.extrairMensagem(response), Toast.LENGTH_LONG).show();
                         }
                     }
 

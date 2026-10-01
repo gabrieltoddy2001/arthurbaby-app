@@ -11,10 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
 import br.com.arthurbaby.R;
+import br.com.arthurbaby.utils.MoedaUtils;
 
 public class ConfirmaPedidoFragment extends Fragment {
 
@@ -63,8 +61,6 @@ public class ConfirmaPedidoFragment extends Fragment {
         double desconto = args != null ? args.getDouble(ARG_DESCONTO, 0) : 0;
         String cupom = args != null ? args.getString(ARG_CUPOM, null) : null;
 
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-
         TextView tvNumero = v.findViewById(R.id.tvNumeroPedido);
         tvNumero.setText("Pedido #" + numero);
 
@@ -74,11 +70,9 @@ public class ConfirmaPedidoFragment extends Fragment {
                 + (obs.isEmpty() ? "" : "\nObservação: " + obs)
                 + "\n\nVocê receberá atualizações sobre o pedido");
 
-        // Subtotal
         TextView tvSub = v.findViewById(R.id.tvSubtotalConf);
-        if (tvSub != null) tvSub.setText(nf.format(subtotal));
+        if (tvSub != null) tvSub.setText(MoedaUtils.formatar(subtotal));
 
-        // Desconto (só aparece se > 0)
         LinearLayout rowDesc = v.findViewById(R.id.rowDescontoConf);
         TextView tvLabelDesc = v.findViewById(R.id.tvLabelDescontoConf);
         TextView tvDescV = v.findViewById(R.id.tvDescontoConf);
@@ -90,19 +84,17 @@ public class ConfirmaPedidoFragment extends Fragment {
                             ? "Desconto (" + cupom + ")"
                             : "Desconto");
                 }
-                tvDescV.setText("- " + nf.format(desconto));
+                tvDescV.setText("- " + MoedaUtils.formatar(desconto));
             } else {
                 rowDesc.setVisibility(View.GONE);
             }
         }
 
-        // Frete
         TextView tvFreteV = v.findViewById(R.id.tvFreteConf);
-        if (tvFreteV != null) tvFreteV.setText(frete == 0 ? "Grátis" : nf.format(frete));
+        if (tvFreteV != null) tvFreteV.setText(frete == 0 ? "Grátis" : MoedaUtils.formatar(frete));
 
-        // Total
         TextView tvTotalV = v.findViewById(R.id.tvTotal);
-        if (tvTotalV != null) tvTotalV.setText(nf.format(total));
+        if (tvTotalV != null) tvTotalV.setText(MoedaUtils.formatar(total));
 
         v.findViewById(R.id.btnVoltarHome).setOnClickListener(x ->
                 requireActivity().getSupportFragmentManager()

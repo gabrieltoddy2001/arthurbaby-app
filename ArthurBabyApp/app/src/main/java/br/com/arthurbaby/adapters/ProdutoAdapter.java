@@ -11,13 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.models.Produto;
 import br.com.arthurbaby.repositories.FavoritoRepository;
+import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.MoedaUtils;
 
 public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
 
@@ -43,41 +43,29 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
-        // Visitante? Esconde o coração
-        boolean logado = br.com.arthurbaby.utils.AuthGuard.estaLogado(h.itemView.getContext());
-        h.btnFavorito.setVisibility(logado ? View.VISIBLE : View.GONE);
         Produto p = produtos.get(position);
         h.tvNome.setText(p.getNome());
+        h.tvPreco.setText(MoedaUtils.formatar(p.getPreco()));
 
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-        h.tvPreco.setText(nf.format(p.getPreco()));
-
-        // Selo promoção
         boolean emPromocao = p.getPreco().doubleValue() < 50 && p.temEstoque();
         h.tvSeloPromocao.setVisibility(emPromocao ? View.VISIBLE : View.GONE);
-
-        // Selo esgotado
         h.tvSeloEsgotado.setVisibility(p.isEsgotado() ? View.VISIBLE : View.GONE);
 
         h.img.setBackgroundColor(0xFFFAD1DE);
 
-        // Coração
-        boolean fav = FavoritoRepository.getInstance().isFavorito(p.getId());
-        atualizarCoracao(h.btnFavorito, fav);
+        boolean logado = AuthGuard.estaLogado(h.itemView.getContext());
+        h.btnFavorito.setVisibility(logado ? View.VISIBLE : View.GONE);
 
-        h.btnFavorito.setOnClickListener(v -> {
-            // Visitante? Pede login
-            if (!br.com.arthurbaby.utils.AuthGuard.estaLogado(v.getContext())) {
-                br.com.arthurbaby.utils.AuthGuard.mostrarDialogLogin(
-                        (android.app.Activity) v.getContext(),
-                        "Entre para salvar seus favoritos.");
-                return;
-            }
+        if (logado) {
+            boolean fav = FavoritoRepository.getInstance().isFavorito(p.getId());
+            atualizarCoracao(h.btnFavorito, fav);
 
-            boolean agora = FavoritoRepository.getInstance().toggle(
-                    v.getContext(), p.getId(), () -> {});
-            atualizarCoracao(h.btnFavorito, agora);
-        });
+            h.btnFavorito.setOnClickListener(v -> {
+                boolean agora = FavoritoRepository.getInstance().toggle(
+                        v.getContext(), p.getId(), () -> {});
+                atualizarCoracao(h.btnFavorito, agora);
+            });
+        }
 
         h.itemView.setOnClickListener(v -> {
             if (p.isEsgotado()) {

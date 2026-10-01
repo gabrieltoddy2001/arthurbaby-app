@@ -21,6 +21,7 @@ import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.AuthResponse;
 import br.com.arthurbaby.network.dto.CadastroRequest;
 import br.com.arthurbaby.network.dto.EnderecoRequest;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
 import br.com.arthurbaby.utils.MaskUtils;
 import br.com.arthurbaby.utils.ViaCepService;
@@ -75,9 +76,6 @@ public class CadastroActivity extends AppCompatActivity {
             }
         });
 
-// Botão voltar
-        findViewById(R.id.btnVoltarCad).setOnClickListener(x -> finish());
-
         btnCadastrar.setOnClickListener(v -> cadastrar());
     }
 
@@ -113,7 +111,7 @@ public class CadastroActivity extends AppCompatActivity {
         String cidade = texto(etCidade);
         String uf = texto(etUf);
 
-        // Validações locais
+        // Validações
         if (TextUtils.isEmpty(nome)) { etNome.setError("Informe seu nome"); return; }
         if (TextUtils.isEmpty(cpf)) { etCpf.setError("Informe seu CPF"); return; }
         if (!MaskUtils.validarCpf(cpf)) { etCpf.setError("CPF inválido"); return; }
@@ -133,20 +131,13 @@ public class CadastroActivity extends AppCompatActivity {
             return;
         }
 
-        // Monta o DTO
         EnderecoRequest endereco = new EnderecoRequest(
                 cep, logradouro, numero, complemento, bairro, cidade, uf,
-                null,  // referência (opcional)
-                true   // principal
-        );
+                null, true);
 
         CadastroRequest request = new CadastroRequest(
-                nome, email, cpf, telefone, senha,
-                true, true,
-                endereco
-        );
+                nome, email, cpf, telefone, senha, true, true, endereco);
 
-        // Chamada real
         LoadingUtils.mostrar(this);
 
         ApiService api = RetrofitClient.getApi(this);
@@ -158,7 +149,6 @@ public class CadastroActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthResponse auth = response.body();
 
-                    // Salva o token (login automático)
                     TokenStorage.salvar(
                             CadastroActivity.this,
                             auth.token,
@@ -176,20 +166,9 @@ public class CadastroActivity extends AppCompatActivity {
                     startActivity(i);
                     finish();
                 } else {
-                    // Erro do backend — tenta ler a mensagem
-                    String msg = "Erro ao cadastrar";
-                    try {
-                        if (response.errorBody() != null) {
-                            String erroJson = response.errorBody().string();
-                            // Extrai o campo "erro" do JSON
-                            if (erroJson.contains("\"erro\"")) {
-                                int inicio = erroJson.indexOf("\"erro\"") + 8;
-                                int fim = erroJson.indexOf("\"", inicio);
-                                msg = erroJson.substring(inicio, fim);
-                            }
-                        }
-                    } catch (Exception ignored) {}
-                    Toast.makeText(CadastroActivity.this, msg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(CadastroActivity.this,
+                            ErrorUtils.extrairMensagem(response),
+                            Toast.LENGTH_LONG).show();
                 }
             }
 

@@ -26,6 +26,7 @@ import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.PedidoResponse;
 import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,7 +54,6 @@ public class MeusPedidosFragment extends Fragment {
         progressBar = v.findViewById(R.id.progressBar);
         containerPedidos = v.findViewById(R.id.containerPedidos);
 
-        // Visitante? Pede login
         if (!AuthGuard.estaLogado(requireContext())) {
             AuthGuard.mostrarDialogLogin(requireActivity(),
                     "Entre para ver seus pedidos.");
@@ -106,7 +106,8 @@ public class MeusPedidosFragment extends Fragment {
                     ).attach();
                 } else {
                     Toast.makeText(requireContext(),
-                            "Erro ao carregar pedidos", Toast.LENGTH_SHORT).show();
+                            ErrorUtils.extrairMensagem(response),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 

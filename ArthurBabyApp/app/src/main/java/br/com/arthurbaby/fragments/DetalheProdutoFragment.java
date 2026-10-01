@@ -19,10 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import br.com.arthurbaby.R;
 import br.com.arthurbaby.models.Produto;
@@ -33,6 +31,8 @@ import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.dto.ProdutoResponse;
 import br.com.arthurbaby.repositories.CarrinhoRepository;
 import br.com.arthurbaby.repositories.FavoritoRepository;
+import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.MoedaUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,28 +80,23 @@ public class DetalheProdutoFragment extends Fragment {
         ImageView btnFav = v.findViewById(R.id.btnFavoritoDetalhe);
         ImageView btnCompartilhar = v.findViewById(R.id.btnCompartilhar);
 
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-
-        // Preenche com dados do adapter (imediatamente)
         if (produto != null) {
             tvNome.setText(produto.getNome());
             tvMarca.setText("Marca: " + produto.getMarca());
             tvDescricao.setText(produto.getDescricao());
-            tvPreco.setText(nf.format(produto.getPreco()));
+            tvPreco.setText(MoedaUtils.formatar(produto.getPreco()));
             tvEstrelas.setText("★★★★★");
             tvAvaliacao.setText("(5.0)");
             img.setBackgroundColor(0xFFFAD1DE);
 
             if (produto.getPreco().doubleValue() < 50 && produto.temEstoque()) {
                 tvPrecoAntigo.setVisibility(View.VISIBLE);
-                tvPrecoAntigo.setText("R$ " + String.format("%.2f",
-                        produto.getPreco().doubleValue() * 1.3));
+                tvPrecoAntigo.setText(MoedaUtils.formatar(produto.getPreco().doubleValue() * 1.3));
                 tvPrecoAntigo.setPaintFlags(tvPrecoAntigo.getPaintFlags()
                         | Paint.STRIKE_THRU_TEXT_FLAG);
             }
 
-            // Visitante? Esconde o coração e mostra só quando logado
-            boolean logado = br.com.arthurbaby.utils.AuthGuard.estaLogado(requireContext());
+            boolean logado = AuthGuard.estaLogado(requireContext());
             btnFav.setVisibility(logado ? View.VISIBLE : View.GONE);
 
             if (logado) {
@@ -113,24 +108,21 @@ public class DetalheProdutoFragment extends Fragment {
                     atualizarCoracao(btnFav, agora);
                 });
             } else {
-                btnFav.setOnClickListener(x -> br.com.arthurbaby.utils.AuthGuard
+                btnFav.setOnClickListener(x -> AuthGuard
                         .mostrarDialogLogin(requireActivity(),
                                 "Entre para salvar seus favoritos."));
             }
 
-            // COMPARTILHAR (sempre visível, mesmo para visitante)
             if (btnCompartilhar != null) {
                 btnCompartilhar.setOnClickListener(x -> compartilharProduto());
             }
 
-            // Busca detalhes atualizados no backend
             carregarProdutoBackend(v);
         }
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
                 requireActivity().getSupportFragmentManager().popBackStack());
 
-        // Quantidade
         v.findViewById(R.id.btnMais).setOnClickListener(x -> {
             qtd++;
             tvQtd.setText(String.valueOf(qtd));
@@ -142,7 +134,6 @@ public class DetalheProdutoFragment extends Fragment {
             }
         });
 
-        // Adicionar ao carrinho
         v.findViewById(R.id.btnAddCarrinho).setOnClickListener(x -> {
             if (produto != null && produto.temEstoque()) {
                 Variacao variacao = null;
@@ -167,6 +158,8 @@ public class DetalheProdutoFragment extends Fragment {
         api.buscarProduto(produto.getId()).enqueue(new Callback<ProdutoResponse>() {
             @Override
             public void onResponse(Call<ProdutoResponse> call, Response<ProdutoResponse> response) {
+                if (!isAdded() || getContext() == null) return;
+
                 if (response.isSuccessful() && response.body() != null) {
                     Produto atualizado = Conversor.paraProduto(response.body());
                     if (atualizado == null) return;
@@ -180,15 +173,12 @@ public class DetalheProdutoFragment extends Fragment {
 
                     tvNome.setText(atualizado.getNome());
                     tvDescricao.setText(atualizado.getDescricao());
-
-                    NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-                    tvPreco.setText(nf.format(atualizado.getPreco()));
+                    tvPreco.setText(MoedaUtils.formatar(atualizado.getPreco()));
 
                     if (atualizado.getAvaliacao() > 0) {
                         tvAvaliacao.setText("(" + atualizado.getAvaliacao() + ".0)");
                     }
 
-                    // Desenha as variações
                     desenharVariacoes(v);
                 }
             }
@@ -200,18 +190,12 @@ public class DetalheProdutoFragment extends Fragment {
         });
     }
 
-    /**
-     * Abre o menu de compartilhamento nativo do Android com texto pré-formatado.
-     */
     private void compartilharProduto() {
         if (produto == null) return;
 
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-        String preco = nf.format(produto.getPreco());
-
         String texto = "Olha esse produto na ArthurBaby 💕\n\n"
                 + produto.getNome() + "\n"
-                + "Por apenas " + preco + "!\n\n"
+                + "Por apenas " + MoedaUtils.formatar(produto.getPreco()) + "!\n\n"
                 + "Baixe o app: https://play.google.com/store/apps/details?id=br.com.arthurbaby";
 
         Intent share = new Intent(Intent.ACTION_SEND);
@@ -222,9 +206,6 @@ public class DetalheProdutoFragment extends Fragment {
         startActivity(Intent.createChooser(share, "Compartilhar produto"));
     }
 
-    /**
-     * Desenha as seções de Tamanho, Cor e Modelo com base nas variações reais.
-     */
     private void desenharVariacoes(View v) {
         if (produto == null || produto.getVariacoes().isEmpty()) return;
 
@@ -238,7 +219,6 @@ public class DetalheProdutoFragment extends Fragment {
             if (var.modelo != null && !modelos.contains(var.modelo)) modelos.add(var.modelo);
         }
 
-        // TAMANHO
         LinearLayout cTam = v.findViewById(R.id.containerTamanhos);
         if (!tamanhos.isEmpty()) {
             cTam.removeAllViews();
@@ -257,7 +237,6 @@ public class DetalheProdutoFragment extends Fragment {
             esconderSecao(v, cTam);
         }
 
-        // COR
         LinearLayout cCor = v.findViewById(R.id.containerCores);
         if (!cores.isEmpty()) {
             cCor.removeAllViews();
@@ -276,7 +255,6 @@ public class DetalheProdutoFragment extends Fragment {
             esconderSecao(v, cCor);
         }
 
-        // MODELO
         LinearLayout cMod = v.findViewById(R.id.containerModelos);
         if (!modelos.isEmpty()) {
             cMod.removeAllViews();
@@ -298,9 +276,6 @@ public class DetalheProdutoFragment extends Fragment {
         atualizarVariacaoIdSel();
     }
 
-    /**
-     * Descobre qual variação corresponde à seleção atual.
-     */
     private void atualizarVariacaoIdSel() {
         variacaoIdSel = null;
         if (produto == null) return;

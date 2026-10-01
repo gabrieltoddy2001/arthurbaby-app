@@ -25,6 +25,7 @@ import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.FavoritoResponse;
 import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,7 +55,6 @@ public class FavoritosFragment extends Fragment {
         progressBar = v.findViewById(R.id.progressBar);
         rv.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        // Visitante? Pede login
         if (!AuthGuard.estaLogado(requireContext())) {
             if (tvVazioTitulo != null) {
                 tvVazioTitulo.setText("Faça login para ver seus favoritos");
@@ -124,7 +124,7 @@ public class FavoritosFragment extends Fragment {
                     }
                 } else {
                     Toast.makeText(requireContext(),
-                            "Erro ao carregar favoritos", Toast.LENGTH_SHORT).show();
+                            ErrorUtils.extrairMensagem(response), Toast.LENGTH_SHORT).show();
                 }
             }
 

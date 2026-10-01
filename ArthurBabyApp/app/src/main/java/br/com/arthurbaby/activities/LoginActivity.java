@@ -18,6 +18,7 @@ import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.AuthRequest;
 import br.com.arthurbaby.network.dto.AuthResponse;
+import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,24 +63,18 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // 1) Mostra o loading
         LoadingUtils.mostrar(this);
 
-        // 2) Pega o serviço Retrofit
         ApiService api = RetrofitClient.getApi(this);
-
-        // 3) Faz a chamada POST /api/auth/login
         api.login(new AuthRequest(login, senha))
                 .enqueue(new Callback<AuthResponse>() {
                     @Override
                     public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                         LoadingUtils.esconder();
 
-                        // 4) Verifica se a resposta foi OK (HTTP 200-299)
                         if (response.isSuccessful() && response.body() != null) {
                             AuthResponse auth = response.body();
 
-                            // 5) Salva o token e dados do usuário no "cofre"
                             TokenStorage.salvar(
                                     LoginActivity.this,
                                     auth.token,
@@ -88,18 +83,15 @@ public class LoginActivity extends AppCompatActivity {
                                     auth.perfil
                             );
 
-                            // 6) Mostra mensagem de boas-vindas
                             Toast.makeText(LoginActivity.this,
                                     "Bem-vindo, " + auth.nome + "!",
                                     Toast.LENGTH_SHORT).show();
 
-                            // 7) Vai para a Home
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                         } else {
-                            // 8) Erro do servidor (401, 400, etc)
                             Toast.makeText(LoginActivity.this,
-                                    "Login inválido. Verifique seus dados.",
+                                    ErrorUtils.extrairMensagem(response),
                                     Toast.LENGTH_LONG).show();
                         }
                     }
@@ -107,8 +99,6 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<AuthResponse> call, Throwable t) {
                         LoadingUtils.esconder();
-
-                        // 9) Erro de rede (backend desligado, sem internet, etc)
                         Toast.makeText(LoginActivity.this,
                                 "Erro de conexão: " + t.getMessage(),
                                 Toast.LENGTH_LONG).show();
