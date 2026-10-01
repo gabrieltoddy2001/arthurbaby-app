@@ -1,615 +1,337 @@
-Pendências do Backend — Documento Consolidado Final
+# Pendências do Backend — Documento Consolidado Final
 
-Documento único com todas as pendências do backend identificadas após a integração completa do app Android e do painel admin web.
+Documento único com **todas as pendências do backend** identificadas após
+a integração completa do app Android e do painel admin web.
 
-Status: o time de backend já resolveu a maioria das pendências anteriores (cupom, recuperar senha, endereços, favoritos e editar perfil).
-Este documento lista apenas o que ainda falta.
+> **Status:** o time de back já resolveu a maioria das pendências anteriores
+> (cupom, recuperar senha, endereços, favoritos, editar perfil).
+> Este documento lista **apenas o que ainda falta**.
 
-📊 Resumo executivo
-#	Pendência	Prioridade	Impacto
-1	LazyInitializationException definitivo (DTOs)	🔴 Crítica	App + Painel Admin
-2	Campo icone nas categorias	🔴 Crítica	Ícones coloridos no app
-3	Formatação de datas no JSON	🟡 Importante	Parse de datas no app
-4	Seed incompleto (modelos, imagens, avaliação)	🟡 Importante	Detalhe do produto vazio
-5	Normalização de e-mail no login/cadastro	🟢 Desejável	Duplicidade de contas
-🔴 1. LazyInitializationException — solução definitiva
-Problema
+---
 
-Vários endpoints retornam HTTP 500 com o erro:
+## 📊 Resumo executivo
 
+| # | Pendência | Prioridade | Impacto |
+|---|---|---|---|
+| 1 | LazyInitializationException definitivo (DTOs) | 🔴 Crítica | App + Painel Admin |
+| 2 | Campo `icone` nas categorias | 🔴 Crítica | Ícones coloridos no app |
+| 3 | Formatação de datas no JSON | 🟡 Importante | Parse de datas no app |
+| 4 | Seed incompleto (modelos, imagens, avaliação) | 🟡 Importante | Detalhe do produto vazio |
+| 5 | Normalização de e-mail no login/cadastro | 🟢 Desejável | Duplicidade de contas |
+
+---
+
+# 🔴 1. LazyInitializationException — solução definitiva
+
+## Problema
+
+Vários endpoints retornam **HTTP 500** com o erro:
+
+```text
 org.springframework.http.converter.HttpMessageNotWritableException:
 Could not write JSON: failed to lazily initialize a collection of role:
-br.com.arthurbaby.entity.Produto.imagens:
-could not initialize proxy - no Session
+br.com.arthurbaby.entity.Produto.imagens: could not initialize proxy - no Session
+```
 
-Endpoints afetados
+## Endpoints afetados
 
-❌ GET /api/admin/produtos — listar produtos (painel admin)
+- ❌ `GET /api/admin/produtos` — listar produtos (painel admin)
+- ❌ `GET /api/admin/{tipo}` — qualquer listagem de entidade com relacionamentos
+- ❌ `POST /api/admin/produtos/completo` — pode dar erro ao retornar
+- ⚠️ `GET /api/favoritos/cliente/{id}` — resolvido com URL nova? precisa confirmar
+- ⚠️ `GET /api/pedidos/{id}` — provavelmente mesmo problema
 
-❌ GET /api/admin/{tipo} — qualquer listagem de entidade com relacionamentos
+## Causa
 
-❌ POST /api/admin/produtos/completo — pode dar erro ao retornar
+O `AdminCrudController` retorna **entidades JPA diretamente**, e essas entidades
+têm relacionamentos LAZY (`@OneToMany`). Quando o Jackson serializa para JSON,
+a sessão do JPA já fechou.
 
-⚠️ GET /api/favoritos/cliente/{id} — resolvido com URL nova? Precisa confirmar
+## Solução definitiva
 
-⚠️ GET /api/pedidos/{id} — provavelmente apresenta o mesmo problema
+Criar **DTOs** para todos os endpoints do `AdminCrudController`:
 
-Causa
-
-O AdminCrudController retorna entidades JPA diretamente, e essas entidades possuem relacionamentos LAZY (@OneToMany).
-
-Quando o Jackson tenta serializar essas entidades para JSON, a sessão do JPA já foi encerrada e as coleções lazy não podem mais ser inicializadas.
-
-Solução definitiva
-
-Criar DTOs para todos os endpoints do AdminCrudController, evitando retornar entidades JPA diretamente.
-
-Exemplo de DTO para produto
+```java
 public record ProdutoAdminResponse(
-Long id,
-String codigo,
-String sku,
-String nome,
-String descricao,
-BigDecimal preco,
-BigDecimal precoPromocional,
-boolean promocao,
-boolean destaque,
-String status,
-Long categoriaId,
-String categoriaNome,
-Long marcaId,
-String marcaNome,
-int avaliacao,
-List<ImagemResponse> imagens,
-List<VariacaoResponse> variacoes
+    Long id, String codigo, String sku, String nome, String descricao,
+    BigDecimal preco, BigDecimal precoPromocional, boolean promocao,
+    boolean destaque, String status,
+    Long categoriaId, String categoriaNome,
+    Long marcaId, String marcaNome,
+    int avaliacao,
+    List<ImagemResponse> imagens,
+    List<VariacaoResponse> variacoes
 ) {}
 
-DTO de imagem
-public record ImagemResponse(
-Long id,
-String url,
-String descricao,
-boolean principal
-) {}
+public record ImagemResponse(Long id, String url, String descricao, boolean principal) {}
 
-DTO de variação
 public record VariacaoResponse(
-Long id,
-String sku,
-String tamanho,
-String cor,
-String modelo,
-BigDecimal preco,
-int estoqueAtual
+    Long id, String sku, String tamanho, String cor, String modelo,
+    BigDecimal preco, int estoqueAtual
 ) {}
+```
 
-Mapeamento no controller
+E no controller, mapear:
 
-Exemplo:
-
+```java
 @GetMapping("/{tipo}")
 public List<?> listar(@PathVariable String tipo) {
-if ("produtos".equals(tipo)) {
-return produtoRepository.findAll().stream()
-.map(this::toProdutoResponse)
-.toList();
+    if ("produtos".equals(tipo)) {
+        return produtoRepository.findAll().stream()
+            .map(this::toProdutoResponse)
+            .toList();
+    }
+    // ... etc
 }
+```
 
-    // ... demais entidades
-}
+## Solução temporária aplicada
 
+Se ainda estiver em uso:
 
-O ideal é que o mapeamento seja feito em métodos específicos ou em uma camada de mapper/service, evitando deixar a lógica de transformação excessivamente concentrada no controller.
-
-Solução temporária
-
-Caso ainda esteja em uso:
-
+```properties
 spring.jpa.open-in-view=true
+```
 
+⚠️ **NÃO usar em produção.**
 
-Essa configuração mantém o contexto de persistência aberto durante a renderização da resposta.
+---
 
-⚠️ Não utilizar como solução definitiva em produção.
+# 🔴 2. Campo `icone` nas categorias
 
-A correção recomendada é trabalhar com DTOs + consultas adequadas, garantindo que todos os dados necessários sejam carregados antes da serialização.
+## Problema
 
-🔴 2. Campo icone nas categorias
-Problema
+O app mobile mostra **ícones coloridos por categoria** (urso, chupeta, mamadeira, etc).
+O app tem os desenhos **hardcoded** e precisa saber **qual ícone** usar para cada categoria.
 
-O app mobile mostra ícones coloridos por categoria, como:
+Hoje, o app mapeia pelo **nome da categoria**, o que é frágil:
 
-urso
+- Se o admin renomear "Enxoval" para "Enxoval Completo", o ícone quebra
+- Categorias novas não têm ícone
 
-chupeta
+## Solução
 
-mamadeira
+Adicionar campo `icone` (String) na entidade `Categoria`:
 
-etc.
-
-Atualmente, o app identifica o ícone pelo nome da categoria, o que é frágil.
-
-Exemplo:
-
-"Enxoval" → ícone enxoval
-
-
-Se o administrador alterar:
-
-"Enxoval"
-
-
-para:
-
-"Enxoval Completo"
-
-
-o mapeamento do app pode deixar de funcionar.
-
-Além disso:
-
-categorias novas não possuem ícone;
-
-alterações de nome podem quebrar o mapeamento;
-
-o nome da categoria passa a ter uma responsabilidade que não deveria ter.
-
-Solução
-
-Adicionar o campo icone à entidade Categoria:
-
+```java
 @Entity
 public class Categoria {
-
     // ... campos existentes
-
-    private String icone;
+    private String icone;  // ← NOVO
 }
+```
 
+E retornar no `GET /api/categorias`:
 
-O endpoint:
-
-GET /api/categorias
-
-
-deve retornar:
-
+```json
 {
-"id": 1,
-"nome": "Enxoval",
-"icone": "enxoval",
-"subcategorias": []
+  "id": 1,
+  "nome": "Enxoval",
+  "icone": "enxoval",
+  "subcategorias": []
 }
+```
 
-Valores esperados para icone
+## Valores esperados de `icone`
 
-Os valores sugeridos são:
+- `enxoval`
+- `roupas_para_bebes`
+- `roupas_infantis`
+- `acessorios`
+- `higiene_e_cuidados`
+- `alimentacao`
+- `quarto_do_bebe`
+- `presentes`
+- `kits`
+- `promocoes`
 
-enxoval
-roupas_para_bebes
-roupas_infantis
-acessorios
-higiene_e_cuidados
-alimentacao
-quarto_do_bebe
-presentes
-kits
-promocoes
+## Seed sugerido
 
-Seed sugerido
-UPDATE categoria SET icone = 'enxoval'
-WHERE nome = 'Enxoval';
+```sql
+UPDATE categoria SET icone = 'enxoval' WHERE nome = 'Enxoval';
+UPDATE categoria SET icone = 'roupas_para_bebes' WHERE nome = 'Roupas para Bebes';
+UPDATE categoria SET icone = 'roupas_infantis' WHERE nome = 'Roupas Infantis';
+UPDATE categoria SET icone = 'acessorios' WHERE nome = 'Acessorios';
+UPDATE categoria SET icone = 'higiene_e_cuidados' WHERE nome = 'Higiene e Cuidados';
+UPDATE categoria SET icone = 'alimentacao' WHERE nome = 'Alimentacao';
+UPDATE categoria SET icone = 'quarto_do_bebe' WHERE nome = 'Quarto do Bebe';
+UPDATE categoria SET icone = 'presentes' WHERE nome = 'Presentes';
+UPDATE categoria SET icone = 'kits' WHERE nome = 'Kits';
+UPDATE categoria SET icone = 'promocoes' WHERE nome = 'Promocoes';
+```
 
-UPDATE categoria SET icone = 'roupas_para_bebes'
-WHERE nome = 'Roupas para Bebes';
+---
 
-UPDATE categoria SET icone = 'roupas_infantis'
-WHERE nome = 'Roupas Infantis';
+# 🟡 3. Formatação de datas no JSON
 
-UPDATE categoria SET icone = 'acessorios'
-WHERE nome = 'Acessorios';
+## Problema
 
-UPDATE categoria SET icone = 'higiene_e_cuidados'
-WHERE nome = 'Higiene e Cuidados';
+O back retorna datas em **formato ISO com nanossegundos**:
 
-UPDATE categoria SET icone = 'alimentacao'
-WHERE nome = 'Alimentacao';
-
-UPDATE categoria SET icone = 'quarto_do_bebe'
-WHERE nome = 'Quarto do Bebe';
-
-UPDATE categoria SET icone = 'presentes'
-WHERE nome = 'Presentes';
-
-UPDATE categoria SET icone = 'kits'
-WHERE nome = 'Kits';
-
-UPDATE categoria SET icone = 'promocoes'
-WHERE nome = 'Promocoes';
-
-🟡 3. Formatação de datas no JSON
-Problema
-
-O backend atualmente pode retornar datas com frações de segundo contendo até 7 dígitos:
-
+```json
 {
-"data": "2026-09-23T11:02:00.9942499"
+  "data": "2026-09-23T11:02:00.9942499"
 }
+```
 
+**7 dígitos** na fração de segundo. O Android (Java) + Gson aceita até
+**3 dígitos** (milissegundos). O app precisou fazer **parse manual** para não quebrar.
 
-O app Android, utilizando Java + Gson, espera trabalhar com precisão de milissegundos, com até 3 dígitos na fração de segundo.
+## Solução
 
-Por isso, o app precisou implementar tratamento manual para evitar erros de parsing.
+Configurar o Jackson no `application.properties`:
 
-Solução
-
-Configurar o Jackson para utilizar o formato:
-
-yyyy-MM-dd'T'HH:mm:ss.SSS
-
-
-No application.properties:
-
+```properties
 spring.jackson.date-format=yyyy-MM-dd'T'HH:mm:ss.SSS
 spring.jackson.serialization.write-dates-as-timestamps=false
+```
 
-Alternativa: @JsonFormat
+Ou usar `@JsonFormat` nos DTOs:
 
-Também é possível configurar diretamente nos DTOs:
-
+```java
 @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
 private LocalDateTime data;
+```
 
-Formato esperado
+---
 
-O backend deve retornar:
+# 🟡 4. Seed incompleto
 
-{
-"data": "2026-09-23T11:02:00.994"
-}
+## Problema
 
+O `DataInitializer` cadastra **cor** e **tamanho** para os produtos, mas **não cadastra**:
 
-em vez de:
+### 4.1 — Modelos
 
-{
-"data": "2026-09-23T11:02:00.9942499"
-}
+**Problema:** a tabela `modelo` existe, mas está vazia. As variações não vinculam modelo.
 
-🟡 4. Seed incompleto
+**Impacto:** o app mobile não mostra a seção "Modelo" no detalhe do produto.
 
-O DataInitializer atualmente cadastra cor e tamanho para os produtos, porém alguns dados necessários para o funcionamento completo do detalhe do produto ainda não estão sendo populados.
+**Solução no `DataInitializer`:**
 
-4.1 — Modelos
-Problema
-
-A tabela modelo existe, mas está vazia.
-
-Consequentemente, as variações dos produtos não possuem modelo associado.
-
-Impacto
-
-O app mobile não consegue exibir corretamente a seção:
-
-Modelo
-
-
-no detalhe do produto.
-
-Solução
-
-Adicionar modelos no DataInitializer:
-
+```java
 if (modelos.count() == 0) {
-for (String nome : List.of("Padrão", "Premium", "Deluxe")) {
-Modelo m = new Modelo();
-m.setNome(nome);
-modelos.save(m);
+    for (String nome : List.of("Padrão", "Premium", "Deluxe")) {
+        Modelo m = new Modelo();
+        m.setNome(nome);
+        modelos.save(m);
+    }
 }
-}
 
-
-Depois, associar um modelo às variações:
-
+// E nas variações:
 v.setModelo(modelos.findAll().get(0));
+```
 
+### 4.2 — Imagens do produto
 
-Idealmente, a implementação deve evitar chamadas repetidas a findAll() dentro de loops e manter os modelos carregados em memória durante a inicialização.
+**Problema:** a tabela `produto_imagem` está vazia.
 
-4.2 — Imagens do produto
-Problema
+**Impacto:** o app mobile mostra o **placeholder rosa** em vez da foto do produto.
 
-A tabela:
+**Solução no `DataInitializer`:**
 
-produto_imagem
-
-
-está vazia.
-
-Impacto
-
-O app mobile exibe o placeholder rosa em vez da foto do produto.
-
-Solução
-
-Adicionar imagens no DataInitializer:
-
+```java
 if (imagens.count() == 0) {
-ProdutoImagem img = new ProdutoImagem();
-
+    ProdutoImagem img = new ProdutoImagem();
     img.setProduto(p);
-    img.setUrl(
-        "https://placehold.co/400x400/ED83A4/FFFFFF?text=Produto"
-    );
+    img.setUrl("https://placehold.co/400x400/ED83A4/FFFFFF?text=Produto");
     img.setPrincipal(true);
     img.setOrdemExibicao(1);
-
     imagens.save(img);
 }
+```
 
+### 4.3 — Avaliação do produto
 
-Para ambiente de desenvolvimento, o placeholder é suficiente para validar o fluxo. Em produção, as URLs devem apontar para as imagens reais dos produtos.
+**Problema:** a coluna `avaliacao` existe em `produto`, mas não está preenchida.
 
-4.3 — Avaliação do produto
-Problema
+**Solução:** definir `p.setAvaliacao(5)` ao criar o produto.
 
-A coluna:
+---
 
-avaliacao
+# 🟢 5. Normalização de e-mail no login/cadastro
 
+## Problema
 
-existe na tabela produto, porém os produtos do seed não estão recebendo um valor.
+`TESTE@x.com` e `teste@x.com` são tratados como **usuários diferentes**.
 
-Impacto
+## Solução
 
-O detalhe do produto pode exibir avaliação zerada ou não apresentar a informação corretamente.
+No `AuthService`:
 
-Solução
-
-Ao criar o produto no DataInitializer:
-
-p.setAvaliacao(5);
-
-🟢 5. Normalização de e-mail no login/cadastro
-Problema
-
-Atualmente:
-
-TESTE@x.com
-
-
-e:
-
-teste@x.com
-
-
-podem ser tratados como e-mails diferentes.
-
-Isso pode resultar em duplicidade de contas.
-
-Solução
-
-Normalizar o e-mail antes de consultar ou salvar:
-
-String email = request.email()
-.toLowerCase()
-.trim();
-
-Login
-
-No AuthService:
-
+```java
 public AuthResponse login(LoginRequest request) {
-
-    String login = request.login()
-        .toLowerCase()
-        .trim();
-
+    String login = request.login().toLowerCase().trim();
     Usuario usuario = usuarios.findByEmail(login)
-        .or(() -> usuarios.findByCpf(login))
-        .orElseThrow(() ->
-            new IllegalArgumentException("Usuário não encontrado")
-        );
-
+            .or(() -> usuarios.findByCpf(login))
+            .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
     // ...
 }
 
-Cadastro
 public AuthResponse cadastrar(CadastroRequest request) {
-
-    String email = request.email()
-        .toLowerCase()
-        .trim();
-
-    if (usuarios.existsByEmail(email)) {
-        throw new IllegalArgumentException(
-            "E-mail já cadastrado"
-        );
-    }
-
+    String email = request.email().toLowerCase().trim();
+    if (usuarios.existsByEmail(email))
+        throw new IllegalArgumentException("E-mail já cadastrado");
     usuario.setEmail(email);
-
     // ...
 }
+```
 
-Recomendação adicional
+---
 
-Além da normalização no service, é recomendável garantir a unicidade no banco de dados através de uma constraint/index UNIQUE no campo de e-mail.
+## 🎯 Resumo de prioridades
 
-Assim, mesmo que alguma chamada futura não passe pelo mesmo fluxo de normalização, o banco continuará protegendo contra duplicidade.
+| **#** | **Pendência** | **Prioridade** | **Tempo estimado** |
+| :--- | :--- | :--- | :--- |
+| 1 | LazyInit definitivo (DTOs) | 🔴 Crítica | 1-2h |
+| 2 | Campo `icone` nas categorias | 🔴 Crítica | 15 min |
+| 3 | Formatação de datas | 🟡 Importante | 10 min |
+| 4 | Seed (modelos, imagens, avaliação) | 🟡 Importante | 30 min |
+| 5 | Normalização de e-mail | 🟢 Desejável | 10 min |
 
-🎯 Resumo de prioridades
-#	Pendência	Prioridade	Tempo estimado
-1	LazyInit definitivo (DTOs)	🔴 Crítica	1–2h
-2	Campo icone nas categorias	🔴 Crítica	~15 min
-3	Formatação de datas	🟡 Importante	~10 min
-4	Seed (modelos, imagens, avaliação)	🟡 Importante	~30 min
-5	Normalização de e-mail	🟢 Desejável	~10 min
-Total estimado		~2–3h
+**Total:** ~2-3 horas de trabalho.
 
-Os tempos são estimativas e podem variar conforme a estrutura atual dos repositories, services, entidades e DTOs.
+---
 
-📌 Como testar cada pendência
-Após #1 — DTOs
+## 📌 Como testar cada um
 
-Listar produtos do painel admin:
+### Após #1 (DTOs)
 
+```bash
 curl -X GET http://localhost:8080/api/admin/produtos \
--H "Authorization: Bearer SEU_TOKEN"
+  -H "Authorization: Bearer SEU_TOKEN"
 
-Resultado esperado
-HTTP 200
+# Deve retornar 200 com lista de produtos
+```
 
+### Após #2 (icone)
 
-com uma lista de produtos serializada corretamente, incluindo imagens e variações quando aplicável.
-
-Não deve ocorrer:
-
-LazyInitializationException
-
-
-nem:
-
-HttpMessageNotWritableException
-
-Após #2 — icone
-
-Consultar categorias:
-
+```bash
 curl -X GET http://localhost:8080/api/categorias
 
-Resultado esperado
+# Deve retornar categorias com campo "icone"
+```
 
-Cada categoria deve possuir o campo:
+### Após #3 (datas)
 
-{
-"id": 1,
-"nome": "Enxoval",
-"icone": "enxoval"
-}
-
-Após #3 — datas
-
-Consultar pedidos:
-
+```bash
 curl -X GET http://localhost:8080/api/pedidos/cliente/8 \
--H "Authorization: Bearer SEU_TOKEN"
+  -H "Authorization: Bearer SEU_TOKEN"
 
-Resultado esperado
+# Datas devem estar no formato "2026-09-23T11:02:00.994"
+```
 
-As datas devem seguir o padrão:
+### Após #4 (seed)
 
-2026-09-23T11:02:00.994
+- Verifique no MySQL: `SELECT * FROM modelo;` (deve ter 3 registros)
+- `SELECT * FROM produto_imagem;` (deve ter pelo menos 1 registro)
+- `SELECT avaliacao FROM produto;` (não deve ser 0)
 
+### Após #5 (email)
 
-sem 4 ou mais casas decimais na fração de segundo.
+- Cadastre com `TESTE@x.com`
+- Tente logar com `teste@x.com` → deve funcionar
 
-Após #4 — seed
+---
 
-Verificar no MySQL:
-
-Modelos
-SELECT * FROM modelo;
-
-
-Resultado esperado:
-
-Padrão
-Premium
-Deluxe
-
-Imagens
-SELECT * FROM produto_imagem;
-
-
-Resultado esperado:
-
-pelo menos 1 registro;
-
-produto associado;
-
-URL preenchida;
-
-uma imagem marcada como principal.
-
-Avaliação
-SELECT id, nome, avaliacao
-FROM produto;
-
-
-Resultado esperado:
-
-produtos com avaliacao preenchida;
-
-nenhum produto do seed com avaliação 0, caso essa seja a regra definida para os dados iniciais.
-
-Após #5 — e-mail
-
-Cadastrar utilizando:
-
-TESTE@x.com
-
-
-Depois tentar realizar login utilizando:
-
-teste@x.com
-
-Resultado esperado
-
-O login deve localizar a mesma conta.
-
-Também deve ser rejeitado um novo cadastro utilizando:
-
-teste@x.com
-
-
-caso:
-
-TESTE@x.com
-
-
-já esteja cadastrado.
-
-✅ Checklist final
-
-Corrigir LazyInitializationException utilizando DTOs
-
-Revisar todos os endpoints do AdminCrudController
-
-Confirmar /api/favoritos/cliente/{id}
-
-Confirmar /api/pedidos/{id}
-
-Adicionar campo icone em Categoria
-
-Atualizar seed das categorias
-
-Padronizar formato das datas no JSON
-
-Popular tabela modelo
-
-Associar modelos às variações
-
-Popular produto_imagem
-
-Definir imagens principais
-
-Preencher avaliacao dos produtos
-
-Normalizar e-mails no cadastro
-
-Normalizar e-mails no login
-
-Garantir unicidade do e-mail no banco
-
-Executar os testes dos endpoints
-
-Validar integração no app Android
-
-Validar integração no painel admin web
-
-📅 Controle do documento
-
-Documento: Pendências do Backend — Documento Consolidado Final
-Status: Pendências finais após integração completa
-Data: 01/10/2026
+*Documento consolidado em 01/10/2026 — Pendências finais após integração completa.*
