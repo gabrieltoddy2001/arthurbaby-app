@@ -10,6 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+
 import java.util.List;
 
 import br.com.arthurbaby.R;
@@ -54,7 +57,21 @@ public class ItemCarrinhoAdapter extends RecyclerView.Adapter<ItemCarrinhoAdapte
         h.tvPreco.setText(MoedaUtils.formatar(item.getProduto().getPreco()));
         h.tvQtd.setText(String.valueOf(item.getQuantidade()));
 
-        h.img.setBackgroundColor(0xFFFAD1DE);
+        // Carrega imagem com fade-in
+        String url = item.getProduto().getImagemUrl();
+        if (url != null && !url.isEmpty()) {
+            Glide.with(h.itemView.getContext())
+                    .load(url)
+                    .transition(DrawableTransitionOptions.withCrossFade(300))
+                    .placeholder(R.drawable.bg_imagem_produto)
+                    .error(R.drawable.bg_imagem_produto)
+                    .centerCrop()
+                    .into(h.img);
+        } else {
+            h.img.setImageDrawable(null);
+            h.img.setBackgroundColor(ContextCompat.getColor(
+                    h.itemView.getContext(), R.color.placeholder_produto));
+        }
 
         h.btnRemover.setImageResource(R.drawable.ic_sair);
         h.btnRemover.setColorFilter(ContextCompat.getColor(

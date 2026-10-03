@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.content.ContextCompat;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -170,9 +171,9 @@ public class PesquisaFragment extends Fragment {
 
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(dp(20));
-        bg.setColor(0xFFF0F2F5);
+        bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_fundo));
         chip.setBackground(bg);
-        chip.setTextColor(0xFF1E293B);
+        chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_texto));
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -261,11 +262,11 @@ public class PesquisaFragment extends Fragment {
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(40f);
         if (ativo) {
-            bg.setColor(0xFF37B6B0);
-            chip.setTextColor(Color.WHITE);
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado_texto));
         } else {
-            bg.setColor(0xFFF0F2F5);
-            chip.setTextColor(0xFF1E293B);
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_fundo));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_texto));
         }
         chip.setBackground(bg);
     }

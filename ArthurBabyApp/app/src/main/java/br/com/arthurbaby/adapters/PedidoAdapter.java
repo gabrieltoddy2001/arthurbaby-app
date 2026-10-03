@@ -58,8 +58,13 @@ public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.VH> {
         h.itemView.setOnClickListener(v -> listener.onClick(p));
     }
 
+    /**
+     * Rótulo do status legível para o usuário.
+     */
     private String rotuloStatus(String status) {
+        if (status == null) return "—";
         switch (status) {
+            case "RASCUNHO": return "Rascunho";
             case "PEDIDO_GERADO": return "Gerado";
             case "EM_ANALISE": return "Em análise";
             case "AGUARDANDO_CONFIRMACAO": return "Aguardando";
@@ -73,17 +78,39 @@ public class PedidoAdapter extends RecyclerView.Adapter<PedidoAdapter.VH> {
         }
     }
 
+    /**
+     * Cores padronizadas para cada status.
+     */
     private int corStatus(String status) {
+        if (status == null) return 0xFF94A3B8;
+
         switch (status) {
-            case "ENTREGUE": return 0xFF10B981;
+            // Sucesso — verde
+            case "ENTREGUE":
+                return 0xFF10B981;
+
+            // Em andamento — azul
             case "EM_TRANSPORTE":
-            case "SEPARANDO_PRODUTOS": return 0xFF3B82F6;
+            case "SEPARANDO_PRODUTOS":
+                return 0xFF3B82F6;
+
+            // Aguardando — amarelo
+            case "PEDIDO_GERADO":
+            case "EM_ANALISE":
             case "AGUARDANDO_CONFIRMACAO":
-            case "EM_ANALISE": return 0xFFFFC107;
-            case "CANCELADO": return 0xFFEF4444;
+                return 0xFFF59E0B;
+
+            // Cancelado — vermelho
+            case "CANCELADO":
+                return 0xFFEF4444;
+
+            // Confirmado/pronto — verde-arthur
             case "CONFIRMADO":
-            case "PRONTO_PARA_RETIRADA": return 0xFF37B6B0;
-            default: return 0xFF94A3B8;
+            case "PRONTO_PARA_RETIRADA":
+                return 0xFF37B6B0;
+
+            default:
+                return 0xFF94A3B8;
         }
     }
 

@@ -16,21 +16,20 @@
             android:orientation="vertical"
             android:paddingBottom="90dp">
 
-            <!-- IMAGEM COM BARRA DE AÇÕES -->
+            <!-- IMAGEM -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="260dp"
-                android:background="@drawable/bg_imagem_produto">
+                android:layout_height="280dp"
+                android:background="@color/branco">
 
                 <ImageView
                     android:id="@+id/imgProduto"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="16dp"
-                    android:scaleType="centerInside"
+                    android:scaleType="fitCenter"
                     android:contentDescription="Imagem do produto" />
 
-                <!-- BARRA DE AÇÕES NO TOPO -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -81,7 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="3dp"
                 app:cardBackgroundColor="@color/branco">
@@ -112,7 +111,6 @@
                         android:textSize="12sp"
                         android:layout_marginTop="2dp" />
 
-                    <!-- ESTRELAS + PREÇO NA MESMA LINHA -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -162,7 +160,6 @@
                             android:textColor="@color/rosa_arthur" />
                     </LinearLayout>
 
-                    <!-- DESCRIÇÃO -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -183,12 +180,12 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- CARD DE VARIAÇÕES (agrupado) -->
+            <!-- CARD DE VARIAÇÕES -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/branco">
@@ -207,7 +204,6 @@
                         android:textColor="@color/texto_primario"
                         android:textSize="14sp" />
 
-                    <!-- COR -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -223,7 +219,6 @@
                         android:orientation="horizontal"
                         android:layout_marginTop="6dp" />
 
-                    <!-- TAMANHO -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -239,7 +234,6 @@
                         android:orientation="horizontal"
                         android:layout_marginTop="6dp" />
 
-                    <!-- MODELO -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -262,7 +256,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="2dp"
@@ -333,7 +327,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- BOTÃO FIXO NO RODAPÉ -->
+    <!-- BOTÃO FIXO -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -341,7 +335,9 @@
         android:orientation="vertical"
         android:background="@color/branco"
         android:elevation="8dp"
-        android:padding="12dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="12dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAddCarrinho"

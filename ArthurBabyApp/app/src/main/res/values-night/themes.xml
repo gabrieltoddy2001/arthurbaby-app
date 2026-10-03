@@ -1,7 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.ArthurBabyApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Theme.ArthurBaby" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/verde_arthur</item>
+        <item name="colorPrimaryVariant">@color/verde_escuro</item>
+        <item name="colorOnPrimary">@color/branco</item>
+        <item name="colorSecondary">@color/rosa_arthur</item>
+        <item name="colorSecondaryVariant">@color/rosa_escuro</item>
+        <item name="colorOnSecondary">@color/branco</item>
+        <item name="android:statusBarColor">@color/verde_arthur</item>
+        <item name="android:windowBackground">@color/fundo_claro</item>
+        <item name="android:navigationBarColor">@color/branco</item>
+        <item name="colorSurface">@color/branco</item>
+        <item name="colorOnSurface">@color/texto_primario</item>
+
+        <!-- Ícones claros na status bar (fundo verde) -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 </resources>

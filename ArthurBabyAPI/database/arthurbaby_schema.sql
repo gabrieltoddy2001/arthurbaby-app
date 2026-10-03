@@ -18,11 +18,12 @@
 --   - popular dados de referencia (categorias, tamanhos, cores, marca,
 --     configuracao da loja) sem depender do primeiro boot da API.
 --
--- Os usuarios de teste (admin@arthurbaby.com.br / admin123 e
--- cliente@teste.com / cliente123) NAO estao neste script porque a
--- senha precisa ser gravada com hash BCrypt gerado pelo backend — eles
--- sao criados automaticamente pelo DataInitializer no primeiro boot,
--- caso a tabela `usuario` esteja vazia.
+-- Os usuarios de teste (senha 123456 para todos: admin@arthurbaby.com.br,
+-- vendedor@arthurbaby.com.br, ana.souza@email.com, mariana.santos@email.com
+-- e maria.teste@exemplo.com) NAO estao neste script porque a senha
+-- precisa ser gravada com hash BCrypt gerado pelo backend — eles sao
+-- criados automaticamente pelo DataInitializer no primeiro boot, caso a
+-- tabela `usuario` esteja vazia.
 --
 -- Como executar (linha de comando):
 --   mysql -u root -p < arthurbaby_schema.sql
@@ -226,15 +227,39 @@ CREATE TABLE IF NOT EXISTS movimentacao_estoque (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
--- cupom (desconto percentual aplicado sobre o subtotal do pedido)
+-- cupom (desconto aplicado sobre o subtotal do pedido)
+--   tipo PERCENTUAL: valor = percentual; VALOR_FIXO: valor em reais;
+--   FRETE_GRATIS: nao usa valor. Bancos antigos com a coluna
+--   percentual_desconto sao migrados pelo SchemaMigration ao subir a API.
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS cupom (
-    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    codigo                VARCHAR(50)   NOT NULL,
-    percentual_desconto   DECIMAL(5,2)  NOT NULL,
-    ativo                 TINYINT(1)    NOT NULL DEFAULT 1,
-    valido_ate            DATETIME      NULL,
+    id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
+    codigo                  VARCHAR(50)    NOT NULL,
+    tipo                    VARCHAR(20)    NOT NULL DEFAULT 'PERCENTUAL',
+    valor                   DECIMAL(12,2)  NULL,
+    valor_minimo            DECIMAL(12,2)  NULL,
+    valor_maximo_desconto   DECIMAL(12,2)  NULL,
+    valido_de               DATETIME       NULL,
+    valido_ate              DATETIME       NULL,
+    ativo                   TINYINT(1)     NOT NULL DEFAULT 1,
+    descricao               VARCHAR(200)   NULL,
+    criado_em               DATETIME       NULL,
     CONSTRAINT uk_cupom_codigo UNIQUE (codigo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- password_reset_token (recuperacao de senha: expira e e de uso unico)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS password_reset_token (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token         VARCHAR(100)  NOT NULL,
+    usuario_id    BIGINT        NOT NULL,
+    expira_em     DATETIME      NOT NULL,
+    usado         TINYINT(1)    NOT NULL DEFAULT 0,
+    criado_em     DATETIME      NULL,
+    CONSTRAINT uk_password_reset_token UNIQUE (token),
+    CONSTRAINT fk_password_reset_token_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
+    INDEX idx_token_reset (token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
@@ -293,6 +318,19 @@ CREATE TABLE IF NOT EXISTS pedido_status_historico (
     CONSTRAINT fk_status_hist_pedido FOREIGN KEY (pedido_id) REFERENCES pedido (id) ON DELETE CASCADE,
     CONSTRAINT fk_status_hist_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id),
     INDEX idx_status_hist_pedido (pedido_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- auditoria (log de ações do painel; usuário gravado como texto)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS auditoria (
+    id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
+    usuario            VARCHAR(180)  NULL,
+    acao               VARCHAR(40)   NOT NULL,
+    entidade           VARCHAR(60)   NULL,
+    entidade_id        BIGINT        NULL,
+    descricao          TEXT          NULL,
+    data               DATETIME      NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
@@ -368,6 +406,8 @@ INSERT IGNORE INTO cor (nome, codigo_hex, ordem_exibicao) VALUES
     ('Amarelo', '#FFC000', 4),
     ('Verde', '#4CB896', 5);
 
+INSERT IGNORE INTO modelo (nome) VALUES ('Padrão'), ('Premium'), ('Deluxe');
+
 INSERT IGNORE INTO marca (nome) VALUES ('ArthurBaby');
 
 INSERT INTO produto (categoria_id, marca_id, codigo, sku, nome, descricao, preco, destaque, promocao, avaliacao)
@@ -376,15 +416,24 @@ SELECT (SELECT id FROM categoria ORDER BY id LIMIT 1),
        'AB-001', 'AB-001', 'Kit Enxoval Bebe', 'Produto inicial para testes da API', 129.90, 1, 0, 5.0
 WHERE NOT EXISTS (SELECT 1 FROM produto WHERE codigo = 'AB-001');
 
-INSERT INTO produto_variacao (produto_id, sku, tamanho_id, cor_id, estoque_atual)
+INSERT INTO produto_variacao (produto_id, sku, tamanho_id, cor_id, modelo_id, estoque_atual)
 SELECT (SELECT id FROM produto WHERE codigo = 'AB-001' LIMIT 1),
        'AB-001-RN-BR',
        (SELECT id FROM tamanho ORDER BY id LIMIT 1),
        (SELECT id FROM cor ORDER BY id LIMIT 1),
+       (SELECT id FROM modelo WHERE nome = 'Padrão' LIMIT 1),
        10
 WHERE NOT EXISTS (SELECT 1 FROM produto_variacao WHERE sku = 'AB-001-RN-BR');
 
-INSERT IGNORE INTO cupom (codigo, percentual_desconto, ativo) VALUES ('ARTHUR10', 10.00, 1);
+INSERT INTO produto_imagem (produto_id, url, descricao, ordem_exibicao, principal)
+SELECT (SELECT id FROM produto WHERE codigo = 'AB-001' LIMIT 1),
+       'https://placehold.co/400x400/ED83A4/FFFFFF?text=Produto', 'Imagem de exemplo', 1, 1
+WHERE NOT EXISTS (SELECT 1 FROM produto_imagem i JOIN produto p ON p.id = i.produto_id WHERE p.codigo = 'AB-001');
+
+INSERT IGNORE INTO cupom (codigo, tipo, valor, descricao, ativo, criado_em) VALUES
+    ('ARTHUR10', 'PERCENTUAL', 10.00, '10% de desconto', 1, NOW()),
+    ('FRETEGRATIS', 'FRETE_GRATIS', NULL, 'Frete gratis', 1, NOW()),
+    ('BEMVINDO', 'VALOR_FIXO', 15.00, 'R$ 15 de desconto', 1, NOW());
 
 -- Subcategorias de exemplo (categoria "Enxoval")
 INSERT IGNORE INTO categoria (categoria_pai_id, nome, descricao, ordem_exibicao)

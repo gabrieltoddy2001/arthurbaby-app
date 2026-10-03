@@ -54,4 +54,22 @@
     <color name="cat_alimentacao">#F5B595</color>
     <color name="cat_quarto">#8FB8E8</color>
     <color name="cat_presentes">#FF9A8B</color>
+
+    <!-- CHIPS (variações de produto, filtros, etc) -->
+    <color name="chip_selecionado">#37B6B0</color>
+    <color name="chip_selecionado_texto">#FFFFFF</color>
+    <color name="chip_fundo">#F0F2F5</color>
+    <color name="chip_borda">#E2E8F0</color>
+    <color name="chip_texto">#1E293B</color>
+
+    <!-- PLACEHOLDER DE IMAGEM -->
+    <color name="placeholder_produto">#FAD1DE</color>
+
+    <!-- STATUS DE PEDIDO -->
+    <color name="status_verde">#10B981</color>
+    <color name="status_azul">#3B82F6</color>
+    <color name="status_amarelo">#F59E0B</color>
+    <color name="status_vermelho">#EF4444</color>
+    <color name="status_cinza">#94A3B8</color>
+    <color name="status_verde_arthur">#37B6B0</color>
 </resources>

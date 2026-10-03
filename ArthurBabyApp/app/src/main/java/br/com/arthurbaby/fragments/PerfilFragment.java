@@ -43,9 +43,14 @@ public class PerfilFragment extends Fragment {
             tvNome.setText("Bem-vindo(a)!");
             tvEmail.setText("Entre para aproveitar tudo");
 
+            v.findViewById(R.id.opMeusDados).setOnClickListener(x ->
+                    AuthGuard.mostrarDialogLogin(requireActivity(),
+                            "Entre para ver seus dados."));
+
             v.findViewById(R.id.opMeusPedidos).setOnClickListener(x ->
                     AuthGuard.mostrarDialogLogin(requireActivity(),
                             "Entre para ver seus pedidos."));
+
 
             v.findViewById(R.id.opEnderecos).setOnClickListener(x ->
                     AuthGuard.mostrarDialogLogin(requireActivity(),
@@ -93,6 +98,11 @@ public class PerfilFragment extends Fragment {
 
         // Busca dados atualizados no backend
         carregarPerfilBackend(tvNome, tvEmail);
+
+        // Meus Dados → Editar Perfil
+        v.findViewById(R.id.opMeusDados).setOnClickListener(x ->
+                startActivity(new Intent(getActivity(),
+                        br.com.arthurbaby.activities.EditarPerfilActivity.class)));
 
         v.findViewById(R.id.opMeusPedidos).setOnClickListener(x ->
                 requireActivity().getSupportFragmentManager()

@@ -26,6 +26,9 @@
         app:itemIconTint="@color/rosa_arthur"
         app:itemTextColor="@color/rosa_arthur"
         app:itemRippleColor="@color/rosa_suave"
-        app:labelVisibilityMode="labeled" />
+        app:labelVisibilityMode="labeled"
+        app:itemIconSize="22dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp" />
 
 </LinearLayout>

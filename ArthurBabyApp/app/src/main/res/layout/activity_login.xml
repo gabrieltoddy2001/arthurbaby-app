@@ -21,11 +21,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingTop="24dp">
 
                 <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:src="@mipmap/ic_launcher"
                     android:contentDescription="Logo" />
 
@@ -34,17 +35,17 @@
                     android:layout_height="wrap_content"
                     android:text="ArthurBaby"
                     android:textColor="@color/branco"
-                    android:textSize="26sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.05"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Enxoval e Moda Infantil"
                     android:textColor="@color/branco"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:alpha="0.9"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
@@ -55,7 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="-40dp"
+            android:layout_marginTop="-30dp"
             app:cardCornerRadius="24dp"
             app:cardElevation="4dp"
             app:cardBackgroundColor="@color/branco">
@@ -134,7 +135,8 @@
                     android:textColor="@color/rosa_arthur"
                     android:layout_gravity="end"
                     android:layout_marginTop="8dp"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"
+                    android:padding="4dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEntrar"
@@ -145,7 +147,7 @@
                     android:textStyle="bold"
                     android:backgroundTint="@color/rosa_arthur"
                     app:cornerRadius="28dp"
-                    android:layout_marginTop="24dp" />
+                    android:layout_marginTop="20dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -172,7 +174,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="40dp" />
+            android:layout_height="32dp" />
 
     </LinearLayout>
 </ScrollView>

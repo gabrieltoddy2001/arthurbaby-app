@@ -24,7 +24,7 @@
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_pedidos"
+                android:src="@drawable/ic_caixa_vazia"
                 app:tint="@color/rosa_arthur"
                 android:contentDescription="Sem pedidos" />
         </FrameLayout>

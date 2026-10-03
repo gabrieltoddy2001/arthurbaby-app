@@ -11,31 +11,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- CABEÇALHO COM GRADIENTE -->
+        <!-- CABEÇALHO -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingVertical="32dp"
+            android:paddingVertical="24dp"
             android:background="@drawable/bg_gradiente_header">
 
-            <!-- AVATAR CIRCULAR COM ANEL -->
             <FrameLayout
-                android:layout_width="120dp"
-                android:layout_height="120dp"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:background="@drawable/bg_avatar_anel"
                 android:elevation="6dp">
 
                 <FrameLayout
-                    android:layout_width="94dp"
-                    android:layout_height="94dp"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:layout_gravity="center"
                     android:background="@drawable/bg_avatar_interno">
 
                     <ImageView
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_perfil"
                         app:tint="@color/rosa_arthur"
@@ -50,8 +49,10 @@
                 android:text="Maria Silva"
                 android:textColor="@color/branco"
                 android:textStyle="bold"
-                android:textSize="20sp"
-                android:layout_marginTop="16dp" />
+                android:textSize="18sp"
+                android:layout_marginTop="14dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp" />
 
             <TextView
                 android:id="@+id/tvEmail"
@@ -59,9 +60,11 @@
                 android:layout_height="wrap_content"
                 android:text="maria@exemplo.com"
                 android:textColor="@color/branco"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:alpha="0.9"
-                android:layout_marginTop="2dp" />
+                android:layout_marginTop="2dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp" />
         </LinearLayout>
 
         <!-- MENU -->
@@ -71,17 +74,64 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- MEUS DADOS (opcional — linka para Editar Perfil) -->
+            <LinearLayout
+                android:id="@+id/opMeusDados"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_circulo_categoria_suave">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_perfil"
+                        app:tint="@color/rosa_arthur"
+                        android:contentDescription="Meus Dados" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:text="Meus Dados"
+                    android:textColor="@color/texto_primario"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="22sp"
+                    android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/opMeusPedidos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="14dp"
                 android:background="@drawable/bg_card_opcao_perfil"
                 android:layout_marginBottom="8dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <FrameLayout
                     android:layout_width="40dp"
@@ -121,11 +171,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="14dp"
                 android:background="@drawable/bg_card_opcao_perfil"
                 android:layout_marginBottom="8dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <FrameLayout
                     android:layout_width="40dp"
@@ -165,11 +216,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="14dp"
                 android:background="@drawable/bg_card_opcao_perfil"
                 android:layout_marginBottom="8dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <FrameLayout
                     android:layout_width="40dp"
@@ -209,11 +261,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="14dp"
                 android:background="@drawable/bg_card_opcao_perfil"
                 android:layout_marginBottom="8dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <FrameLayout
                     android:layout_width="40dp"
@@ -253,11 +306,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="14dp"
                 android:background="@drawable/bg_card_opcao_perfil"
                 android:layout_marginBottom="8dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <FrameLayout
                     android:layout_width="40dp"
@@ -297,12 +351,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="14dp"
                 android:background="@drawable/bg_card_opcao_perfil"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="20dp"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
                 <FrameLayout
                     android:layout_width="40dp"

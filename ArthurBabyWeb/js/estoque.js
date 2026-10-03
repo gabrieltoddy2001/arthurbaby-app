@@ -57,13 +57,6 @@
    function renderVisao() {
      const painel = document.getElementById('painel-estoque');
    
-     // Calcula o estoque atual por produto (última movimentação + inicial)
-     const estoquePorProduto = {};
-     movimentacoes.forEach(m => {
-       const atual = estoquePorProduto[m.produtoId] ?? 0;
-       estoquePorProduto[m.produtoId] = m.estoquePosterior ?? atual;
-     });
-   
      if (!document.getElementById('tabela-visao-estoque')) {
        painel.innerHTML = `
          <div class="filtros">
@@ -102,15 +95,10 @@
      const busca = input.value.toLowerCase().trim();
      const situacao = sel.value;
    
-     const estoquePorProduto = {};
-     movimentacoes.forEach(m => {
-       estoquePorProduto[m.produtoId] = m.estoquePosterior ?? 0;
-     });
-   
      const linhas = produtos
        .filter(p => !busca || p.nome.toLowerCase().includes(busca))
        .map(p => {
-         const atual = estoquePorProduto[p.id] ?? 0;
+         const atual = estoqueProduto(p);
          const minimo = p.estoqueMinimo || 0;
          let situacaoProduto = 'OK';
          if (atual === 0) situacaoProduto = 'ZERADO';
@@ -199,7 +187,7 @@
    
      const filtradas = movimentacoes
        .filter(m => {
-         if (busca && !m.produtoNome.toLowerCase().includes(busca)) return false;
+         if (busca && !`${m.produtoNome || ''} ${m.sku || ''}`.toLowerCase().includes(busca)) return false;
          if (tipo && m.tipo !== tipo) return false;
          return true;
        })
@@ -221,15 +209,22 @@
            return `
              <tr>
                <td>${formatarData(m.data)}</td>
-               <td>${escapeHtml(m.produtoNome)}</td>
+               <td>${escapeHtml(m.produtoNome)}${m.sku ? `<br><code style="font-size:.75rem;color:var(--texto-secundario);">${escapeHtml(m.sku)}</code>` : ''}</td>
                <td><span class="badge ${badge}">${m.tipo}</span></td>
-               <td class="text-center">${m.quantidade > 0 ? '+' : ''}${m.quantidade}</td>
+               <td class="text-center">${sinalMovimentacao(m)}${m.quantidade}</td>
                <td class="text-center">${m.estoqueAnterior}</td>
                <td class="text-center"><strong>${m.estoquePosterior}</strong></td>
                <td>${escapeHtml(m.usuario || '—')}</td>
                <td style="font-size:.85rem;color:var(--texto-secundario);">${escapeHtml(m.observacao || '—')}</td>
              </tr>`;
          }).join('');
+   }
+   
+   // O backend grava a quantidade sempre positiva; o sinal vem do tipo (ou da diferença, no ajuste)
+   function sinalMovimentacao(m) {
+     if (m.tipo === 'SAIDA' || m.tipo === 'RESERVA') return '-';
+     if (m.tipo === 'AJUSTE') return (m.estoquePosterior ?? 0) < (m.estoqueAnterior ?? 0) ? '-' : '+';
+     return '+';
    }
    
    /* ============================================
@@ -246,9 +241,15 @@
          <form id="form-mov">
            <div class="field">
              <label>Produto *</label>
-             <select id="m-produto">
+             <select id="m-produto" onchange="preencherVariacoes()">
                <option value="">Selecione...</option>
                ${produtos.map(p => `<option value="${p.id}">${escapeHtml(p.nome)}</option>`).join('')}
+             </select>
+           </div>
+           <div class="field">
+             <label>Variação *</label>
+             <select id="m-variacao">
+               <option value="">Selecione o produto primeiro</option>
              </select>
            </div>
            <div class="field">
@@ -256,15 +257,15 @@
              <select id="m-tipo">
                <option value="ENTRADA">ENTRADA (adicionar estoque)</option>
                <option value="SAIDA">SAIDA (remover estoque)</option>
-               <option value="AJUSTE">AJUSTE (corrigir saldo)</option>
+               <option value="AJUSTE">AJUSTE (definir novo saldo)</option>
                <option value="ESTORNO">ESTORNO (devolver saldo)</option>
              </select>
            </div>
            <div class="field">
              <label>Quantidade *</label>
-             <input type="number" id="m-qtd" min="1" value="1">
+             <input type="number" id="m-qtd" min="0" value="1">
              <small style="color:var(--texto-secundario);font-size:.8rem;">
-               Para AJUSTE, use valores positivos (adicionar) ou negativos (remover).
+               Para AJUSTE, informe o novo saldo total da variação (ex.: contagem do inventário).
              </small>
            </div>
            <div class="field">
@@ -286,63 +287,53 @@
      });
    }
    
+   function preencherVariacoes() {
+     const produtoId = Number(document.getElementById('m-produto').value);
+     const sel = document.getElementById('m-variacao');
+     const produto = produtos.find(p => p.id === produtoId);
+     const variacoes = produto?.variacoes || [];
+   
+     if (!produto) {
+       sel.innerHTML = '<option value="">Selecione o produto primeiro</option>';
+     } else if (variacoes.length === 0) {
+       sel.innerHTML = '<option value="">Produto sem variações cadastradas</option>';
+     } else {
+       sel.innerHTML = variacoes.map(v => {
+         const desc = [v.tamanho?.nome, v.cor?.nome, v.modelo?.nome].filter(Boolean).join(' / ');
+         return `<option value="${v.id}">${escapeHtml(v.sku)}${desc ? ' — ' + escapeHtml(desc) : ''} (estoque: ${v.estoqueAtual ?? 0})</option>`;
+       }).join('');
+     }
+   }
+   
    async function registrarMovimentacao() {
      const alerta = document.getElementById('modal-alerta');
      const btn = document.getElementById('m-salvar');
    
-     const produtoId = Number(document.getElementById('m-produto').value);
+     const variacaoId = Number(document.getElementById('m-variacao').value);
      const tipo = document.getElementById('m-tipo').value;
-     const qtdRaw = Number(document.getElementById('m-qtd').value);
+     const qtdRaw = document.getElementById('m-qtd').value;
+     const quantidade = Number(qtdRaw);
      const obs = document.getElementById('m-obs').value.trim();
    
      alerta.classList.add('hidden');
    
-     if (!produtoId) return mostrarErroModal('Selecione um produto.');
-     if (!qtdRaw) return mostrarErroModal('Informe a quantidade.');
-   
-     const produto = produtos.find(p => p.id === produtoId);
-     if (!produto) return mostrarErroModal('Produto não encontrado.');
-   
-     // Calcula o estoque atual do produto
-     const estoqueAtual = movimentacoes
-       .filter(m => m.produtoId === produtoId)
-       .reduce((acc, m) => m.estoquePosterior ?? acc, 0);
-   
-     let quantidade = qtdRaw;
-     if (tipo === 'SAIDA') quantidade = -Math.abs(qtdRaw);
-     if (tipo === 'ENTRADA' || tipo === 'ESTORNO') quantidade = Math.abs(qtdRaw);
-   
-     const estoquePosterior = estoqueAtual + quantidade;
-   
-     if (estoquePosterior < 0) {
-       return mostrarErroModal(`Estoque insuficiente. Estoque atual: ${estoqueAtual}, tentativa de saída: ${Math.abs(quantidade)}.`);
-     }
-   
-     const usuario = getUsuario();
-     const novaMov = {
-       produtoId,
-       produtoNome: produto.nome,
-       variacaoId: null,
-       tipo,
-       quantidade,
-       estoqueAnterior: estoqueAtual,
-       estoquePosterior,
-       usuario: usuario?.nome || 'Administrador',
-       observacao: obs || null,
-       data: new Date().toISOString(),
-     };
+     if (!Number(document.getElementById('m-produto').value)) return mostrarErroModal('Selecione um produto.');
+     if (!variacaoId) return mostrarErroModal('Selecione uma variação.');
+     if (qtdRaw === '' || !Number.isInteger(quantidade) || quantidade < 0) return mostrarErroModal('Informe uma quantidade válida.');
+     if (tipo !== 'AJUSTE' && quantidade === 0) return mostrarErroModal('A quantidade deve ser maior que zero.');
    
      btn.disabled = true;
      btn.textContent = 'Registrando...';
    
      try {
-       await adminApi.criar('movimentacoes', novaMov);
+       await adminApi.movimentarEstoque(variacaoId, tipo.toLowerCase(), {
+         quantidade,
+         observacao: obs || null,
+       });
        fecharModal();
        await carregar();
      } catch (err) {
        mostrarErroModal(err.message);
-       btn.disabled = false;
-       btn.textContent = 'Registrar';
      }
    }
    

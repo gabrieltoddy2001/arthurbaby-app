@@ -7,9 +7,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
 import java.util.List;
 
@@ -47,11 +51,24 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
         h.tvNome.setText(p.getNome());
         h.tvPreco.setText(MoedaUtils.formatar(p.getPreco()));
 
+        // Carrega a imagem com fade-in
+        if (p.getImagemUrl() != null && !p.getImagemUrl().isEmpty()) {
+            Glide.with(h.itemView.getContext())
+                    .load(p.getImagemUrl())
+                    .transition(DrawableTransitionOptions.withCrossFade(300))
+                    .placeholder(R.drawable.bg_imagem_produto)
+                    .error(R.drawable.bg_imagem_produto)
+                    .centerCrop()
+                    .into(h.img);
+        } else {
+            h.img.setImageDrawable(null);
+            h.img.setBackgroundColor(ContextCompat.getColor(
+                    h.itemView.getContext(), R.color.placeholder_produto));
+        }
+
         boolean emPromocao = p.getPreco().doubleValue() < 50 && p.temEstoque();
         h.tvSeloPromocao.setVisibility(emPromocao ? View.VISIBLE : View.GONE);
         h.tvSeloEsgotado.setVisibility(p.isEsgotado() ? View.VISIBLE : View.GONE);
-
-        h.img.setBackgroundColor(0xFFFAD1DE);
 
         boolean logado = AuthGuard.estaLogado(h.itemView.getContext());
         h.btnFavorito.setVisibility(logado ? View.VISIBLE : View.GONE);

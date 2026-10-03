@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import java.text.SimpleDateFormat;
@@ -66,6 +67,7 @@ public class DetalhePedidoFragment extends Fragment {
 
     private void preencherUI(View v) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", new Locale("pt", "BR"));
+        int corTexto = ContextCompat.getColor(requireContext(), R.color.texto_primario);
 
         TextView tvTitulo = v.findViewById(R.id.tvTitulo);
         tvTitulo.setText("Pedido #" + pedido.getNumeroPedido());
@@ -83,7 +85,7 @@ public class DetalhePedidoFragment extends Fragment {
                 TextView linha = new TextView(getContext());
                 linha.setText(item.getQuantidade() + "x  " + item.getProduto().getNome()
                         + "  —  " + MoedaUtils.formatar(item.getSubtotal()));
-                linha.setTextColor(0xFF000000);
+                linha.setTextColor(corTexto);
                 linha.setTextSize(14f);
                 linha.setPadding(0, 6, 0, 6);
                 cItens.addView(linha);
@@ -96,7 +98,7 @@ public class DetalhePedidoFragment extends Fragment {
             for (PedidoStatus ps : pedido.getHistorico()) {
                 TextView linha = new TextView(getContext());
                 linha.setText("• " + ps.getStatus() + "  —  " + sdf.format(ps.getData()));
-                linha.setTextColor(0xFF000000);
+                linha.setTextColor(corTexto);
                 linha.setTextSize(14f);
                 linha.setPadding(0, 6, 0, 6);
                 cHist.addView(linha);

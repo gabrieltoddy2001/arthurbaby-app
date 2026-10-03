@@ -1,5 +1,6 @@
 package br.com.arthurbaby.service;
 
+import br.com.arthurbaby.entity.Auditoria;
 import br.com.arthurbaby.entity.Categoria;
 import br.com.arthurbaby.entity.ConfiguracaoLoja;
 import br.com.arthurbaby.entity.Cor;
@@ -16,6 +17,7 @@ import br.com.arthurbaby.entity.ProdutoImagem;
 import br.com.arthurbaby.entity.ProdutoVariacao;
 import br.com.arthurbaby.entity.Tamanho;
 import br.com.arthurbaby.entity.Usuario;
+import br.com.arthurbaby.repository.AuditoriaRepository;
 import br.com.arthurbaby.repository.CategoriaRepository;
 import br.com.arthurbaby.repository.ConfiguracaoLojaRepository;
 import br.com.arthurbaby.repository.CorRepository;
@@ -63,7 +65,7 @@ public class AdminCrudService {
                             ProdutoVariacaoRepository variacoes, MovimentacaoEstoqueRepository movimentos,
                             PedidoRepository pedidos, PedidoItemRepository itens,
                             PedidoStatusHistoricoRepository historicos, ConfiguracaoLojaRepository configs,
-                            FavoritoRepository favoritos, ObjectMapper mapper, PasswordEncoder encoder) {
+                            FavoritoRepository favoritos, AuditoriaRepository auditoria, ObjectMapper mapper, PasswordEncoder encoder) {
         this.mapper = mapper;
         this.encoder = encoder;
         this.recursos = Map.ofEntries(
@@ -82,7 +84,8 @@ public class AdminCrudService {
                 recurso("pedido-itens", itens, PedidoItem.class),
                 recurso("pedido-status-historicos", historicos, PedidoStatusHistorico.class),
                 recurso("configuracoes-loja", configs, ConfiguracaoLoja.class),
-                recurso("favoritos", favoritos, Favorito.class)
+                recurso("favoritos", favoritos, Favorito.class),
+                recurso("auditoria", auditoria, Auditoria.class)
         );
     }
 

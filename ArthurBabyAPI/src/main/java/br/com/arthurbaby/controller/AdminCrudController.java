@@ -23,7 +23,7 @@ import java.util.List;
 public class AdminCrudController {
     private static final String TIPOS = " Tipos aceitos: usuarios, enderecos, categorias, marcas, produtos, produto-imagens, "
             + "tamanhos, cores, modelos, produto-variacoes, movimentacoes-estoque, pedidos, pedido-itens, "
-            + "pedido-status-historicos, configuracoes-loja, favoritos.";
+            + "pedido-status-historicos, configuracoes-loja, favoritos, auditoria.";
     private static final String SEM_PERMISSAO = "Acesso negado: apenas perfis ADMINISTRADOR ou VENDEDOR";
 
     private static final String CORPO = "Campos da entidade do tipo informado (os nomes seguem as colunas da tabela). "

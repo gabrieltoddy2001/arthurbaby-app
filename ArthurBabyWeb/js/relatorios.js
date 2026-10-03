@@ -5,7 +5,6 @@
 
    let produtos = [];
    let pedidos = [];
-   let movimentacoes = [];
    let abaAtual = 'mais-vendidos';
    
    async function carregar() {
@@ -13,14 +12,12 @@
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
    
      try {
-       const [prods, peds, movs] = await Promise.all([
+       const [prods, peds] = await Promise.all([
          adminApi.listar('produtos'),
          adminApi.listar('pedidos'),
-         adminApi.listar('movimentacoes'),
        ]);
        produtos = prods;
        pedidos = peds;
-       movimentacoes = movs;
        renderTudo();
      } catch (err) {
        conteudo.innerHTML = `<div class="alert alert-erro">Erro: ${err.message}</div>`;
@@ -157,16 +154,10 @@
    function renderEstoqueBaixo() {
      const painel = document.getElementById('painel-relatorios');
    
-     // Calcula estoque atual por produto
-     const estoqueAtual = {};
-     movimentacoes.forEach(m => {
-       estoqueAtual[m.produtoId] = m.estoquePosterior ?? 0;
-     });
-   
      // Filtra produtos com estoque <= mínimo
      const criticos = produtos
        .map(p => {
-         const atual = estoqueAtual[p.id] ?? 0;
+         const atual = estoqueProduto(p);
          const minimo = p.estoqueMinimo || 0;
          return { p, atual, minimo };
        })

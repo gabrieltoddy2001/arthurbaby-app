@@ -11,5 +11,9 @@
         <item name="android:navigationBarColor">@color/branco</item>
         <item name="colorSurface">@color/branco</item>
         <item name="colorOnSurface">@color/texto_primario</item>
+
+        <!-- Ícones escuros na nav bar clara -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>

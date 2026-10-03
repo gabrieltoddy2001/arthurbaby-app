@@ -1,8 +1,6 @@
 package br.com.arthurbaby.fragments;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -87,13 +85,14 @@ public class DetalheProdutoFragment extends Fragment {
             tvPreco.setText(MoedaUtils.formatar(produto.getPreco()));
             tvEstrelas.setText("★★★★★");
             tvAvaliacao.setText("(5.0)");
-            img.setBackgroundColor(0xFFFAD1DE);
+
+            carregarImagem(img, produto.getImagemUrl());
 
             if (produto.getPreco().doubleValue() < 50 && produto.temEstoque()) {
                 tvPrecoAntigo.setVisibility(View.VISIBLE);
                 tvPrecoAntigo.setText(MoedaUtils.formatar(produto.getPreco().doubleValue() * 1.3));
                 tvPrecoAntigo.setPaintFlags(tvPrecoAntigo.getPaintFlags()
-                        | Paint.STRIKE_THRU_TEXT_FLAG);
+                        | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
             }
 
             boolean logado = AuthGuard.estaLogado(requireContext());
@@ -170,6 +169,7 @@ public class DetalheProdutoFragment extends Fragment {
                     TextView tvPreco = v.findViewById(R.id.tvPreco);
                     TextView tvDescricao = v.findViewById(R.id.tvDescricao);
                     TextView tvAvaliacao = v.findViewById(R.id.tvAvaliacao);
+                    ImageView img = v.findViewById(R.id.imgProduto);
 
                     tvNome.setText(atualizado.getNome());
                     tvDescricao.setText(atualizado.getDescricao());
@@ -177,6 +177,10 @@ public class DetalheProdutoFragment extends Fragment {
 
                     if (atualizado.getAvaliacao() > 0) {
                         tvAvaliacao.setText("(" + atualizado.getAvaliacao() + ".0)");
+                    }
+
+                    if (atualizado.getImagemUrl() != null && !atualizado.getImagemUrl().isEmpty()) {
+                        carregarImagem(img, atualizado.getImagemUrl());
                     }
 
                     desenharVariacoes(v);
@@ -188,6 +192,21 @@ public class DetalheProdutoFragment extends Fragment {
                 // Silencioso
             }
         });
+    }
+
+    private void carregarImagem(ImageView img, String url) {
+        if (url != null && !url.isEmpty()) {
+            com.bumptech.glide.Glide.with(this)
+                    .load(url)
+                    .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(300))
+                    .placeholder(R.drawable.bg_imagem_produto)
+                    .error(R.drawable.bg_imagem_produto)
+                    .fitCenter()
+                    .into(img);
+        } else {
+            img.setImageDrawable(null);
+            img.setBackgroundResource(R.drawable.bg_imagem_produto);
+        }
     }
 
     private void compartilharProduto() {
@@ -321,17 +340,21 @@ public class DetalheProdutoFragment extends Fragment {
         return chip;
     }
 
+    /**
+     * Aplica estilo do chip respeitando o modo claro/escuro.
+     */
     private void aplicarEstiloChip(TextView chip, boolean selecionado) {
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(dp(20));
+
         if (selecionado) {
-            bg.setColor(0xFF37B6B0);
-            bg.setStroke(dp(2), 0xFF37B6B0);
-            chip.setTextColor(Color.WHITE);
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado));
+            bg.setStroke(dp(2), ContextCompat.getColor(requireContext(), R.color.chip_selecionado));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado_texto));
         } else {
-            bg.setColor(0xFFF0F2F5);
-            bg.setStroke(dp(1), 0xFFE2E8F0);
-            chip.setTextColor(0xFF1E293B);
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_fundo));
+            bg.setStroke(dp(1), ContextCompat.getColor(requireContext(), R.color.chip_borda));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_texto));
         }
         chip.setBackground(bg);
     }

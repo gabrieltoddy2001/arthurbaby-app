@@ -6,15 +6,13 @@
     android:orientation="vertical"
     android:background="@color/fundo_claro">
 
-    <!-- CABEÇALHO COM GRADIENTE -->
+    <!-- CABEÇALHO -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
         android:background="@drawable/bg_gradiente_header">
 
         <ImageView
@@ -36,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:text="Meu Carrinho"
                 android:textColor="@color/branco"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -50,6 +48,7 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- ESTADO VAZIO -->
     <LinearLayout
         android:id="@+id/tvVazio"
         android:layout_width="match_parent"
@@ -115,7 +114,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/branco">
@@ -124,7 +123,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -132,20 +131,21 @@
                         android:text="Forma de recebimento"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="15sp" />
+                        android:textSize="14sp" />
 
                     <RadioGroup
                         android:id="@+id/rgRecebimento"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="6dp">
 
                         <RadioButton
                             android:id="@+id/rbRetirada"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Retirar na loja"
+                            android:textSize="13sp"
                             android:checked="true"
                             android:buttonTint="@color/rosa_arthur" />
 
@@ -154,6 +154,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Entrega"
+                            android:textSize="13sp"
                             android:buttonTint="@color/rosa_arthur"
                             android:layout_marginStart="16dp" />
                     </RadioGroup>
@@ -165,7 +166,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/branco">
@@ -174,7 +175,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -182,14 +183,14 @@
                         android:text="Cupom de desconto"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="15sp" />
+                        android:textSize="14sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginTop="8dp">
+                        android:layout_marginTop="6dp">
 
                         <EditText
                             android:id="@+id/etCupom"
@@ -200,7 +201,7 @@
                             android:background="@drawable/bg_contador_quantidade"
                             android:padding="12dp"
                             android:inputType="text"
-                            android:textSize="14sp" />
+                            android:textSize="13sp" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnAplicarCupom"
@@ -221,7 +222,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/branco">
@@ -230,7 +231,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -238,7 +239,7 @@
                         android:text="Observação"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="15sp" />
+                        android:textSize="14sp" />
 
                     <EditText
                         android:id="@+id/etObservacao"
@@ -250,8 +251,8 @@
                         android:inputType="textMultiLine"
                         android:minLines="2"
                         android:gravity="top"
-                        android:textSize="14sp"
-                        android:layout_marginTop="8dp" />
+                        android:textSize="13sp"
+                        android:layout_marginTop="6dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -260,7 +261,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 app:cardCornerRadius="18dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="@color/branco">
@@ -269,7 +270,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="14dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -280,32 +281,36 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Subtotal"
-                            android:textColor="@color/cinza_medio" />
+                            android:textColor="@color/cinza_medio"
+                            android:textSize="13sp" />
                         <TextView
                             android:id="@+id/tvSubtotal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="R$ 0,00"
-                            android:textColor="@color/texto_primario" />
+                            android:textColor="@color/texto_primario"
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="6dp">
+                        android:layout_marginTop="4dp">
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Frete"
-                            android:textColor="@color/cinza_medio" />
+                            android:textColor="@color/cinza_medio"
+                            android:textSize="13sp" />
                         <TextView
                             android:id="@+id/tvFrete"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="R$ 0,00"
-                            android:textColor="@color/texto_primario" />
+                            android:textColor="@color/texto_primario"
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -313,7 +318,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="6dp"
+                        android:layout_marginTop="4dp"
                         android:visibility="gone">
                         <TextView
                             android:layout_width="0dp"
@@ -321,21 +326,23 @@
                             android:layout_weight="1"
                             android:text="Desconto"
                             android:textColor="@color/verde_arthur"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:textSize="13sp" />
                         <TextView
                             android:id="@+id/tvDesconto"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="- R$ 0,00"
                             android:textColor="@color/verde_arthur"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/cinza_borda"
-                        android:layout_marginVertical="10dp" />
+                        android:layout_marginVertical="8dp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -347,7 +354,7 @@
                             android:layout_weight="1"
                             android:text="Total"
                             android:textStyle="bold"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textColor="@color/texto_primario" />
                         <TextView
                             android:id="@+id/tvTotal"
@@ -355,7 +362,7 @@
                             android:layout_height="wrap_content"
                             android:text="R$ 0,00"
                             android:textStyle="bold"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textColor="@color/rosa_arthur" />
                     </LinearLayout>
                 </LinearLayout>
@@ -363,20 +370,23 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="20dp" />
+                android:layout_height="16dp" />
         </LinearLayout>
     </ScrollView>
 
-    <!-- BOTÃO FINALIZAR COM GRADIENTE -->
+    <!-- BOTÃO FINALIZAR -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnFinalizar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_margin="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
         android:text="FINALIZAR PEDIDO"
         android:backgroundTint="@color/rosa_arthur"
         android:textColor="@color/branco"
         android:textStyle="bold"
+        android:textSize="14sp"
         app:cornerRadius="28dp"
         app:icon="@drawable/ic_check_circle"
         app:iconTint="@color/branco"

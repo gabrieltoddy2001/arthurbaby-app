@@ -62,12 +62,34 @@ public class Conversor {
     public static Produto paraProduto(ProdutoResponse p) {
         if (p == null) return null;
         String marca = (p.marca != null && !p.marca.isEmpty()) ? p.marca : "ArthurBaby";
+
+        // Pega a imagem principal
+        String imagemUrl = null;
+        if (p.imagens != null && !p.imagens.isEmpty()) {
+            // Procura a imagem principal
+            for (ProdutoResponse.ImagemResponse img : p.imagens) {
+                if (img.principal && img.url != null && !img.url.isEmpty()) {
+                    imagemUrl = img.url;
+                    break;
+                }
+            }
+            // Se não achou principal, usa a primeira
+            if (imagemUrl == null) {
+                for (ProdutoResponse.ImagemResponse img : p.imagens) {
+                    if (img.url != null && !img.url.isEmpty()) {
+                        imagemUrl = img.url;
+                        break;
+                    }
+                }
+            }
+        }
+
         Produto produto = new Produto(
                 p.id,
                 p.nome,
                 p.descricao,
                 p.precoPromocional != null ? p.precoPromocional : p.preco,
-                null,
+                imagemUrl,
                 10,
                 marca
         );
@@ -75,7 +97,7 @@ public class Conversor {
         // Avaliação
         produto.setAvaliacao(p.avaliacao);
 
-        // Imagens
+        // Imagens (lista)
         if (p.imagens != null) {
             List<String> urls = new ArrayList<>();
             for (ProdutoResponse.ImagemResponse img : p.imagens) {
@@ -92,14 +114,6 @@ public class Conversor {
                         v.id, v.sku, v.tamanho, v.cor, v.modelo, v.preco, v.estoqueAtual));
             }
             produto.setVariacoes(vars);
-
-            // Se tem variações, usa a primeira como estoque do produto
-            if (!vars.isEmpty()) {
-                int totalEstoque = 0;
-                for (Produto.VariacaoReal v : vars) totalEstoque += v.estoqueAtual;
-                // como não temos setter para estoque, o produto assume 10 por padrão.
-                // Se quiser, adicione setEstoque() no Produto.
-            }
         }
 
         return produto;

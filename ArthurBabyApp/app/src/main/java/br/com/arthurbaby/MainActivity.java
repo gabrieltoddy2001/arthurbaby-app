@@ -52,13 +52,10 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                // 1) Se tem fragment empilhado, volta
                 if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
                     getSupportFragmentManager().popBackStack();
                     return;
                 }
-
-                // 2) Se não está na Home, vai pra Home
                 Fragment atual = getSupportFragmentManager()
                         .findFragmentById(R.id.frameContainer);
                 if (!(atual instanceof HomeFragment)) {
@@ -66,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
                     bottomNav.setSelectedItemId(R.id.nav_home);
                     return;
                 }
-
-                // 3) Já está na Home, fecha o app
                 setEnabled(false);
                 getOnBackPressedDispatcher().onBackPressed();
             }
@@ -75,8 +70,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Limpa a pilha inteira e troca o fragment.
-     * Isso garante que ao mudar de aba, não acumule lixo.
+     * Troca o fragment com animação de fade.
      */
     private void trocarFragment(Fragment fragment) {
         getSupportFragmentManager().popBackStack(
@@ -84,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
+                .setCustomAnimations(
+                        R.anim.fade_in,
+                        R.anim.fade_out)
                 .replace(R.id.frameContainer, fragment)
                 .commit();
     }

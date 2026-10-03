@@ -24,20 +24,19 @@
       conteudo.innerHTML = '<div class="loading">Carregando indicadores...</div>';
 
       try {
-        const [produtos, pedidos, usuarios, movimentacoes] = await Promise.all([
+        const [produtos, pedidos, usuarios] = await Promise.all([
           adminApi.listar('produtos'),
           adminApi.listar('pedidos'),
           adminApi.listar('usuarios'),
-          adminApi.listar('movimentacoes'),
         ]);
 
-        renderDashboard(produtos, pedidos, usuarios, movimentacoes);
+        renderDashboard(produtos, pedidos, usuarios);
       } catch (err) {
         conteudo.innerHTML = `<div class="alert alert-erro">Erro: ${err.message}</div>`;
       }
     }
 
-    function renderDashboard(produtos, pedidos, usuarios, movimentacoes) {
+    function renderDashboard(produtos, pedidos, usuarios) {
       const conteudo = document.getElementById('conteudo');
 
       /* ===== KPIs ===== */
@@ -50,12 +49,8 @@
       ).length;
 
       /* ===== Estoque baixo ===== */
-      const estoqueAtual = {};
-      movimentacoes.forEach(m => {
-        estoqueAtual[m.produtoId] = m.estoquePosterior ?? 0;
-      });
       const produtosCriticos = produtos
-        .map(p => ({ p, atual: estoqueAtual[p.id] ?? 0, minimo: p.estoqueMinimo || 0 }))
+        .map(p => ({ p, atual: estoqueProduto(p), minimo: p.estoqueMinimo || 0 }))
         .filter(({ atual, minimo }) => atual <= minimo)
         .sort((a, b) => a.atual - b.atual)
         .slice(0, 5);
