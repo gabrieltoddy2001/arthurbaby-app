@@ -10,14 +10,33 @@ import java.math.BigDecimal;
 @Getter @Setter @Entity
 public class ProdutoVariacao {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-    // WRITE_ONLY: aceito na entrada (CRUD admin envia { "id": N }), mas omitido na saida para evitar referencia circular no JSON
-    @ManyToOne(optional = false) @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) private Produto produto;
+
+    @ManyToOne(optional = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Produto produto;
+
     @ManyToOne private Tamanho tamanho;
     @ManyToOne private Cor cor;
     @ManyToOne private Modelo modelo;
-    @Column(nullable = false, unique = true, length = 100) private String sku;
-    @Column(precision = 12, scale = 2) private BigDecimal preco;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String sku;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal preco;
+
     private int estoqueAtual;
     private int estoqueMinimo;
-    @Enumerated(EnumType.STRING) private VariacaoStatus status = VariacaoStatus.ATIVA;
+
+    @Enumerated(EnumType.STRING)
+    private VariacaoStatus status = VariacaoStatus.ATIVA;
+
+    /**
+     * Campo de controle de concorrência otimista.
+     * O JPA incrementa automaticamente a cada UPDATE.
+     * Se dois usuários tentarem alterar a mesma variação ao mesmo tempo,
+     * o segundo recebe OptimisticLockException — evitando estoque negativo.
+     */
+    @Version
+    private Long version;
 }
