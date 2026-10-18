@@ -18,4 +18,4 @@ public record PedidoRequest(
         @Schema(description = "Ignorado: o desconto é calculado a partir do cupom", example = "0", deprecated = true) BigDecimal desconto,
         @Schema(description = "Ignorado: o frete é calculado no servidor", example = "0", deprecated = true) BigDecimal frete,
         @Schema(description = "Observação do cliente para a loja", example = "Entregar após as 14h") String observacao,
-        @Schema(description = "Itens do pedido (ao menos um)") List<PedidoItemRequest> itens) {}
+        @Schema(description = "Itens selecionados no carrinho do app para esta compra (ao menos um); enviados diretamente na criação do pedido") List<PedidoItemRequest> itens) {}

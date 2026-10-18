@@ -22,7 +22,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/api/pedidos", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Pedidos", description = "Criação, consulta, alteração de status e cancelamento de pedidos. Exige token; clientes só acessam os próprios pedidos.")
+@Tag(name = "Pedidos", description = "Checkout, consulta, alteração de status e cancelamento de pedidos. Exige token; clientes só acessam os próprios pedidos. "
+        + "A API não mantém um carrinho separado: o app monta o carrinho e envia seus itens ao criar o pedido.")
 public class PedidoController {
     private static final String OUTRO_CLIENTE = "Acesso negado: pedido pertence a outro cliente";
 
@@ -30,7 +31,8 @@ public class PedidoController {
     public PedidoController(PedidoService service) { this.service = service; }
 
     @PostMapping
-    @Operation(summary = "Criar pedido", description = "Cria um novo pedido com os itens e dados fornecidos no corpo da requisição. "
+    @Operation(summary = "Criar pedido (finalizar carrinho)", description = "Use este endpoint para finalizar a compra: envie os produtos, variações escolhidas e quantidades do carrinho do app no campo \"itens\". "
+            + "Não existe endpoint separado de carrinho; este POST cria o pedido diretamente com os itens enviados. "
             + "Subtotal, desconto (somente via cupom), frete e total são recalculados no servidor: os campos \"desconto\" e \"frete\" enviados são ignorados. "
             + "Frete: retirada na loja = 0; entrega = R$ 15,00, grátis a partir de R$ 200,00 de subtotal ou com cupom FRETE_GRATIS.")
     @ApiResponses({
