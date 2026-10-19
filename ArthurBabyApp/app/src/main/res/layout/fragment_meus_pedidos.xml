@@ -32,6 +32,49 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/texto_primario" />
+
+        <!-- BOTÃO DE FILTRO -->
+        <ImageView
+            android:id="@+id/btnFiltrar"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_filtro"
+            app:tint="@color/texto_primario"
+            android:contentDescription="Filtrar" />
+    </LinearLayout>
+
+    <!-- BARRA DE FILTRO ATIVO -->
+    <LinearLayout
+        android:id="@+id/containerFiltro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:background="@color/branco"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvFiltroAtivo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Filtro ativo: ..."
+            android:textColor="@color/texto_primario"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/tvLimparFiltro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Limpar"
+            android:textColor="@color/rosa_arthur"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:padding="4dp" />
     </LinearLayout>
 
     <!-- PROGRESS BAR -->
@@ -44,7 +87,7 @@
         android:indeterminateTint="@color/verde_arthur"
         android:visibility="visible" />
 
-    <!-- ABAS + VIEWPAGER (inicia escondido) -->
+    <!-- ABAS + VIEWPAGER -->
     <LinearLayout
         android:id="@+id/containerPedidos"
         android:layout_width="match_parent"
@@ -68,5 +111,4 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
     </LinearLayout>
-
 </LinearLayout>

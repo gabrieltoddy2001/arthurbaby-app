@@ -19,10 +19,12 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.tags.Tag;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,6 +39,16 @@ import java.util.Map;
 public class OpenApiConfig {
     private static final String SECURITY_SCHEME_NAME = "bearerAuth";
     private static final String ERRO_SCHEMA = "ErroResponse";
+    private static final List<String> ORDEM_TAGS = List.of(
+            "Autenticação",
+            "Catálogo",
+            "Favoritos",
+            "Clientes",
+            "Cupons",
+            "Pedidos",
+            "Administração - Produtos",
+            "Administração - Estoque",
+            "Administração");
 
     /**
      * Mensagem de exemplo por código de erro. São as mesmas mensagens que o {@code ApiExceptionHandler}
@@ -59,7 +71,12 @@ public class OpenApiConfig {
                         .version("1.0.0")
                         .description("API REST da loja ArthurBaby: autenticação de clientes, perfil e endereços, "
                                 + "catálogo de produtos e estoque, pedidos, favoritos e administração.\n\n"
-                                + "**Autenticação:** faça login em `POST /api/auth/login`, copie o `token` da resposta "
+                                + "**Fluxo sugerido:** autentique-se em `POST /api/auth/login`; consulte o catálogo "
+                                + "e escolha produto, variação e quantidade; mantenha o carrinho no app e, ao concluir "
+                                + "a compra, envie os itens em `POST /api/pedidos`. A API não possui endpoints para "
+                                + "criar ou consultar um carrinho separado. A validação opcional do cupom é feita em "
+                                + "`POST /api/cupons/validar`; o pedido recalcula os valores no servidor.\n\n"
+                                + "**Autenticação:** copie o `token` da resposta do login "
                                 + "e informe-o no botão **Authorize** (sem o prefixo `Bearer`).\n\n"
                                 + "**Formato:** todas as requisições e respostas usam `application/json`.\n\n"
                                 + "**Erros:** todas as respostas de erro seguem o formato "
@@ -73,6 +90,24 @@ public class OpenApiConfig {
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")));
+    }
+
+    /** Mantém as seções do Swagger na ordem do fluxo da loja, em vez da ordem alfabética. */
+    @Bean
+    OpenApiCustomizer ordenarTagsPorFluxoDeUso() {
+        return openApi -> {
+            List<Tag> tags = openApi.getTags();
+            if (tags == null) return;
+
+            Map<String, Integer> posicao = new LinkedHashMap<>();
+            for (int i = 0; i < ORDEM_TAGS.size(); i++) {
+                posicao.put(ORDEM_TAGS.get(i), i);
+            }
+            openApi.setTags(new ArrayList<>(tags.stream()
+                    .sorted(Comparator.comparingInt(tag ->
+                            posicao.getOrDefault(tag.getName(), ORDEM_TAGS.size())))
+                    .toList()));
+        };
     }
 
     /**

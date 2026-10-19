@@ -9,11 +9,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -22,7 +24,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value = "/api/pedidos", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Pedidos", description = "Criação, consulta, alteração de status e cancelamento de pedidos. Exige token; clientes só acessam os próprios pedidos.")
+@Tag(name = "Pedidos", description = "Checkout, consulta, alteração de status e cancelamento de pedidos. Exige token; clientes só acessam os próprios pedidos. "
+        + "A API não mantém um carrinho separado: o app monta o carrinho e envia seus itens ao criar o pedido.")
 public class PedidoController {
     private static final String OUTRO_CLIENTE = "Acesso negado: pedido pertence a outro cliente";
 
@@ -30,7 +33,8 @@ public class PedidoController {
     public PedidoController(PedidoService service) { this.service = service; }
 
     @PostMapping
-    @Operation(summary = "Criar pedido", description = "Cria um novo pedido com os itens e dados fornecidos no corpo da requisição. "
+    @Operation(summary = "Criar pedido (finalizar carrinho)", description = "Use este endpoint para finalizar a compra: envie os produtos, variações escolhidas e quantidades do carrinho do app no campo \"itens\". "
+            + "Não existe endpoint separado de carrinho; este POST cria o pedido diretamente com os itens enviados. "
             + "Subtotal, desconto (somente via cupom), frete e total são recalculados no servidor: os campos \"desconto\" e \"frete\" enviados são ignorados. "
             + "Frete: retirada na loja = 0; entrega = R$ 15,00, grátis a partir de R$ 200,00 de subtotal ou com cupom FRETE_GRATIS.")
     @ApiResponses({
@@ -39,7 +43,6 @@ public class PedidoController {
             @ApiResponse(responseCode = "403", description = "Acesso negado: cliente só cria pedidos para si mesmo")
     })
     public PedidoResponse criar(@RequestBody PedidoRequest request, @AuthenticationPrincipal Usuario logado) {
-        // Cliente comum só pode criar pedido em nome próprio; equipe da loja pode criar para qualquer cliente
         boolean equipeLoja = logado.getPerfil() == Perfil.ADMINISTRADOR || logado.getPerfil() == Perfil.VENDEDOR;
         if (!equipeLoja && !logado.getId().equals(request.clienteId())) {
             throw new AccessDeniedException("Cliente so pode criar pedidos para si mesmo");
@@ -70,13 +73,18 @@ public class PedidoController {
     }
 
     @GetMapping("/cliente/{id}")
-    @Operation(summary = "Listar pedidos do cliente", description = "Retorna todos os pedidos do cliente identificado pelo id informado.")
+    @Operation(summary = "Listar pedidos do cliente", description = "Retorna todos os pedidos do cliente identificado pelo id informado, com filtros opcionais por status e período.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de pedidos do cliente, do mais recente para o mais antigo"),
             @ApiResponse(responseCode = "403", description = "Acesso negado: pedidos de outro cliente")
     })
-    public List<PedidoResponse> porCliente(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @AuthenticationPrincipal Usuario logado) {
-        return service.listarPorCliente(id, logado);
+    public List<PedidoResponse> porCliente(
+            @Parameter(description = "Id do cliente", example = "3") @PathVariable Long id,
+            @Parameter(description = "Status do pedido (opcional)", example = "ENTREGUE") @RequestParam(required = false) String status,
+            @Parameter(description = "Data inicial (AAAA-MM-DD, opcional)", example = "2026-09-01") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @Parameter(description = "Data final (AAAA-MM-DD, opcional)", example = "2026-09-30") @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            @AuthenticationPrincipal Usuario logado) {
+        return service.listarPorClienteFiltrado(id, status, dataInicio, dataFim, logado);
     }
 
     @PutMapping("/{id}/status")
