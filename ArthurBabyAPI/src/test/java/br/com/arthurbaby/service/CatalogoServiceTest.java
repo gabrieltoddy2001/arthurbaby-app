@@ -11,6 +11,7 @@ import br.com.arthurbaby.entity.Produto;
 import br.com.arthurbaby.entity.ProdutoImagem;
 import br.com.arthurbaby.entity.ProdutoVariacao;
 import br.com.arthurbaby.entity.Tamanho;
+import br.com.arthurbaby.repository.AvaliacaoRepository;
 import br.com.arthurbaby.repository.CategoriaRepository;
 import br.com.arthurbaby.repository.MovimentacaoEstoqueRepository;
 import br.com.arthurbaby.repository.ProdutoImagemRepository;
@@ -35,6 +36,7 @@ class CatalogoServiceTest {
     private ProdutoRepository produtos;
     private ProdutoImagemRepository imagens;
     private ProdutoVariacaoRepository variacoes;
+    private AvaliacaoRepository avaliacoes;
     private CatalogoService service;
 
     @BeforeEach
@@ -43,7 +45,8 @@ class CatalogoServiceTest {
         produtos = mock(ProdutoRepository.class);
         imagens = mock(ProdutoImagemRepository.class);
         variacoes = mock(ProdutoVariacaoRepository.class);
-        service = new CatalogoService(categorias, produtos, imagens, variacoes, mock(MovimentacaoEstoqueRepository.class));
+        avaliacoes = mock(AvaliacaoRepository.class);
+        service = new CatalogoService(categorias, produtos, imagens, variacoes, mock(MovimentacaoEstoqueRepository.class), avaliacoes);
     }
 
     @Test
@@ -116,6 +119,21 @@ class CatalogoServiceTest {
         assertEquals("Azul", response.variacoes().getFirst().cor());
         assertEquals("Classico", response.variacoes().getFirst().modelo());
         assertEquals(4, response.variacoes().getFirst().estoqueAtual());
+    }
+
+    @Test
+    void detalheUsaMediaDasAvaliacoesComUmaCasaDecimal() {
+        Produto produto = new Produto();
+        produto.setId(11L);
+        produto.setAvaliacao(new BigDecimal("5.0")); // valor antigo da coluna nao deve ser usado no detalhe
+        when(produtos.findById(11L)).thenReturn(Optional.of(produto));
+        when(avaliacoes.calcularMediaAvaliacoesByProdutoId(11L)).thenReturn(4.5);
+
+        assertEquals(new BigDecimal("4.5"), service.detalhe(11L).avaliacao());
+
+        // Sem avaliacoes o repositorio devolve 0.0 (COALESCE) e o detalhe mostra 0.0
+        when(avaliacoes.calcularMediaAvaliacoesByProdutoId(11L)).thenReturn(0.0);
+        assertEquals(new BigDecimal("0.0"), service.detalhe(11L).avaliacao());
     }
 
     @Test

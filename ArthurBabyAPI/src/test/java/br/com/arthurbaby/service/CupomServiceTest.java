@@ -1,5 +1,6 @@
 package br.com.arthurbaby.service;
 
+import br.com.arthurbaby.dto.CupomResponse;
 import br.com.arthurbaby.dto.CupomValidacaoResponse;
 import br.com.arthurbaby.entity.Cupom;
 import br.com.arthurbaby.entity.Enums.TipoCupom;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +30,26 @@ class CupomServiceTest {
     void setUp() {
         cupons = mock(CupomRepository.class);
         service = new CupomService(cupons);
+    }
+
+    @Test
+    void listarAtivosMapeiaCuponsVigentesDoRepositorio() {
+        Cupom percentual = cupom("ARTHUR10", TipoCupom.PERCENTUAL, "10.00");
+        percentual.setDescricao("10% de desconto em todo o site");
+        percentual.setValidoAte(LocalDateTime.of(2026, 12, 31, 23, 59, 59));
+        Cupom frete = cupom("FRETEGRATIS", TipoCupom.FRETE_GRATIS, null);
+        when(cupons.findCuponsAtivos(any(LocalDateTime.class))).thenReturn(List.of(percentual, frete));
+
+        List<CupomResponse> ativos = service.listarAtivos();
+
+        assertEquals(2, ativos.size());
+        assertEquals("ARTHUR10", ativos.get(0).codigo());
+        assertEquals("PERCENTUAL", ativos.get(0).tipo());
+        assertEquals(new BigDecimal("10.00"), ativos.get(0).valor());
+        assertEquals(LocalDateTime.of(2026, 12, 31, 23, 59, 59), ativos.get(0).validoAte());
+        // FRETE_GRATIS sem valor e sem data limite: valor 0 e validoAte nulo
+        assertEquals(BigDecimal.ZERO, ativos.get(1).valor());
+        assertNull(ativos.get(1).validoAte());
     }
 
     @Test

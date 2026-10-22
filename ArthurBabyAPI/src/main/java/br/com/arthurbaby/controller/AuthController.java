@@ -3,6 +3,7 @@ package br.com.arthurbaby.controller;
 import br.com.arthurbaby.dto.*;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.service.AuthService;
+import br.com.arthurbaby.service.ClienteService;
 import br.com.arthurbaby.service.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Endpoints de autenticação. Login, cadastro e recuperação de senha são públicos;
- * {@code /me} exige o token JWT no cabeçalho Authorization.
+ * {@code /me} e {@code /alterar-senha} exigem o token JWT no cabeçalho Authorization.
  */
 @RestController
 @RequestMapping(value = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -26,9 +27,11 @@ public class AuthController {
 
     private final AuthService auth;
     private final PasswordResetService passwordReset;
-    public AuthController(AuthService auth, PasswordResetService passwordReset) {
+    private final ClienteService clientes;
+    public AuthController(AuthService auth, PasswordResetService passwordReset, ClienteService clientes) {
         this.auth = auth;
         this.passwordReset = passwordReset;
+        this.clientes = clientes;
     }
 
     @PostMapping("/login")
@@ -78,5 +81,19 @@ public class AuthController {
     })
     public void redefinirSenha(@RequestBody RedefinirSenhaRequest request) {
         passwordReset.redefinirSenha(request.token(), request.novaSenha());
+    }
+
+    @PutMapping("/alterar-senha")
+    @Operation(summary = "Alterar senha do usuário logado", description = "Troca a senha do dono do token JWT (tela de Perfil). "
+            + "Confere a senha atual com a gravada no banco e exige nova senha com no mínimo 4 caracteres.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "{ \"mensagem\": \"" + ClienteController.MENSAGEM_SENHA_ALTERADA + "\" }"),
+            @ApiResponse(responseCode = "400", description = "Senha atual incorreta ou nova senha com menos de 4 caracteres"),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou expirado")
+    })
+    public MensagemResponse alterarSenha(@RequestBody AlterarSenhaRequest request, @AuthenticationPrincipal Usuario logado) {
+        // O id vem do proprio token: o usuario so consegue trocar a propria senha
+        clientes.alterarSenha(logado.getId(), request);
+        return new MensagemResponse(ClienteController.MENSAGEM_SENHA_ALTERADA);
     }
 }

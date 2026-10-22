@@ -1,5 +1,6 @@
 package br.com.arthurbaby.service;
 
+import br.com.arthurbaby.dto.CupomResponse;
 import br.com.arthurbaby.dto.CupomValidacaoResponse;
 import br.com.arthurbaby.entity.Cupom;
 import br.com.arthurbaby.entity.Enums.TipoCupom;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -41,6 +43,16 @@ public class CupomService {
         Aplicacao aplicacao = calcular(cupom, subtotal);
         return new CupomValidacaoResponse(true, cupom.getCodigo(), cupom.getTipo().name(), cupom.getDescricao(),
                 aplicacao.desconto(), aplicacao.freteGratis(), null);
+    }
+
+    /**
+     * Tela "Meus Cupons": cupons ativos e dentro da validade neste momento.
+     * O filtro de data e feito no banco (CupomRepository#findCuponsAtivos); subtotal minimo nao entra aqui
+     * porque depende do carrinho e e conferido no /validar e na criacao do pedido.
+     */
+    @Transactional(readOnly = true)
+    public List<CupomResponse> listarAtivos() {
+        return cupons.findCuponsAtivos(LocalDateTime.now()).stream().map(CupomResponse::de).toList();
     }
 
     /** Usado na criacao do pedido: cupom inexistente ou nao aplicavel gera 400. */

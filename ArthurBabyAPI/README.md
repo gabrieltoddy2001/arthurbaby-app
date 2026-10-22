@@ -159,6 +159,30 @@ cupom inexistente, inativo ou expirado retorna `400`. Sem cupom, vale o `descont
 Cancelamento: exige motivo, nao permite cancelar pedido ja cancelado ou entregue, registra o historico e estorna
 o estoque (`MovimentacaoEstoque` do tipo `ESTORNO`). Cliente so ve/cancela os proprios pedidos (`403` caso contrario).
 
+## Perfil: alterar senha, cupons e avaliacoes
+
+```bash
+# Alterar senha do usuario logado (o id vem do token). Tambem existe PUT /api/clientes/{id}/senha
+curl -X PUT http://localhost:8080/api/auth/alterar-senha \
+  -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" \
+  -d '{"senhaAtual": "123456", "novaSenha": "novaSenha123"}'
+# 200 {"mensagem":"Senha alterada com sucesso."} | 400 "Senha atual incorreta" ou nova senha < 4 caracteres
+
+# Cupons ativos e dentro da validade (publico)
+curl http://localhost:8080/api/cupons/ativos
+
+# Avaliacoes do produto (publico) e nova avaliacao (exige token)
+curl http://localhost:8080/api/produtos/1/avaliacoes
+curl -X POST http://localhost:8080/api/produtos/1/avaliacoes \
+  -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" \
+  -d '{"nota": 5, "comentario": "Tecido muito macio, amei!"}'
+```
+
+Regras da avaliacao: nota de 1 a 5, uma por cliente/produto e so para quem tem um pedido **ENTREGUE**
+com o produto (para testar, mude o status do pedido com `PUT /api/pedidos/{id}/status` logado como admin).
+O campo `avaliacao` de `GET /api/produtos/{id}` passa a ser a media das notas (0.0 sem avaliacoes).
+A tabela `avaliacao` e criada sozinha ao subir a API.
+
 ## Painel admin: estoque e auditoria
 
 O estoque fica em cada **variacao** do produto (tamanho/cor/modelo). O saldo do produto e a soma das variacoes.

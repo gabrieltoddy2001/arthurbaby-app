@@ -207,6 +207,23 @@ CREATE TABLE IF NOT EXISTS favorito (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
+-- avaliacao (nota 1 a 5 + comentario; um cliente avalia cada produto
+--   uma unica vez). A media aparece em GET /api/produtos/{id}.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS avaliacao (
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    produto_id    BIGINT    NOT NULL,
+    cliente_id    BIGINT    NOT NULL,
+    nota          INT       NOT NULL,
+    comentario    TEXT      NULL,
+    criado_em     DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_avaliacao_nota CHECK (nota BETWEEN 1 AND 5),
+    CONSTRAINT uk_cliente_produto UNIQUE (cliente_id, produto_id),
+    CONSTRAINT fk_avaliacao_produto FOREIGN KEY (produto_id) REFERENCES produto (id) ON DELETE CASCADE,
+    CONSTRAINT fk_avaliacao_cliente FOREIGN KEY (cliente_id) REFERENCES usuario (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
 -- movimentacao_estoque
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS movimentacao_estoque (

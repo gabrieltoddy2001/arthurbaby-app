@@ -1,5 +1,6 @@
 package br.com.arthurbaby.service;
 
+import br.com.arthurbaby.dto.AlterarSenhaRequest;
 import br.com.arthurbaby.dto.AtualizarClienteRequest;
 import br.com.arthurbaby.dto.EnderecoRequest;
 import br.com.arthurbaby.dto.EnderecoResponse;
@@ -10,6 +11,8 @@ import br.com.arthurbaby.repository.EnderecoRepository;
 import br.com.arthurbaby.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,6 +31,7 @@ import static org.mockito.Mockito.when;
 class ClienteServiceTest {
     private UsuarioRepository usuarios;
     private EnderecoRepository enderecos;
+    private PasswordEncoder encoder;
     private ClienteService service;
     private Usuario cliente;
 
@@ -35,7 +39,8 @@ class ClienteServiceTest {
     void setUp() {
         usuarios = mock(UsuarioRepository.class);
         enderecos = mock(EnderecoRepository.class);
-        service = new ClienteService(usuarios, enderecos);
+        encoder = new BCryptPasswordEncoder();
+        service = new ClienteService(usuarios, enderecos, encoder);
         cliente = new Usuario();
         cliente.setId(4L);
         cliente.setNomeCompleto("Ana Lima");
@@ -67,6 +72,50 @@ class ClienteServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.atualizarPerfil(4L,
                 new AtualizarClienteRequest(null, "ocupado@example.com", null, null)));
         verify(usuarios, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    void alterarSenhaGravaNovaSenhaCriptografada() {
+        cliente.setSenha(encoder.encode("admin123"));
+
+        service.alterarSenha(4L, new AlterarSenhaRequest("admin123", "novaSenha123"));
+
+        assertTrue(encoder.matches("novaSenha123", cliente.getSenha()));
+        assertFalse(cliente.getSenha().contains("novaSenha123")); // nunca em texto puro
+        verify(usuarios).save(cliente);
+    }
+
+    @Test
+    void alterarSenhaRejeitaSenhaAtualIncorreta() {
+        cliente.setSenha(encoder.encode("admin123"));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.alterarSenha(4L, new AlterarSenhaRequest("errada", "novaSenha123")));
+
+        assertEquals("Senha atual incorreta", ex.getMessage());
+        verify(usuarios, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    void alterarSenhaRejeitaNovaSenhaCurtaOuVazia() {
+        cliente.setSenha(encoder.encode("admin123"));
+
+        IllegalArgumentException curta = assertThrows(IllegalArgumentException.class,
+                () -> service.alterarSenha(4L, new AlterarSenhaRequest("admin123", "abc")));
+        assertEquals("A nova senha deve possuir no mínimo 4 caracteres.", curta.getMessage());
+        assertThrows(IllegalArgumentException.class,
+                () -> service.alterarSenha(4L, new AlterarSenhaRequest("admin123", "    ")));
+        assertThrows(IllegalArgumentException.class,
+                () -> service.alterarSenha(4L, new AlterarSenhaRequest("admin123", null)));
+        verify(usuarios, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    void alterarSenhaDeClienteInexistenteDa404() {
+        when(usuarios.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class,
+                () -> service.alterarSenha(99L, new AlterarSenhaRequest("admin123", "novaSenha123")));
     }
 
     @Test
