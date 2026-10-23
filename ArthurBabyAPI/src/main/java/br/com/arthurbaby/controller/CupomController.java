@@ -3,6 +3,7 @@ package br.com.arthurbaby.controller;
 import br.com.arthurbaby.dto.CupomResponse;
 import br.com.arthurbaby.dto.CupomValidacaoRequest;
 import br.com.arthurbaby.dto.CupomValidacaoResponse;
+import br.com.arthurbaby.repository.CupomRepository;
 import br.com.arthurbaby.service.CupomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,30 +12,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Cupons para o app: lista dos vigentes ("Meus Cupons") e prévia de desconto no carrinho.
- * O valor definitivo do desconto é sempre recalculado ao criar o pedido.
- */
+/** Prévia de cupom para o carrinho do app; o valor definitivo é recalculado ao criar o pedido. */
 @RestController
 @RequestMapping(value = "/api/cupons", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Cupons", description = "Listagem e validação de cupons de desconto cadastrados pelo admin. Endpoints públicos.")
+@Tag(name = "Cupons", description = "Validação e listagem de cupons de desconto. Endpoint público.")
 public class CupomController {
     private final CupomService service;
+    private final CupomRepository repository;
 
-    public CupomController(CupomService service) {
+    public CupomController(CupomService service, CupomRepository repository) {
         this.service = service;
-    }
-
-    @GetMapping("/ativos")
-    @Operation(summary = "Listar cupons ativos", description = "Retorna os cupons ativos e dentro da validade agora (validoDe já alcançado e validoAte "
-            + "não vencido; datas nulas não limitam). Usado na tela \"Meus Cupons\" do app.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Lista de cupons vigentes (vazia se não houver)")
-    })
-    public List<CupomResponse> ativos() {
-        return service.listarAtivos();
+        this.repository = repository;
     }
 
     @PostMapping("/validar")
@@ -46,5 +37,23 @@ public class CupomController {
     })
     public CupomValidacaoResponse validar(@RequestBody CupomValidacaoRequest request) {
         return service.validar(request.codigo(), request.subtotal());
+    }
+
+    @GetMapping("/ativos")
+    @Operation(summary = "Listar cupons ativos", description = "Retorna todos os cupons ativos e dentro do prazo de validade para exibição no app.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de cupons válidos")
+    })
+    public List<CupomResponse> listarAtivos() {
+        return repository.findCuponsAtivos(LocalDateTime.now())
+                .stream()
+                .map(c -> new CupomResponse(
+                        c.getCodigo(),
+                        c.getDescricao(),
+                        c.getTipo().name(),
+                        c.getValor(),
+                        c.getValidoAte()
+                ))
+                .toList();
     }
 }
