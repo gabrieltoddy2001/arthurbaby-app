@@ -106,6 +106,7 @@ public class AdminCrudService {
         RecursoAdmin recurso = recurso(tipo);
         Object entity = mapper.convertValue(body, recurso.entityClass());
         prepararUsuario(entity, null);
+        prepararProduto(entity, null);
         return json(recurso.repository().save(entity));
     }
 
@@ -119,6 +120,7 @@ public class AdminCrudService {
         Object entity = mapper.convertValue(body, recurso.entityClass());
         new BeanWrapperImpl(entity).setPropertyValue("id", id);
         prepararUsuario(entity, existente);
+        prepararProduto(entity, existente);
         return json(recurso.repository().save(entity));
     }
 
@@ -144,6 +146,20 @@ public class AdminCrudService {
             if (existente instanceof Usuario atual) usuario.setSenha(atual.getSenha());
         } else if (!BCRYPT.matcher(senha).matches()) {
             usuario.setSenha(encoder.encode(senha));
+        }
+    }
+
+    /**
+     * Produto com imagens/variacoes aninhadas: o JSON nao traz a referencia de volta (campo WRITE_ONLY),
+     * entao cada filho e ligado ao produto aqui. Na edicao, mantem campos que o painel nao envia.
+     */
+    private void prepararProduto(Object entity, Object existente) {
+        if (!(entity instanceof Produto produto)) return;
+        produto.getImagens().forEach(imagem -> imagem.setProduto(produto));
+        produto.getVariacoes().forEach(variacao -> variacao.setProduto(produto));
+        if (existente instanceof Produto atual) {
+            produto.setCriadoEm(atual.getCriadoEm());
+            if (produto.getAvaliacao() == null) produto.setAvaliacao(atual.getAvaliacao());
         }
     }
 

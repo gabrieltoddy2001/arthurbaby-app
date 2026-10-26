@@ -43,8 +43,16 @@
        if (idUrl) {
          editando = produtos.find(p => p.id === idUrl) || null;
          if (editando) {
+           // A API devolve relacionamentos como objeto ({ categoria: { id } }); o formulário trabalha com ids.
+           editando.categoriaId = editando.categoria?.id ?? editando.categoriaId ?? null;
+           editando.marcaId = editando.marca?.id ?? editando.marcaId ?? null;
            imagens = [...(editando.imagens || [])];
-           variacoes = [...(editando.variacoes || [])];
+           variacoes = (editando.variacoes || []).map(v => ({
+             ...v,
+             tamanhoId: v.tamanho?.id ?? v.tamanhoId ?? null,
+             corId: v.cor?.id ?? v.corId ?? null,
+             modeloId: v.modelo?.id ?? v.modeloId ?? null,
+           }));
          }
        }
    
@@ -402,10 +410,11 @@
      btn.textContent = 'Salvando...';
    
      try {
+       const payload = MOCK ? body : paraEntidade(body);
        if (editando) {
-         await adminApi.atualizar('produtos', editando.id, body);
+         await adminApi.atualizar('produtos', editando.id, payload);
        } else {
-         await adminApi.criar('produtos', body);
+         await adminApi.criar('produtos', payload);
        }
        window.location.href = 'produtos.html';
      } catch (err) {
@@ -414,6 +423,35 @@
      }
    }
    
+   /* O CRUD genérico da API recebe a entidade Produto: relacionamentos vão como { id }. */
+   function paraEntidade(body) {
+     const ref = (id) => (id ? { id } : null);
+     const { categoriaId, marcaId, ...resto } = body;
+     return {
+       ...resto,
+       categoria: ref(categoriaId),
+       marca: ref(marcaId),
+       imagens: body.imagens.map((img, i) => ({
+         id: img.id ?? null,
+         url: img.url.trim(),
+         descricao: img.descricao || null,
+         ordemExibicao: i + 1,
+         principal: !!img.principal,
+       })),
+       variacoes: body.variacoes.map(v => ({
+         id: v.id ?? null,
+         sku: v.sku.trim(),
+         tamanho: ref(v.tamanhoId),
+         cor: ref(v.corId),
+         modelo: ref(v.modeloId),
+         preco: v.preco ?? null,
+         estoqueAtual: v.estoqueAtual || 0,
+         estoqueMinimo: v.estoqueMinimo || 0,
+         ...(v.status ? { status: v.status } : {}),
+       })),
+     };
+   }
+
    function voltar() {
      window.location.href = 'produtos.html';
    }
