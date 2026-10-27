@@ -8,10 +8,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * Endpoints de autenticação. Login, cadastro e recuperação de senha são públicos;
@@ -26,6 +32,7 @@ public class AuthController {
 
     private final AuthService auth;
     private final PasswordResetService passwordReset;
+
     public AuthController(AuthService auth, PasswordResetService passwordReset) {
         this.auth = auth;
         this.passwordReset = passwordReset;
@@ -78,5 +85,28 @@ public class AuthController {
     })
     public void redefinirSenha(@RequestBody RedefinirSenhaRequest request) {
         passwordReset.redefinirSenha(request.token(), request.novaSenha());
+    }
+
+    @PutMapping("/alterar-senha")
+    @Operation(summary = "Alterar senha logado", description = "Permite que o usuário autenticado altere sua própria senha informando a atual.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Senha atual incorreta ou nova senha inválida"),
+            @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    })
+    public ResponseEntity<?> alterarSenha(@RequestBody @Valid AlterarSenhaRequest request) {
+        // Pega o usuário logado diretamente do contexto do Spring Security.
+        // Isso evita o problema do @AuthenticationPrincipal vir nulo se o filtro não configurar o UserDetails.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof Usuario)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("erro", "Usuário não autenticado ou token inválido."));
+        }
+
+        Usuario logado = (Usuario) authentication.getPrincipal();
+        auth.alterarSenha(logado.getId(), request);
+
+        return ResponseEntity.ok(Map.of("mensagem", "Senha alterada com sucesso."));
     }
 }

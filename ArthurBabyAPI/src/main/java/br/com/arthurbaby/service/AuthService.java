@@ -7,15 +7,18 @@ import br.com.arthurbaby.repository.UsuarioRepository;
 import br.com.arthurbaby.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 
 @Service
 public class AuthService {
     private final UsuarioRepository usuarios;
     private final PasswordEncoder encoder;
     private final JwtService jwt;
+
     public AuthService(UsuarioRepository usuarios, PasswordEncoder encoder, JwtService jwt) {
         this.usuarios = usuarios;
         this.encoder = encoder;
@@ -77,6 +80,19 @@ public class AuthService {
 
         usuarios.save(usuario);
         return new AuthResponse(jwt.gerarToken(usuario), usuario.getId(), usuario.getNomeCompleto(), usuario.getPerfil().name());
+    }
+
+    @Transactional
+    public void alterarSenha(Long usuarioId, AlterarSenhaRequest request) {
+        Usuario usuario = usuarios.findById(usuarioId)
+                .orElseThrow(() -> new NoSuchElementException("Usuario nao encontrado"));
+
+        if (!encoder.matches(request.senhaAtual(), usuario.getSenha())) {
+            throw new IllegalArgumentException("Senha atual incorreta");
+        }
+
+        usuario.setSenha(encoder.encode(request.novaSenha()));
+        usuarios.save(usuario);
     }
 
     static String normalizarEmail(String email) {

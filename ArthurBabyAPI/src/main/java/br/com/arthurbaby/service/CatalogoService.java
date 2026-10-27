@@ -13,6 +13,7 @@ import br.com.arthurbaby.entity.Enums.VariacaoStatus;
 import br.com.arthurbaby.entity.Marca;
 import br.com.arthurbaby.entity.Produto;
 import br.com.arthurbaby.entity.ProdutoVariacao;
+import br.com.arthurbaby.repository.AvaliacaoRepository;
 import br.com.arthurbaby.repository.CategoriaRepository;
 import br.com.arthurbaby.repository.MovimentacaoEstoqueRepository;
 import br.com.arthurbaby.repository.ProdutoImagemRepository;
@@ -35,13 +36,16 @@ public class CatalogoService {
     private final ProdutoImagemRepository imagens;
     private final ProdutoVariacaoRepository variacoes;
     private final MovimentacaoEstoqueRepository movimentos;
+    private final AvaliacaoRepository avaliacoes;
     public CatalogoService(CategoriaRepository categorias, ProdutoRepository produtos, ProdutoImagemRepository imagens,
-                           ProdutoVariacaoRepository variacoes, MovimentacaoEstoqueRepository movimentos) {
+                           ProdutoVariacaoRepository variacoes, MovimentacaoEstoqueRepository movimentos,
+                           AvaliacaoRepository avaliacoes) {
         this.categorias = categorias;
         this.produtos = produtos;
         this.imagens = imagens;
         this.variacoes = variacoes;
         this.movimentos = movimentos;
+        this.avaliacoes = avaliacoes;
     }
 
     /** Arvore de categorias ativas: raizes com suas subcategorias ativas, na ordem de exibicao. */
@@ -77,6 +81,7 @@ public class CatalogoService {
         return produtos.findAll(spec, pageable).map(ProdutoResumoResponse::de);
     }
 
+    /** Detalhe do produto; o campo avaliacao e a media das notas da tabela avaliacao, calculada na hora (0.0 sem notas). */
     @Transactional(readOnly = true)
     public ProdutoDetalheResponse detalhe(Long id) {
         Produto produto = produtos.findById(id).orElseThrow(() -> new NoSuchElementException("Produto nao encontrado"));
@@ -88,7 +93,7 @@ public class CatalogoService {
                 produto.getStatus().name(),
                 categoria != null ? categoria.getId() : null, categoria != null ? categoria.getNome() : null,
                 marca != null ? marca.getId() : null, marca != null ? marca.getNome() : null,
-                produto.getAvaliacao(),
+                AvaliacaoService.arredondarMedia(avaliacoes.calcularMediaAvaliacoesByProdutoId(id)),
                 imagens.findByProdutoIdOrderByOrdemExibicaoAsc(id).stream().map(ImagemResponse::de).toList(),
                 variacoes.findByProdutoIdAndStatus(id, VariacaoStatus.ATIVA).stream().map(CatalogoService::toVariacao).toList());
     }

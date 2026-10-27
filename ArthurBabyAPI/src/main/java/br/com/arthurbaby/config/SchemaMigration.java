@@ -35,7 +35,9 @@ public class SchemaMigration implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         migrarCupomPercentualParaTipoValor();
-        alinharFkPasswordResetTokenNoMysql();
+        alinharFkNoMysql("password_reset_token", "usuario_id", "usuario", "fk_password_reset_token_usuario");
+        alinharFkNoMysql("avaliacao", "produto_id", "produto", "fk_avaliacao_produto");
+        alinharFkNoMysql("avaliacao", "cliente_id", "usuario", "fk_avaliacao_cliente");
     }
 
     /** Cupom antigo (so percentual_desconto NOT NULL) vira PERCENTUAL com valor = percentual; a coluna antiga sai. */
@@ -48,24 +50,26 @@ public class SchemaMigration implements CommandLineRunner {
     }
 
     /**
-     * Bancos criados pelo script arthurbaby_bd.sql usam usuario.id BIGINT UNSIGNED; o Hibernate cria
-     * password_reset_token.usuario_id como BIGINT e o MySQL recusa a FK. Aqui a coluna e alinhada e a FK criada.
+     * Bancos criados pelo script arthurbaby_bd.sql usam ids BIGINT UNSIGNED (usuario, produto...); o Hibernate cria
+     * as colunas de FK das tabelas novas (password_reset_token, avaliacao) como BIGINT e o MySQL recusa a FK.
+     * Aqui a coluna e alinhada ao tipo do id referenciado e a FK (ON DELETE CASCADE) e criada se ainda faltar.
+     * Os nomes de tabela/coluna sao constantes do proprio codigo (nunca vem de fora), por isso podem ir no SQL.
      */
-    private void alinharFkPasswordResetTokenNoMysql() throws SQLException {
-        if (!mysql() || !colunaExiste("password_reset_token", "usuario_id")) return;
-        String tipoUsuarioId = tipoColuna("usuario", "id");
-        String tipoFk = tipoColuna("password_reset_token", "usuario_id");
-        if (tipoUsuarioId == null || tipoFk == null) return;
-        if (tipoUsuarioId.contains("unsigned") && !tipoFk.contains("unsigned")) {
-            jdbc.execute("ALTER TABLE password_reset_token MODIFY usuario_id BIGINT UNSIGNED NOT NULL");
-            log.info("[MIGRACAO] password_reset_token.usuario_id alterado para BIGINT UNSIGNED");
+    private void alinharFkNoMysql(String tabela, String coluna, String tabelaRef, String nomeFk) throws SQLException {
+        if (!mysql() || !colunaExiste(tabela, coluna)) return;
+        String tipoRefId = tipoColuna(tabelaRef, "id");
+        String tipoFk = tipoColuna(tabela, coluna);
+        if (tipoRefId == null || tipoFk == null) return;
+        if (tipoRefId.contains("unsigned") && !tipoFk.contains("unsigned")) {
+            jdbc.execute("ALTER TABLE " + tabela + " MODIFY " + coluna + " BIGINT UNSIGNED NOT NULL");
+            log.info("[MIGRACAO] {}.{} alterado para BIGINT UNSIGNED", tabela, coluna);
         }
         Integer fks = jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() "
-                + "AND TABLE_NAME = 'password_reset_token' AND COLUMN_NAME = 'usuario_id' AND REFERENCED_TABLE_NAME = 'usuario'", Integer.class);
+                + "AND TABLE_NAME = ? AND COLUMN_NAME = ? AND REFERENCED_TABLE_NAME = ?", Integer.class, tabela, coluna, tabelaRef);
         if (fks != null && fks == 0) {
-            jdbc.execute("ALTER TABLE password_reset_token ADD CONSTRAINT fk_password_reset_token_usuario "
-                    + "FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE");
-            log.info("[MIGRACAO] FK fk_password_reset_token_usuario criada");
+            jdbc.execute("ALTER TABLE " + tabela + " ADD CONSTRAINT " + nomeFk
+                    + " FOREIGN KEY (" + coluna + ") REFERENCES " + tabelaRef + " (id) ON DELETE CASCADE");
+            log.info("[MIGRACAO] FK {} criada", nomeFk);
         }
     }
 

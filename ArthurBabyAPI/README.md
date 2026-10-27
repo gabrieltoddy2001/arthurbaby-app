@@ -2,6 +2,22 @@
 
 Backend Spring Boot para catalogo, clientes, favoritos, estoque e ordens de pedido.
 
+## Pre-requisitos
+
+- **JDK 21** (o projeto compila com Java 21; versoes mais novas como 25 nao sao suportadas pelo Lombok/Spring desta versao)
+- **Maven 3.9+** (ou o Maven embutido do IntelliJ)
+- **MySQL 8** rodando em `localhost:3306` (ou use o modo H2 mais abaixo, que nao precisa de MySQL)
+
+### Abrindo no IntelliJ
+
+1. `File > Open` e selecione a pasta `ArthurBabyAPI` (a que tem o `pom.xml`).
+2. `File > Project Structure > Project > SDK`: escolha um **JDK 21**.
+3. Na aba **Maven** (lateral direita), clique em **Reload All Maven Projects** para baixar as dependencias.
+4. Rode a classe `ArthurBabyApplication`.
+
+> Erro `package org.springframework... does not exist` ao compilar significa que as dependencias
+> do Maven nao foram carregadas: refaca o passo 3 (e confira o JDK do passo 2).
+
 ## Executar com MySQL (padrao)
 
 O perfil `mysql` e ativado por padrao (`application.properties`). Basta ter um MySQL local
@@ -142,3 +158,53 @@ cupom inexistente, inativo ou expirado retorna `400`. Sem cupom, vale o `descont
 
 Cancelamento: exige motivo, nao permite cancelar pedido ja cancelado ou entregue, registra o historico e estorna
 o estoque (`MovimentacaoEstoque` do tipo `ESTORNO`). Cliente so ve/cancela os proprios pedidos (`403` caso contrario).
+
+## Perfil: alterar senha, cupons e avaliacoes
+
+```bash
+# Alterar senha do usuario logado (o id vem do token). Tambem existe PUT /api/clientes/{id}/senha
+curl -X PUT http://localhost:8080/api/auth/alterar-senha \
+  -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" \
+  -d '{"senhaAtual": "123456", "novaSenha": "novaSenha123"}'
+# 200 {"mensagem":"Senha alterada com sucesso."} | 400 "Senha atual incorreta" ou nova senha < 4 caracteres
+
+# Cupons ativos e dentro da validade (publico)
+curl http://localhost:8080/api/cupons/ativos
+
+# Avaliacoes do produto (publico) e nova avaliacao (exige token)
+curl http://localhost:8080/api/produtos/1/avaliacoes
+curl -X POST http://localhost:8080/api/produtos/1/avaliacoes \
+  -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" \
+  -d '{"nota": 5, "comentario": "Tecido muito macio, amei!"}'
+```
+
+Regras da avaliacao: nota de 1 a 5, uma por cliente/produto e so para quem tem um pedido **ENTREGUE**
+com o produto (para testar, mude o status do pedido com `PUT /api/pedidos/{id}/status` logado como admin).
+O campo `avaliacao` de `GET /api/produtos/{id}` passa a ser a media das notas (0.0 sem avaliacoes).
+A tabela `avaliacao` e criada sozinha ao subir a API.
+
+## Painel admin: estoque e auditoria
+
+O estoque fica em cada **variacao** do produto (tamanho/cor/modelo). O saldo do produto e a soma das variacoes.
+
+```bash
+# Historico de movimentacoes (mais recente primeiro, com nome do produto e do usuario)
+curl http://localhost:8080/api/admin/movimentacoes -H "Authorization: Bearer SEU_TOKEN"
+
+# Movimentar uma variacao: entrada | saida | ajuste | estorno
+# (no ajuste, "quantidade" e o NOVO saldo total, ex.: contagem do inventario)
+curl -X POST http://localhost:8080/api/admin/estoque/variacoes/1/entrada \
+  -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" \
+  -d '{"quantidade": 5, "observacao": "Chegou do fornecedor"}'
+
+# Auditoria (log de acoes do painel) - usa o CRUD generico, tipo "auditoria"
+curl http://localhost:8080/api/admin/auditoria -H "Authorization: Bearer SEU_TOKEN"
+```
+
+A tabela `auditoria` e criada sozinha ao subir a API (`ddl-auto=update`), nao precisa rodar SQL.
+
+### Dicas se o painel mostrar "Erro ao listar ..."
+
+- **Reinicie a API depois de puxar mudancas** (Stop + Run no IntelliJ). A API que ja estava rodando
+  continua com o codigo antigo e responde `400 Tipo de recurso invalido`.
+- No navegador, recarregue com **Ctrl+F5** para nao usar os arquivos JS antigos do cache.

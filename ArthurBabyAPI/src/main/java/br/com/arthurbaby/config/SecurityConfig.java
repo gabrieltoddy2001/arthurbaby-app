@@ -27,11 +27,13 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // /me fica antes da liberacao de /api/auth/** porque exige token
-                        .requestMatchers("/api/auth/me").authenticated()
+                        // /me e /alterar-senha ficam antes da liberacao de /api/auth/** porque exigem token
+                        .requestMatchers("/api/auth/me", "/api/auth/alterar-senha").authenticated()
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/h2-console/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cupons/validar").permitAll()
+                        // "Meus Cupons": lista publica de cupons vigentes, consultada antes do checkout
+                        .requestMatchers(HttpMethod.GET, "/api/cupons/ativos").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categorias", "/api/produtos", "/api/produtos/**", "/api/estoque/**").permitAll()
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                         .anyRequest().authenticated())

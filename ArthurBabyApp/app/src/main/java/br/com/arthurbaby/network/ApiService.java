@@ -36,6 +36,8 @@ public interface ApiService {
             @Query("page") int page,
             @Query("size") int size
     );
+    @POST("api/produtos/{produtoId}/avaliacoes")
+    Call<Void> avaliarProduto(@Path("produtoId") Long produtoId, @Body AvaliacaoRequest request);
 
     @GET("api/produtos/{id}")
     Call<ProdutoResponse> buscarProduto(@Path("id") Long id);
@@ -43,6 +45,9 @@ public interface ApiService {
     // ---------- CUPONS ----------
     @POST("api/cupons/validar")
     Call<CupomValidacaoResponse> validarCupom(@Body CupomValidacaoRequest request);
+
+    @GET("api/cupons/disponiveis")
+    Call<java.util.List<CupomResponse>> listarCuponsDisponiveis();
 
     // ---------- FAVORITOS ----------
     @GET("api/favoritos/cliente/{clienteId}")
@@ -82,6 +87,9 @@ public interface ApiService {
 
     @PUT("api/clientes/{id}")
     Call<UsuarioResponse> atualizarCliente(@Path("id") Long id, @Body ClienteRequest request);
+
+    @PUT("api/clientes/{id}/senha")
+    Call<Void> alterarSenha(@Path("id") Long id, @Body AlterarSenhaRequest request);
 
     // ---------- ENDEREÇOS ----------
     @GET("api/clientes/{clienteId}/enderecos")

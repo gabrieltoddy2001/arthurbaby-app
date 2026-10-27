@@ -1,9 +1,11 @@
 package br.com.arthurbaby.controller;
 
+import br.com.arthurbaby.dto.AlterarSenhaRequest;
 import br.com.arthurbaby.dto.AtualizarClienteRequest;
 import br.com.arthurbaby.dto.ClienteResponse;
 import br.com.arthurbaby.dto.EnderecoRequest;
 import br.com.arthurbaby.dto.EnderecoResponse;
+import br.com.arthurbaby.dto.MensagemResponse;
 import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.service.ClienteService;
@@ -26,6 +28,8 @@ import java.util.List;
 @Tag(name = "Clientes", description = "Perfil e endereços do cliente. Exige token; o cliente só acessa os próprios dados, administrador e vendedor acessam qualquer cliente.")
 public class ClienteController {
     private static final String OUTRO_CLIENTE = "Acesso negado: dados pertencem a outro cliente";
+    /** Mensagem de sucesso da troca de senha (tambem usada pelo AuthController). */
+    public static final String MENSAGEM_SENHA_ALTERADA = "Senha alterada com sucesso.";
 
     private final ClienteService service;
     public ClienteController(ClienteService service) { this.service = service; }
@@ -54,6 +58,22 @@ public class ClienteController {
                                      @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
         return service.atualizarPerfil(id, request);
+    }
+
+    @PutMapping("/{id}/senha")
+    @Operation(summary = "Alterar senha do cliente", description = "Troca a senha do cliente identificado pelo id, conferindo antes a senha atual. "
+            + "Mesmo efeito de PUT /api/auth/alterar-senha, mas com o id na URL.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "{ \"mensagem\": \"" + MENSAGEM_SENHA_ALTERADA + "\" }"),
+            @ApiResponse(responseCode = "400", description = "Senha atual incorreta ou nova senha com menos de 4 caracteres"),
+            @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
+    })
+    public MensagemResponse alterarSenha(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @RequestBody AlterarSenhaRequest request,
+                                         @AuthenticationPrincipal Usuario logado) {
+        verificarAcesso(id, logado);
+        service.alterarSenha(id, request);
+        return new MensagemResponse(MENSAGEM_SENHA_ALTERADA);
     }
 
     @DeleteMapping("/{id}")

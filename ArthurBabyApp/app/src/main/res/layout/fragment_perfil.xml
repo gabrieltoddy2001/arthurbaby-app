@@ -88,6 +88,8 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
 
+
+
                 <FrameLayout
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -118,6 +120,44 @@
                     android:text="›"
                     android:textSize="22sp"
                     android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/opAlterarSenha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <FrameLayout android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circulo_categoria_suave">
+                    <ImageView android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="center" android:src="@drawable/ic_sair" app:tint="@color/rosa_arthur" />
+                </FrameLayout>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:text="Alterar Senha" android:textColor="@color/texto_primario" android:textSize="15sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="22sp" android:textColor="@color/rosa_arthur" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/opMeusCupons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:background="@drawable/bg_card_opcao_perfil"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+                <FrameLayout android:layout_width="40dp" android:layout_height="40dp" android:background="@drawable/bg_circulo_categoria_suave">
+                    <ImageView android:layout_width="22dp" android:layout_height="22dp" android:layout_gravity="center" android:src="@drawable/ic_promocao" app:tint="@color/rosa_arthur" />
+                </FrameLayout>
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:text="Meus Cupons" android:textColor="@color/texto_primario" android:textSize="15sp" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="22sp" android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
             <LinearLayout

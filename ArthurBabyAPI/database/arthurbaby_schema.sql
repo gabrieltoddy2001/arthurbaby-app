@@ -41,8 +41,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- usuario (clientes, vendedores e administradores)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS usuario (
-    id                                  BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome_completo                       VARCHAR(150)  NOT NULL,
+                                       id                                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                       nome_completo                       VARCHAR(150)  NOT NULL,
     email                                VARCHAR(150)  NOT NULL,
     senha                                VARCHAR(255)  NOT NULL,
     telefone                             VARCHAR(20)   NULL,
@@ -59,15 +59,15 @@ CREATE TABLE IF NOT EXISTS usuario (
     atualizado_em                        DATETIME      NULL,
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- endereco (enderecos de entrega/cobranca do cliente)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS endereco (
-    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id     BIGINT        NOT NULL,
-    cep            VARCHAR(9)    NULL,
+                                        id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        usuario_id     BIGINT        NOT NULL,
+                                        cep            VARCHAR(9)    NULL,
     logradouro     VARCHAR(200)  NULL,
     numero         VARCHAR(20)   NULL,
     complemento    VARCHAR(100)  NULL,
@@ -78,15 +78,15 @@ CREATE TABLE IF NOT EXISTS endereco (
     principal      TINYINT(1)    NOT NULL DEFAULT 0,
     CONSTRAINT fk_endereco_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
     INDEX idx_endereco_usuario (usuario_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- categoria (com subcategoria via auto-relacionamento)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS categoria (
-    id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
-    categoria_pai_id    BIGINT        NULL,
-    nome                VARCHAR(100)  NOT NULL,
+                                         id                  BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                         categoria_pai_id    BIGINT        NULL,
+                                         nome                VARCHAR(100)  NOT NULL,
     descricao           VARCHAR(500)  NULL,
     imagem_url          VARCHAR(500)  NULL,
     icone               VARCHAR(50)   NULL,
@@ -96,50 +96,50 @@ CREATE TABLE IF NOT EXISTS categoria (
     atualizado_em       DATETIME      NULL,
     CONSTRAINT uk_categoria_nome UNIQUE (nome),
     CONSTRAINT fk_categoria_pai FOREIGN KEY (categoria_pai_id) REFERENCES categoria (id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- marca / tamanho / cor / modelo (atributos de produto)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS marca (
-    id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome     VARCHAR(255) NOT NULL,
+                                     id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                     nome     VARCHAR(255) NOT NULL,
     status   VARCHAR(20)  NOT NULL DEFAULT 'ATIVA',
     CONSTRAINT uk_marca_nome UNIQUE (nome)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS tamanho (
-    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome              VARCHAR(30) NOT NULL,
+                                       id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                       nome              VARCHAR(30) NOT NULL,
     ordem_exibicao    INT         NOT NULL DEFAULT 0,
     status            VARCHAR(20) NOT NULL DEFAULT 'ATIVO',
     CONSTRAINT uk_tamanho_nome UNIQUE (nome)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS cor (
-    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome              VARCHAR(50) NOT NULL,
+                                   id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                   nome              VARCHAR(50) NOT NULL,
     codigo_hex        VARCHAR(7)  NULL,
     ordem_exibicao    INT         NOT NULL DEFAULT 0,
     status            VARCHAR(20) NOT NULL DEFAULT 'ATIVA',
     CONSTRAINT uk_cor_nome UNIQUE (nome)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS modelo (
-    id       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome     VARCHAR(80) NOT NULL,
+                                      id       BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                      nome     VARCHAR(80) NOT NULL,
     status   VARCHAR(20) NOT NULL DEFAULT 'ATIVO',
     CONSTRAINT uk_modelo_nome UNIQUE (nome)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- produto / produto_imagem / produto_variacao
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS produto (
-    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    categoria_id          BIGINT         NOT NULL,
-    marca_id              BIGINT         NULL,
-    codigo                VARCHAR(50)    NOT NULL,
+                                       id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                       categoria_id          BIGINT         NOT NULL,
+                                       marca_id              BIGINT         NULL,
+                                       codigo                VARCHAR(50)    NOT NULL,
     sku                   VARCHAR(80)    NOT NULL,
     nome                  VARCHAR(180)   NOT NULL,
     descricao             TEXT           NULL,
@@ -161,26 +161,26 @@ CREATE TABLE IF NOT EXISTS produto (
     CONSTRAINT uk_produto_sku UNIQUE (sku),
     CONSTRAINT fk_produto_categoria FOREIGN KEY (categoria_id) REFERENCES categoria (id),
     CONSTRAINT fk_produto_marca FOREIGN KEY (marca_id) REFERENCES marca (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS produto_imagem (
-    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-    produto_id        BIGINT        NOT NULL,
-    url               VARCHAR(500)  NOT NULL,
+                                              id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                              produto_id        BIGINT        NOT NULL,
+                                              url               VARCHAR(500)  NOT NULL,
     descricao         VARCHAR(255)  NULL,
     ordem_exibicao    INT           NOT NULL DEFAULT 0,
     principal         TINYINT(1)    NOT NULL DEFAULT 0,
     CONSTRAINT fk_produto_imagem_produto FOREIGN KEY (produto_id) REFERENCES produto (id) ON DELETE CASCADE,
     INDEX idx_produto_imagem_produto (produto_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS produto_variacao (
-    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-    produto_id        BIGINT         NOT NULL,
-    tamanho_id        BIGINT         NULL,
-    cor_id            BIGINT         NULL,
-    modelo_id         BIGINT         NULL,
-    sku               VARCHAR(100)   NOT NULL,
+                                                id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                                produto_id        BIGINT         NOT NULL,
+                                                tamanho_id        BIGINT         NULL,
+                                                cor_id            BIGINT         NULL,
+                                                modelo_id         BIGINT         NULL,
+                                                sku               VARCHAR(100)   NOT NULL,
     preco             DECIMAL(12,2)  NULL,
     estoque_atual     INT            NOT NULL DEFAULT 0,
     estoque_minimo    INT            NOT NULL DEFAULT 0,
@@ -191,30 +191,47 @@ CREATE TABLE IF NOT EXISTS produto_variacao (
     CONSTRAINT fk_variacao_cor FOREIGN KEY (cor_id) REFERENCES cor (id),
     CONSTRAINT fk_variacao_modelo FOREIGN KEY (modelo_id) REFERENCES modelo (id),
     INDEX idx_variacao_produto (produto_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- favorito (produtos favoritados por cliente)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS favorito (
-    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-    cliente_id    BIGINT    NOT NULL,
-    produto_id    BIGINT    NOT NULL,
-    criado_em     DATETIME  NULL,
-    CONSTRAINT uk_favorito_cliente_produto UNIQUE (cliente_id, produto_id),
+                                        id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                        cliente_id    BIGINT    NOT NULL,
+                                        produto_id    BIGINT    NOT NULL,
+                                        criado_em     DATETIME  NULL,
+                                        CONSTRAINT uk_favorito_cliente_produto UNIQUE (cliente_id, produto_id),
     CONSTRAINT fk_favorito_cliente FOREIGN KEY (cliente_id) REFERENCES usuario (id) ON DELETE CASCADE,
     CONSTRAINT fk_favorito_produto FOREIGN KEY (produto_id) REFERENCES produto (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- avaliacao (nota 1 a 5 + comentario; um cliente avalia cada produto
+--   uma unica vez). A media aparece em GET /api/produtos/{id}.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS avaliacao (
+                                         id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                         produto_id    BIGINT    NOT NULL,
+                                         cliente_id    BIGINT    NOT NULL,
+                                         nota          INT       NOT NULL,
+                                         comentario    TEXT      NULL,
+                                         criado_em     DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                         CONSTRAINT chk_avaliacao_nota CHECK (nota BETWEEN 1 AND 5),
+    CONSTRAINT uk_cliente_produto UNIQUE (cliente_id, produto_id),
+    CONSTRAINT fk_avaliacao_produto FOREIGN KEY (produto_id) REFERENCES produto (id) ON DELETE CASCADE,
+    CONSTRAINT fk_avaliacao_cliente FOREIGN KEY (cliente_id) REFERENCES usuario (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- movimentacao_estoque
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS movimentacao_estoque (
-    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    produto_id            BIGINT        NOT NULL,
-    variacao_id           BIGINT        NULL,
-    usuario_id            BIGINT        NULL,
-    tipo                  VARCHAR(20)   NOT NULL,
+                                                    id                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                                    produto_id            BIGINT        NOT NULL,
+                                                    variacao_id           BIGINT        NULL,
+                                                    usuario_id            BIGINT        NULL,
+                                                    tipo                  VARCHAR(20)   NOT NULL,
     quantidade            INT           NOT NULL DEFAULT 0,
     estoque_anterior      INT           NULL,
     estoque_posterior     INT           NULL,
@@ -224,7 +241,7 @@ CREATE TABLE IF NOT EXISTS movimentacao_estoque (
     CONSTRAINT fk_mov_estoque_variacao FOREIGN KEY (variacao_id) REFERENCES produto_variacao (id),
     CONSTRAINT fk_mov_estoque_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id),
     INDEX idx_mov_estoque_produto (produto_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- cupom (desconto aplicado sobre o subtotal do pedido)
@@ -233,8 +250,8 @@ CREATE TABLE IF NOT EXISTS movimentacao_estoque (
 --   percentual_desconto sao migrados pelo SchemaMigration ao subir a API.
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS cupom (
-    id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
-    codigo                  VARCHAR(50)    NOT NULL,
+                                     id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                     codigo                  VARCHAR(50)    NOT NULL,
     tipo                    VARCHAR(20)    NOT NULL DEFAULT 'PERCENTUAL',
     valor                   DECIMAL(12,2)  NULL,
     valor_minimo            DECIMAL(12,2)  NULL,
@@ -245,14 +262,14 @@ CREATE TABLE IF NOT EXISTS cupom (
     descricao               VARCHAR(200)   NULL,
     criado_em               DATETIME       NULL,
     CONSTRAINT uk_cupom_codigo UNIQUE (codigo)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- password_reset_token (recuperacao de senha: expira e e de uso unico)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS password_reset_token (
-    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-    token         VARCHAR(100)  NOT NULL,
+                                                    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                                    token         VARCHAR(100)  NOT NULL,
     usuario_id    BIGINT        NOT NULL,
     expira_em     DATETIME      NOT NULL,
     usado         TINYINT(1)    NOT NULL DEFAULT 0,
@@ -260,14 +277,14 @@ CREATE TABLE IF NOT EXISTS password_reset_token (
     CONSTRAINT uk_password_reset_token UNIQUE (token),
     CONSTRAINT fk_password_reset_token_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) ON DELETE CASCADE,
     INDEX idx_token_reset (token)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- pedido / pedido_item / pedido_status_historico
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pedido (
-    id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
-    numero_pedido           VARCHAR(30)    NOT NULL,
+                                      id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                      numero_pedido           VARCHAR(30)    NOT NULL,
     cliente_id              BIGINT         NOT NULL,
     vendedor_id             BIGINT         NULL,
     status                  VARCHAR(30)    NOT NULL DEFAULT 'PEDIDO_GERADO',
@@ -287,14 +304,14 @@ CREATE TABLE IF NOT EXISTS pedido (
     CONSTRAINT fk_pedido_cliente FOREIGN KEY (cliente_id) REFERENCES usuario (id),
     CONSTRAINT fk_pedido_vendedor FOREIGN KEY (vendedor_id) REFERENCES usuario (id),
     INDEX idx_pedido_cliente (cliente_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS pedido_item (
-    id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
-    pedido_id               BIGINT         NOT NULL,
-    produto_id               BIGINT         NOT NULL,
-    variacao_id              BIGINT         NULL,
-    codigo_produto           VARCHAR(50)    NOT NULL,
+                                           id                      BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                           pedido_id               BIGINT         NOT NULL,
+                                           produto_id               BIGINT         NOT NULL,
+                                           variacao_id              BIGINT         NULL,
+                                           codigo_produto           VARCHAR(50)    NOT NULL,
     nome_produto             VARCHAR(180)   NOT NULL,
     variacao_descricao       VARCHAR(255)   NULL,
     quantidade                INT            NOT NULL DEFAULT 0,
@@ -305,40 +322,40 @@ CREATE TABLE IF NOT EXISTS pedido_item (
     CONSTRAINT fk_pedido_item_produto FOREIGN KEY (produto_id) REFERENCES produto (id),
     CONSTRAINT fk_pedido_item_variacao FOREIGN KEY (variacao_id) REFERENCES produto_variacao (id),
     INDEX idx_pedido_item_pedido (pedido_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS pedido_status_historico (
-    id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
-    pedido_id          BIGINT        NOT NULL,
-    usuario_id         BIGINT        NULL,
-    status_anterior    VARCHAR(30)   NULL,
+                                                       id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                                       pedido_id          BIGINT        NOT NULL,
+                                                       usuario_id         BIGINT        NULL,
+                                                       status_anterior    VARCHAR(30)   NULL,
     status_novo        VARCHAR(30)   NOT NULL,
     observacao         VARCHAR(500)  NULL,
     criado_em          DATETIME      NULL,
     CONSTRAINT fk_status_hist_pedido FOREIGN KEY (pedido_id) REFERENCES pedido (id) ON DELETE CASCADE,
     CONSTRAINT fk_status_hist_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id),
     INDEX idx_status_hist_pedido (pedido_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- auditoria (log de ações do painel; usuário gravado como texto)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS auditoria (
-    id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
-    usuario            VARCHAR(180)  NULL,
+                                         id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                         usuario            VARCHAR(180)  NULL,
     acao               VARCHAR(40)   NOT NULL,
     entidade           VARCHAR(60)   NULL,
     entidade_id        BIGINT        NULL,
     descricao          TEXT          NULL,
     data               DATETIME      NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- configuracao_loja
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS configuracao_loja (
-    id                       BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome_fantasia            VARCHAR(255)  NULL,
+                                                 id                       BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                                 nome_fantasia            VARCHAR(255)  NULL,
     razao_social             VARCHAR(255)  NULL,
     cnpj                     VARCHAR(20)   NULL,
     telefone                 VARCHAR(20)   NULL,
@@ -364,7 +381,7 @@ CREATE TABLE IF NOT EXISTS configuracao_loja (
     cor_texto_primario       VARCHAR(7)    NULL,
     cor_texto_secundario     VARCHAR(7)    NULL,
     atualizado_em            DATETIME      NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -375,13 +392,13 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- =====================================================================
 
 INSERT INTO configuracao_loja (nome_fantasia, razao_social, cnpj, telefone, whatsapp, email, email_pedidos,
-                                instagram, shopee_url, logradouro, numero, complemento, bairro, cidade, uf, cep,
-                                cor_primaria, cor_destaque, cor_fundo, cor_superficie)
+                               instagram, shopee_url, logradouro, numero, complemento, bairro, cidade, uf, cep,
+                               cor_primaria, cor_destaque, cor_fundo, cor_superficie)
 SELECT 'ARTHURBABY', 'ARTHUR BABY ENXOVAIS LTDA - ME', '35.671.222/0001-10', '(71) 99339-9816', '(71) 99131-1944',
        'arthuradorno13@gmail.com', 'pedidoababy@gmail.com', '@lojao_arthur_baby',
        'https://shopee.com.br/arthurbabylojao', 'Avenida Sete de Setembro', '548', 'Edf. Fatima Loja Lj',
        'Centro - Dois de Julho', 'Salvador', 'BA', '40020-455', '#37B6B0', '#ED83A4', '#FFFFFF', '#F0F2F5'
-WHERE NOT EXISTS (SELECT 1 FROM configuracao_loja);
+    WHERE NOT EXISTS (SELECT 1 FROM configuracao_loja);
 
 INSERT IGNORE INTO categoria (nome, descricao, ordem_exibicao, icone) VALUES
     ('Enxoval', 'Categoria Enxoval', 1, 'enxoval'),

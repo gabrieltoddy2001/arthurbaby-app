@@ -1,5 +1,6 @@
 package br.com.arthurbaby.service;
 
+import br.com.arthurbaby.dto.AlterarSenhaRequest;
 import br.com.arthurbaby.dto.AtualizarClienteRequest;
 import br.com.arthurbaby.dto.ClienteResponse;
 import br.com.arthurbaby.dto.EnderecoRequest;
@@ -9,7 +10,9 @@ import br.com.arthurbaby.entity.Enums.UsuarioStatus;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.repository.EnderecoRepository;
 import br.com.arthurbaby.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,10 +21,15 @@ import java.util.NoSuchElementException;
 public class ClienteService {
     private final UsuarioRepository usuarios;
     private final EnderecoRepository enderecos;
+    private final PasswordEncoder encoder;
 
-    public ClienteService(UsuarioRepository usuarios, EnderecoRepository enderecos) {
+    /** Mesmo tamanho minimo exigido na redefinicao de senha (PasswordResetService). */
+    static final int TAMANHO_MINIMO_SENHA = 4;
+
+    public ClienteService(UsuarioRepository usuarios, EnderecoRepository enderecos, PasswordEncoder encoder) {
         this.usuarios = usuarios;
         this.enderecos = enderecos;
+        this.encoder = encoder;
     }
 
     public ClienteResponse buscarPerfil(Long id) {
@@ -56,6 +64,33 @@ public class ClienteService {
         }
 
         return ClienteResponse.from(usuarios.save(usuario));
+    }
+
+    /**
+     * Troca a senha de um usuario ja autenticado (tela de Perfil do app).
+     * Regras: a senha atual precisa conferir com o hash BCrypt do banco e a nova precisa ter no minimo
+     * 4 caracteres; qualquer falha vira 400 (IllegalArgumentException) com a mensagem exibida pelo app.
+     * A nova senha nunca e gravada em texto puro: sempre passa pelo {@link PasswordEncoder}.
+     */
+    @Transactional
+    public void alterarSenha(Long id, AlterarSenhaRequest request) {
+        Usuario usuario = buscarUsuario(id);
+        String senhaAtual = request == null ? null : request.senhaAtual();
+        String novaSenha = request == null ? null : request.novaSenha();
+
+        if (senhaAtual == null || senhaAtual.isBlank()) {
+            throw new IllegalArgumentException("A senha atual é obrigatória.");
+        }
+        // matches() compara o texto digitado com o hash salvo (o hash nao pode ser "descriptografado")
+        if (!encoder.matches(senhaAtual, usuario.getSenha())) {
+            throw new IllegalArgumentException("Senha atual incorreta");
+        }
+        if (novaSenha == null || novaSenha.isBlank() || novaSenha.length() < TAMANHO_MINIMO_SENHA) {
+            throw new IllegalArgumentException("A nova senha deve possuir no mínimo " + TAMANHO_MINIMO_SENHA + " caracteres.");
+        }
+
+        usuario.setSenha(encoder.encode(novaSenha));
+        usuarios.save(usuario);
     }
 
     public void inativar(Long id) {

@@ -116,6 +116,13 @@ public class DetalheProdutoFragment extends Fragment {
                 btnCompartilhar.setOnClickListener(x -> compartilharProduto());
             }
 
+            // BOTÃO AVALIAR
+            com.google.android.material.button.MaterialButton btnAvaliar = v.findViewById(R.id.btnAvaliar);
+            if (btnAvaliar != null && AuthGuard.estaLogado(requireContext())) {
+                btnAvaliar.setOnClickListener(x -> abrirDialogAvaliacao());
+            } else if (btnAvaliar != null) {
+                btnAvaliar.setOnClickListener(x -> AuthGuard.mostrarDialogLogin(requireActivity(), "Entre para avaliar o produto."));
+            }
             carregarProdutoBackend(v);
         }
 
@@ -223,6 +230,61 @@ public class DetalheProdutoFragment extends Fragment {
         share.putExtra(Intent.EXTRA_TEXT, texto);
 
         startActivity(Intent.createChooser(share, "Compartilhar produto"));
+    }
+
+    private void abrirDialogAvaliacao() {
+        android.widget.LinearLayout container = new android.widget.LinearLayout(getContext());
+        container.setOrientation(android.widget.LinearLayout.VERTICAL);
+        container.setPadding(50, 30, 50, 10);
+
+        android.widget.RatingBar ratingBar = new android.widget.RatingBar(getContext());
+        ratingBar.setNumStars(5);
+        ratingBar.setStepSize(1.0f);
+        ratingBar.setRating(5);
+        container.addView(ratingBar);
+
+        android.widget.EditText etComentario = new android.widget.EditText(getContext());
+        etComentario.setHint("Escreva seu comentário (opcional)");
+        etComentario.setMinLines(2);
+        etComentario.setPadding(0, 20, 0, 0);
+        container.addView(etComentario);
+
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Avaliar Produto")
+                .setView(container)
+                .setPositiveButton("Enviar", (d, w) -> {
+                    int nota = (int) ratingBar.getRating();
+                    String comentario = etComentario.getText().toString().trim();
+                    enviarAvaliacao(nota, comentario);
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void enviarAvaliacao(int nota, String comentario) {
+        Long clienteId = br.com.arthurbaby.network.TokenStorage.getUsuarioId(requireContext());
+        if (clienteId == null || produto == null) return;
+
+        br.com.arthurbaby.utils.LoadingUtils.mostrar(requireContext());
+
+        ApiService api = RetrofitClient.getApi(requireContext());
+        api.avaliarProduto(produto.getId(), new br.com.arthurbaby.network.dto.AvaliacaoRequest(clienteId, nota, comentario))
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        br.com.arthurbaby.utils.LoadingUtils.esconder();
+                        if (response.isSuccessful()) {
+                            Toast.makeText(requireContext(), "Avaliação enviada! Obrigado.", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(requireContext(), br.com.arthurbaby.utils.ErrorUtils.extrairMensagem(response), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        br.com.arthurbaby.utils.LoadingUtils.esconder();
+                        Toast.makeText(requireContext(), "Erro: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void desenharVariacoes(View v) {

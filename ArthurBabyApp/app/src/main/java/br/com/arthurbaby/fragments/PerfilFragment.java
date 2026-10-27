@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import br.com.arthurbaby.R;
+import br.com.arthurbaby.activities.AlterarSenhaActivity;
 import br.com.arthurbaby.activities.LoginActivity;
 import br.com.arthurbaby.network.ApiService;
 import br.com.arthurbaby.network.RetrofitClient;
@@ -103,6 +104,16 @@ public class PerfilFragment extends Fragment {
         v.findViewById(R.id.opMeusDados).setOnClickListener(x ->
                 startActivity(new Intent(getActivity(),
                         br.com.arthurbaby.activities.EditarPerfilActivity.class)));
+
+        // Meus Cupons
+        v.findViewById(R.id.opMeusCupons).setOnClickListener(x ->
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frameContainer, new MeusCuponsFragment())
+                        .addToBackStack(null).commit());
+
+        // Alterar Senha
+        v.findViewById(R.id.opAlterarSenha).setOnClickListener(x ->
+                startActivity(new Intent(getActivity(), AlterarSenhaActivity.class)));
 
         v.findViewById(R.id.opMeusPedidos).setOnClickListener(x ->
                 requireActivity().getSupportFragmentManager()

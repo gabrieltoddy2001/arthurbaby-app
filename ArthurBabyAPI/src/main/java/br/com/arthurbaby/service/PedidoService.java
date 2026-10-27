@@ -9,7 +9,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -24,7 +23,6 @@ public class PedidoService {
     private final CupomService cupons;
     private final FreteService frete;
     private final EstoqueService estoque;
-
     public PedidoService(PedidoRepository pedidos, UsuarioRepository usuarios, ProdutoRepository produtos,
                          ProdutoVariacaoRepository variacoes, CupomService cupons, FreteService frete,
                          EstoqueService estoque) {
@@ -119,26 +117,6 @@ public class PedidoService {
         return pedidos.findByClienteIdOrderByCriadoEmDesc(clienteId).stream().map(PedidoResponse::de).toList();
     }
 
-    /**
-     * Lista pedidos de um cliente aplicando filtros opcionais de status e período (data de criação).
-     * Datas nulas são ignoradas. Status é comparado em caixa alta.
-     */
-    @Transactional(readOnly = true)
-    public List<PedidoResponse> listarPorClienteFiltrado(Long clienteId, String status,
-                                                         LocalDate dataInicio, LocalDate dataFim,
-                                                         Usuario logado) {
-        if (!equipeLoja(logado) && !logado.getId().equals(clienteId)) {
-            throw new AccessDeniedException("Acesso negado a pedidos de outro cliente");
-        }
-
-        return pedidos.findByClienteIdOrderByCriadoEmDesc(clienteId).stream()
-                .filter(p -> status == null || status.isBlank() || p.getStatus().name().equalsIgnoreCase(status))
-                .filter(p -> dataInicio == null || !p.getCriadoEm().toLocalDate().isBefore(dataInicio))
-                .filter(p -> dataFim == null || !p.getCriadoEm().toLocalDate().isAfter(dataFim))
-                .map(PedidoResponse::de)
-                .toList();
-    }
-
     @Transactional
     public PedidoResponse alterarStatus(Long id, StatusPedidoRequest request) {
         Pedido pedido = pedidos.findById(id).orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado"));
@@ -180,7 +158,6 @@ public class PedidoService {
             throw new AccessDeniedException("Acesso negado a pedido de outro cliente");
         }
     }
-
     private boolean equipeLoja(Usuario logado) {
         return logado.getPerfil() == Perfil.ADMINISTRADOR || logado.getPerfil() == Perfil.VENDEDOR;
     }
@@ -194,7 +171,6 @@ public class PedidoService {
         historico.setObservacao(obs);
         pedido.getHistorico().add(historico);
     }
-
     private String descrever(ProdutoVariacao variacao) {
         if (variacao == null) return null;
         String tamanho = variacao.getTamanho() == null ? "" : "Tamanho: " + variacao.getTamanho().getNome();
