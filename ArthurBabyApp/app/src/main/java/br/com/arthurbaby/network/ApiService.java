@@ -46,7 +46,7 @@ public interface ApiService {
     @POST("api/cupons/validar")
     Call<CupomValidacaoResponse> validarCupom(@Body CupomValidacaoRequest request);
 
-    @GET("api/cupons/disponiveis")
+    @GET("api/cupons/ativos")
     Call<java.util.List<CupomResponse>> listarCuponsDisponiveis();
 
     // ---------- FAVORITOS ----------
