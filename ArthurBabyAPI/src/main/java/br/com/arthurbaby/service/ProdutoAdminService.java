@@ -46,16 +46,16 @@ public class ProdutoAdminService {
 
     @Transactional
     public ProdutoDetalheResponse cadastrarCompleto(ProdutoCompletoRequest request, Usuario usuario) {
-        obrigatorio(request.nome(), "Nome e obrigatorio");
-        obrigatorio(request.codigo(), "Codigo e obrigatorio");
-        obrigatorio(request.sku(), "SKU e obrigatorio");
-        if (request.preco() == null || request.preco().signum() <= 0) throw new IllegalArgumentException("Preco deve ser maior que zero");
+        obrigatorio(request.nome(), "Informe o nome do produto.");
+        obrigatorio(request.codigo(), "Informe o código do produto.");
+        obrigatorio(request.sku(), "Informe o SKU principal do produto.");
+        if (request.preco() == null || request.preco().signum() <= 0) throw new IllegalArgumentException("O preço deve ser maior que zero.");
         if (request.precoPromocional() != null && request.precoPromocional().compareTo(request.preco()) >= 0) {
-            throw new IllegalArgumentException("Preco promocional deve ser menor que o preco");
+            throw new IllegalArgumentException("O preço promocional deve ser menor que o preço de venda.");
         }
-        if (request.categoriaId() == null) throw new IllegalArgumentException("Categoria e obrigatoria");
-        if (produtos.existsByCodigo(request.codigo().trim())) throw new IllegalArgumentException("Codigo de produto ja cadastrado");
-        if (produtos.existsBySku(request.sku().trim())) throw new IllegalArgumentException("SKU de produto ja cadastrado");
+        if (request.categoriaId() == null) throw new IllegalArgumentException("Selecione a categoria do produto.");
+        if (produtos.existsByCodigo(request.codigo().trim())) throw new IllegalArgumentException("Já existe um produto com este código.");
+        if (produtos.existsBySku(request.sku().trim())) throw new IllegalArgumentException("Já existe um produto com este SKU.");
 
         Produto produto = new Produto();
         produto.setCategoria(buscar(categorias, request.categoriaId(), "Categoria"));
@@ -71,6 +71,10 @@ public class ProdutoAdminService {
 
         adicionarImagens(produto, request.imagens());
         adicionarVariacoes(produto, request.variacoes());
+        boolean semEstoque = produto.getVariacoes().stream().mapToInt(ProdutoVariacao::getEstoqueAtual).sum() <= 0;
+        if (semEstoque && produto.getStatus() == br.com.arthurbaby.entity.Enums.ProdutoStatus.ATIVO) {
+            produto.setStatus(br.com.arthurbaby.entity.Enums.ProdutoStatus.ESGOTADO);
+        }
         Produto salvo = produtos.saveAndFlush(produto);
 
         // Estoque inicial fica registrado como ENTRADA para manter o historico de movimentacoes consistente.
@@ -93,7 +97,7 @@ public class ProdutoAdminService {
         }
         for (int i = 0; i < imagens.size(); i++) {
             ImagemRequest req = imagens.get(i);
-            obrigatorio(req.url(), "URL da imagem e obrigatoria");
+            obrigatorio(req.url(), "Informe a URL de cada imagem.");
             ProdutoImagem img = new ProdutoImagem();
             img.setProduto(produto);
             img.setUrl(req.url().trim());
@@ -105,15 +109,17 @@ public class ProdutoAdminService {
     }
 
     private void adicionarVariacoes(Produto produto, List<VariacaoRequest> variacoes) {
-        if (variacoes == null || variacoes.isEmpty()) return;
+        if (variacoes == null || variacoes.isEmpty()) {
+            throw new IllegalArgumentException("Cadastre pelo menos uma variação (tamanho/cor/modelo): o estoque é controlado por variação.");
+        }
         Set<String> skus = new HashSet<>();
         for (VariacaoRequest req : variacoes) {
-            obrigatorio(req.sku(), "SKU da variacao e obrigatorio");
+            obrigatorio(req.sku(), "Informe o SKU de cada variação.");
             String sku = req.sku().trim();
-            if (!skus.add(sku)) throw new IllegalArgumentException("SKU de variacao repetido: " + sku);
-            if (variacoesRepo.existsBySku(sku)) throw new IllegalArgumentException("SKU de variacao ja cadastrado: " + sku);
-            if (req.estoqueAtual() < 0) throw new IllegalArgumentException("Estoque inicial nao pode ser negativo");
-            if (req.preco() != null && req.preco().signum() <= 0) throw new IllegalArgumentException("Preco da variacao deve ser maior que zero");
+            if (!skus.add(sku)) throw new IllegalArgumentException("SKU repetido nas variações: " + sku + ".");
+            if (variacoesRepo.existsBySku(sku)) throw new IllegalArgumentException("Já existe uma variação com o SKU " + sku + ".");
+            if (req.estoqueAtual() < 0) throw new IllegalArgumentException("O estoque inicial não pode ser negativo.");
+            if (req.preco() != null && req.preco().signum() <= 0) throw new IllegalArgumentException("O preço da variação deve ser maior que zero.");
 
             ProdutoVariacao v = new ProdutoVariacao();
             v.setProduto(produto);
@@ -128,7 +134,7 @@ public class ProdutoAdminService {
     }
 
     private static <T> T buscar(JpaRepository<T, Long> repo, Long id, String nome) {
-        return repo.findById(id).orElseThrow(() -> new IllegalArgumentException(nome + " nao encontrado(a): id " + id));
+        return repo.findById(id).orElseThrow(() -> new IllegalArgumentException(nome + " não encontrado(a) (id " + id + ")."));
     }
 
     private static void obrigatorio(String valor, String mensagem) {

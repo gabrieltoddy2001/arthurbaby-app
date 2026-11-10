@@ -6,51 +6,59 @@ Backend Spring Boot para catalogo, clientes, favoritos, estoque e ordens de pedi
 
 - **JDK 21** (o projeto compila com Java 21; versoes mais novas como 25 nao sao suportadas pelo Lombok/Spring desta versao)
 - **Maven 3.9+** (ou o Maven embutido do IntelliJ)
-- **MySQL 8** rodando em `localhost:3306` (ou use o modo H2 mais abaixo, que nao precisa de MySQL)
+- **MySQL 8** rodando em `localhost:3306` (usuario `root`, senha `Admin321`). O banco padrao da API e o MySQL.
 
 ### Abrindo no IntelliJ
 
 1. `File > Open` e selecione a pasta `ArthurBabyAPI` (a que tem o `pom.xml`).
 2. `File > Project Structure > Project > SDK`: escolha um **JDK 21**.
 3. Na aba **Maven** (lateral direita), clique em **Reload All Maven Projects** para baixar as dependencias.
-4. Rode a classe `ArthurBabyApplication`.
+4. Com o MySQL aberto, escolha **ArthurBaby API (MySQL)** no seletor de execucao (barra superior) e clique em **Run**.
+
+   As configuracoes ficam na pasta `.run/` e funcionam no IntelliJ Community e Ultimate. Se nao aparecerem,
+   rode a classe `ArthurBabyApplication` direto (botao verde ao lado do `main`): ela tambem usa o MySQL.
 
 > Erro `package org.springframework... does not exist` ao compilar significa que as dependencias
 > do Maven nao foram carregadas: refaca o passo 3 (e confira o JDK do passo 2).
+>
+> Erro `Communications link failure` ou `Access denied for user 'root'` ao iniciar significa que o MySQL
+> nao esta rodando ou a senha do `root` e diferente: veja "Personalizar a conexao" abaixo.
 
 ## Executar com MySQL (padrao)
 
-O perfil `mysql` e ativado por padrao (`application.properties`). Basta ter um MySQL local
-rodando com as credenciais abaixo (o banco `arthurbaby` e criado automaticamente se nao existir):
+Com Java 21, Maven e o MySQL 8 rodando, inicie a API:
 
-- Host: `localhost:3306`
-- Usuario: `root`
-- Senha: `Admin321`
-
-```bash
+```powershell
 mvn spring-boot:run
 ```
 
-Se preferir, use o script `database/arthurbaby_schema.sql` para criar as tabelas manualmente
-antes de subir a aplicacao (veja o cabecalho do arquivo para detalhes). Isso e opcional: com
-`ddl-auto=update` a propria aplicacao cria/atualiza as tabelas ao iniciar.
-
-Variaveis opcionais:
-
-```bash
-DB_URL=jdbc:mysql://localhost:3306/arthurbaby?createDatabaseIfNotExist=true
-DB_USER=root
-DB_PASSWORD=Admin321
-JWT_SECRET=troque-por-uma-chave-grande-em-producao
-```
-
-## Executar em teste rapido com H2 (em memoria, sem MySQL)
-
-```bash
-mvn spring-boot:run -DSPRING_PROFILES_ACTIVE=default
-```
+O perfil `mysql` (`application-mysql.properties`) e ativado automaticamente. O banco `arthurbaby` e
+criado sozinho se ainda nao existir, e `ddl-auto=update` cria/atualiza as tabelas ao iniciar.
+Tambem e possivel usar o script `database/arthurbaby_schema.sql` para criar as tabelas manualmente (opcional).
 
 Swagger: http://localhost:8080/swagger-ui.html
+
+### Personalizar a conexao
+
+As credenciais padrao sao `root` / `Admin321`. Se o seu MySQL usar outra senha ou porta, defina antes de rodar:
+
+```powershell
+$env:DB_URL="jdbc:mysql://localhost:3306/arthurbaby?createDatabaseIfNotExist=true"
+$env:DB_USER="root"
+$env:DB_PASSWORD="sua-senha"
+```
+
+No IntelliJ, essas variaveis podem ser colocadas em **Run > Edit Configurations > Environment variables**.
+
+## Executar sem MySQL (H2 em memoria, alternativa)
+
+Para testar sem instalar o MySQL, use a configuracao **ArthurBaby API (H2)** no IntelliJ, ou:
+
+```powershell
+mvn spring-boot:run -Dspring-boot.run.profiles=h2
+```
+
+Os dados sao descartados ao encerrar a aplicacao.
 
 Console H2: http://localhost:8080/h2-console
 
@@ -60,15 +68,15 @@ Console H2: http://localhost:8080/h2-console
 
 ## Usuarios iniciais
 
-- Admin: `admin@arthurbaby.com.br` / `admin123`
-- Cliente: `cliente@teste.com` / `cliente123`
+- Admin: `admin@arthurbaby.com.br` / `123456`
+- Cliente: `ana.souza@email.com` / `123456`
 
 ## Fluxo minimo de teste
 
-```bash
-curl -X POST http://localhost:8080/api/auth/login ^
-  -H "Content-Type: application/json" ^
-  -d "{\"login\":\"admin@arthurbaby.com.br\",\"senha\":\"admin123\"}"
+```powershell
+curl.exe -X POST http://localhost:8080/api/auth/login `
+  -H "Content-Type: application/json" `
+  -d '{"login":"admin@arthurbaby.com.br","senha":"123456"}'
 ```
 
 Use o campo `token` retornado:

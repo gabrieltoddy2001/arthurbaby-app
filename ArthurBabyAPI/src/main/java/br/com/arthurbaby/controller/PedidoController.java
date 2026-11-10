@@ -85,10 +85,16 @@ public class PedidoController {
     @Operation(summary = "Alterar status do pedido", description = "Atualiza o status do pedido identificado pelo id informado.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status alterado; retorna o pedido atualizado"),
-            @ApiResponse(responseCode = "400", description = "Pedido não encontrado, status inválido ou cancelamento sem motivo")
+            @ApiResponse(responseCode = "400", description = "Pedido não encontrado, status inválido ou cancelamento sem motivo"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado: apenas perfis ADMINISTRADOR ou VENDEDOR")
     })
-    public PedidoResponse status(@Parameter(description = "Id do pedido", example = "15") @PathVariable Long id, @RequestBody StatusPedidoRequest request) {
-        return service.alterarStatus(id, request);
+    public PedidoResponse status(@Parameter(description = "Id do pedido", example = "15") @PathVariable Long id, @RequestBody StatusPedidoRequest request,
+                                 @AuthenticationPrincipal Usuario logado) {
+        // Somente a equipe da loja altera status; clientes usam o endpoint de cancelamento
+        if (logado.getPerfil() != Perfil.ADMINISTRADOR && logado.getPerfil() != Perfil.VENDEDOR) {
+            throw new AccessDeniedException("Apenas a equipe da loja pode alterar o status do pedido");
+        }
+        return service.alterarStatus(id, request, logado);
     }
 
     @PutMapping("/{numeroPedido}/cancelar")

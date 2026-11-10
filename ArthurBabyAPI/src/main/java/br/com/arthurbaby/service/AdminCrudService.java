@@ -141,9 +141,26 @@ public class AdminCrudService {
     private void prepararUsuario(Object entity, Object existente) {
         if (!(entity instanceof Usuario usuario)) return;
         usuario.setEmail(AuthService.normalizarEmail(usuario.getEmail()));
+        if (usuario.getNomeCompleto() == null || usuario.getNomeCompleto().isBlank()) {
+            throw new IllegalArgumentException("Nome do usuario e obrigatorio");
+        }
+        if (existente instanceof Usuario atual) {
+            // O painel nao edita enderecos nem aceites: preserva os dados do cadastro em vez de apaga-los
+            usuario.setEnderecos(new java.util.ArrayList<>(atual.getEnderecos()));
+            usuario.setCriadoEm(atual.getCriadoEm());
+            usuario.setAceiteTermoUso(atual.isAceiteTermoUso());
+            usuario.setDataAceiteTermoUso(atual.getDataAceiteTermoUso());
+            usuario.setAceiteLgpd(atual.isAceiteLgpd());
+            usuario.setDataAceiteLgpd(atual.getDataAceiteLgpd());
+        } else {
+            usuario.getEnderecos().forEach(endereco -> endereco.setUsuario(usuario));
+        }
         String senha = usuario.getSenha();
         if (senha == null || senha.isBlank()) {
             if (existente instanceof Usuario atual) usuario.setSenha(atual.getSenha());
+            else throw new IllegalArgumentException("Senha inicial e obrigatoria");
+        } else if (!BCRYPT.matcher(senha).matches() && senha.length() < 6) {
+            throw new IllegalArgumentException("A senha deve ter pelo menos 6 caracteres");
         } else if (!BCRYPT.matcher(senha).matches()) {
             usuario.setSenha(encoder.encode(senha));
         }
@@ -157,6 +174,27 @@ public class AdminCrudService {
         if (!(entity instanceof Produto produto)) return;
         produto.getImagens().forEach(imagem -> imagem.setProduto(produto));
         produto.getVariacoes().forEach(variacao -> variacao.setProduto(produto));
+
+        // O estoque é controlado por variação: produto sem variação venderia sem baixa nem conferência de estoque
+        if (produto.getVariacoes().isEmpty()) {
+            throw new IllegalArgumentException("Cadastre pelo menos uma variação (tamanho/cor/modelo): o estoque é controlado por variação.");
+        }
+        java.util.Set<String> skus = new java.util.HashSet<>();
+        for (var variacao : produto.getVariacoes()) {
+            String sku = variacao.getSku() == null ? "" : variacao.getSku().trim().toUpperCase();
+            if (sku.isEmpty()) throw new IllegalArgumentException("Informe o SKU de cada variação.");
+            if (!skus.add(sku)) throw new IllegalArgumentException("SKU repetido nas variações: " + variacao.getSku().trim() + ".");
+            if (variacao.getEstoqueAtual() < 0) throw new IllegalArgumentException("O estoque não pode ficar negativo (SKU " + variacao.getSku().trim() + ").");
+        }
+        // Status automático: ATIVO sem saldo vira ESGOTADO; ESGOTADO com saldo volta a ATIVO. INATIVO não muda.
+        int saldo = produto.getVariacoes().stream()
+                .filter(v -> v.getStatus() != br.com.arthurbaby.entity.Enums.VariacaoStatus.INATIVA)
+                .mapToInt(br.com.arthurbaby.entity.ProdutoVariacao::getEstoqueAtual).sum();
+        if (produto.getStatus() == br.com.arthurbaby.entity.Enums.ProdutoStatus.ATIVO && saldo <= 0) {
+            produto.setStatus(br.com.arthurbaby.entity.Enums.ProdutoStatus.ESGOTADO);
+        } else if (produto.getStatus() == br.com.arthurbaby.entity.Enums.ProdutoStatus.ESGOTADO && saldo > 0) {
+            produto.setStatus(br.com.arthurbaby.entity.Enums.ProdutoStatus.ATIVO);
+        }
         if (existente instanceof Produto atual) {
             produto.setCriadoEm(atual.getCriadoEm());
             if (produto.getAvaliacao() == null) produto.setAvaliacao(atual.getAvaliacao());
