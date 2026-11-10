@@ -150,9 +150,9 @@
                     </div>
                   </div>
                 `).join('')}
-            <div style="margin-top:.75rem;text-align:right;">
+            ${ehAdmin() ? `<div style="margin-top:.75rem;text-align:right;">
               <a href="relatorios.html" style="font-size:.85rem;">Ver relatório completo →</a>
-            </div>
+            </div>` : ''}
           </div>
         </div>
 
@@ -208,14 +208,14 @@
               <span style="font-size:1.5rem;">📊</span>
               <span>Movimentar estoque</span>
             </a>
-            <a href="relatorios.html" class="atalho">
+            ${ehAdmin() ? `<a href="relatorios.html" class="atalho">
               <span style="font-size:1.5rem;">📈</span>
               <span>Relatórios</span>
             </a>
             <a href="configuracoes.html" class="atalho">
               <span style="font-size:1.5rem;">⚙️</span>
               <span>Configurações</span>
-            </a>
+            </a>` : ''}
           </div>
         </div>
       `;

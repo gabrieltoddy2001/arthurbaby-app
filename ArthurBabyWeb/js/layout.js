@@ -44,12 +44,18 @@ const ICONES = {
   
       { secao: 'Sistema' },
       { href: 'usuarios.html',     label: 'Usuários internos', icone: 'usuarios', chave: 'usuarios' },
-      { href: 'relatorios.html',   label: 'Relatórios',  icone: 'relatorios', chave: 'relatorios' },
-      { href: 'configuracoes.html',label: 'Configurações', icone: 'configuracoes', chave: 'configuracoes' },
-      { href: 'auditoria.html',    label: 'Auditoria',   icone: 'auditoria', chave: 'auditoria' },
+      { href: 'relatorios.html',   label: 'Relatórios',  icone: 'relatorios', chave: 'relatorios', somenteAdmin: true },
+      { href: 'configuracoes.html',label: 'Configurações', icone: 'configuracoes', chave: 'configuracoes', somenteAdmin: true },
+      { href: 'auditoria.html',    label: 'Auditoria',   icone: 'auditoria', chave: 'auditoria', somenteAdmin: true },
     ];
-  
-    const sidebar = menu.map(item => {
+
+    // Vendedor não acessa Relatórios, Configurações nem Auditoria (nem pelo endereço direto)
+    if (!ehAdmin(usuario) && PAGINAS_SOMENTE_ADMIN.includes(paginaAtiva)) {
+      window.location.replace('dashboard.html');
+      return null;
+    }
+
+    const sidebar = menu.filter(item => !item.somenteAdmin || ehAdmin(usuario)).map(item => {
       if (item.secao) return `<div class="secao">${item.secao}</div>`;
       const svg = ICONES[item.icone] || '';
       return `<a href="${item.href}" class="${item.chave === paginaAtiva ? 'ativo' : ''}">

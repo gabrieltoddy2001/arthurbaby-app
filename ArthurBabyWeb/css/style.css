@@ -260,6 +260,20 @@
      background-clip: text;
      letter-spacing: -0.02em;
    }
+   .login-marca {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: .6rem;
+     margin-bottom: .25rem;
+   }
+   .login-marca h1 { margin-bottom: 0; }
+   .login-icone {
+     width: 40px;
+     height: 40px;
+     object-fit: contain;
+     flex-shrink: 0;
+   }
    .login-box .subtitulo {
      text-align: center;
      color: var(--texto-secundario);

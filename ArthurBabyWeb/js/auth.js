@@ -18,6 +18,13 @@
     return usuario;
   }
   
+  /* Páginas que o perfil VENDEDOR não pode ver */
+  const PAGINAS_SOMENTE_ADMIN = ['relatorios', 'configuracoes', 'auditoria'];
+
+  function ehAdmin(usuario = getUsuario()) {
+    return usuario?.perfil === 'ADMINISTRADOR';
+  }
+
   function logout() {
     limparSessao();
     window.location.href = 'login.html';
