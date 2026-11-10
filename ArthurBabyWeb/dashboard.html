@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — ArthurBaby Admin</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="app"></div>
 
-  <script src="js/mock-data.js"></script>
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/layout.js"></script>
@@ -108,7 +108,7 @@
         </div>
 
         <!-- ===== 2 colunas: Pedidos por status + Estoque baixo ===== -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+        <div class="grid-dashboard" style="display:grid;grid-template-columns:1fr 1fr;">
 
           <!-- Pedidos por status -->
           <div class="card">
@@ -121,7 +121,7 @@
                   return `
                     <div style="margin-bottom:.75rem;">
                       <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.25rem;">
-                        <span><span class="badge ${badgeStatus(s)}" style="font-size:.7rem;">${s}</span></span>
+                        <span><span class="badge ${classeStatus(s)}" style="font-size:.7rem;">${rotuloStatus(s)}</span></span>
                         <strong>${qtd}</strong>
                       </div>
                       <div style="height:6px;background:var(--superficie);border-radius:3px;overflow:hidden;">
@@ -157,7 +157,7 @@
         </div>
 
         <!-- ===== Últimos pedidos ===== -->
-        <div class="card" style="margin-bottom:1.25rem;">
+        <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
             <h3 class="secao-titulo" style="margin:0;">🧾 Últimos pedidos</h3>
             <a href="pedidos.html" style="font-size:.85rem;">Ver todos →</a>
@@ -180,7 +180,7 @@
                       <td><strong>${escapeHtml(p.numeroPedido)}</strong></td>
                       <td>${escapeHtml(p.clienteNome)}</td>
                       <td>${formatarData(p.criadoEm)}</td>
-                      <td><span class="badge ${badgeStatus(p.status)}">${p.status}</span></td>
+                      <td><span class="badge ${classeStatus(p.status)}">${rotuloStatus(p.status)}</span></td>
                       <td class="text-right"><strong>R$ ${formatarPreco(p.total)}</strong></td>
                     </tr>
                   `).join('')}
