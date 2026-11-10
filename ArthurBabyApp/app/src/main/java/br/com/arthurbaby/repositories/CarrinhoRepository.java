@@ -91,15 +91,34 @@ public class CarrinhoRepository {
     }
 
     public void adicionar(Produto produto, int quantidade, Variacao variacao, Long variacaoId) {
+        adicionar(produto, quantidade, variacao, variacaoId, null);
+    }
+
+    /**
+     * Junta a quantidade só quando é o mesmo produto E a mesma variação.
+     * Antes juntava apenas pelo produto: escolher o tamanho M depois do P somava no item P.
+     */
+    public void adicionar(Produto produto, int quantidade, Variacao variacao, Long variacaoId,
+                          java.math.BigDecimal precoVariacao) {
         for (ItemCarrinho item : itens) {
-            if (item.getProduto().getId().equals(produto.getId())) {
+            if (item.mesmoItem(produto.getId(), variacaoId)) {
                 item.setQuantidade(item.getQuantidade() + quantidade);
                 persistir();
                 return;
             }
         }
-        itens.add(new ItemCarrinho(produto, quantidade, variacao, variacaoId));
+        ItemCarrinho novo = new ItemCarrinho(produto, quantidade, variacao, variacaoId);
+        novo.setPrecoVariacao(precoVariacao);
+        itens.add(novo);
         persistir();
+    }
+
+    /** Quantidade já no carrinho para o produto/variação (para respeitar o estoque). */
+    public int quantidadeNoCarrinho(Long produtoId, Long variacaoId) {
+        for (ItemCarrinho item : itens) {
+            if (item.mesmoItem(produtoId, variacaoId)) return item.getQuantidade();
+        }
+        return 0;
     }
 
     public void remover(ItemCarrinho item) {

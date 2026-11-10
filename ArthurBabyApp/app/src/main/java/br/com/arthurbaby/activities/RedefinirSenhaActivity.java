@@ -80,7 +80,7 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
                         public void onFailure(Call<Void> call, Throwable t) {
                             LoadingUtils.esconder();
                             Toast.makeText(RedefinirSenhaActivity.this,
-                                    "Erro de conexão: " + t.getMessage(),
+                                    ErrorUtils.mensagemFalha(t),
                                     Toast.LENGTH_LONG).show();
                         }
                     });

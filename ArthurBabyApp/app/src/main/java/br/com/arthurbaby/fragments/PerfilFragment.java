@@ -179,6 +179,7 @@ public class PerfilFragment extends Fragment {
         api.buscarMeuPerfil().enqueue(new Callback<UsuarioResponse>() {
             @Override
             public void onResponse(Call<UsuarioResponse> call, Response<UsuarioResponse> response) {
+                if (!isAdded()) return;
                 // 🔴 PROTEÇÃO: verifica se o Fragment ainda está anexado
                 if (!isAdded() || getContext() == null) return;
 
@@ -201,6 +202,7 @@ public class PerfilFragment extends Fragment {
 
             @Override
             public void onFailure(Call<UsuarioResponse> call, Throwable t) {
+                if (!isAdded()) return;
                 // 🔴 PROTEÇÃO: verifica se o Fragment ainda está anexado
                 if (!isAdded() || getContext() == null) return;
                 // Silencioso — mantém os dados locais

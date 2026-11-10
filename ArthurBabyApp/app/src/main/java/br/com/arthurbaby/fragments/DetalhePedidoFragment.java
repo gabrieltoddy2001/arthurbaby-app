@@ -143,6 +143,7 @@ public class DetalhePedidoFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PedidoResponse> call, Throwable t) {
+                        if (!isAdded()) return;
                         // Silencioso
                     }
                 });
@@ -181,6 +182,8 @@ public class DetalhePedidoFragment extends Fragment {
                                            Response<PedidoResponse> response) {
                         LoadingUtils.esconder();
 
+                        if (!isAdded()) return;
+
                         if (response.isSuccessful()) {
                             Toast.makeText(requireContext(),
                                     "Pedido cancelado", Toast.LENGTH_SHORT).show();
@@ -194,8 +197,9 @@ public class DetalhePedidoFragment extends Fragment {
                     @Override
                     public void onFailure(Call<PedidoResponse> call, Throwable t) {
                         LoadingUtils.esconder();
+                        if (!isAdded()) return;
                         Toast.makeText(requireContext(),
-                                "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                                ErrorUtils.mensagemFalha(t), Toast.LENGTH_LONG).show();
                     }
                 });
     }

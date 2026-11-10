@@ -95,6 +95,8 @@ public class FavoritosFragment extends Fragment {
                                    Response<List<FavoritoResponse>> response) {
                 LoadingView.esconder(progressBar, rv);
 
+                if (!isAdded()) return;
+
                 if (response.isSuccessful() && response.body() != null) {
                     List<Produto> produtos = new ArrayList<>();
                     for (FavoritoResponse f : response.body()) {
@@ -131,8 +133,9 @@ public class FavoritosFragment extends Fragment {
             @Override
             public void onFailure(Call<List<FavoritoResponse>> call, Throwable t) {
                 LoadingView.esconder(progressBar, rv);
+                if (!isAdded()) return;
                 Toast.makeText(requireContext(),
-                        "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
             }
         });
     }

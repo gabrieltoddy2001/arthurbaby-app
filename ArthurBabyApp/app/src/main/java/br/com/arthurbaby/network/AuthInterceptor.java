@@ -13,28 +13,18 @@ public class AuthInterceptor implements Interceptor {
     private final Context context;
 
     public AuthInterceptor(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request original = chain.request();
-        String path = original.url().encodedPath();
-
-        // Rotas públicas — não precisam de token
-        boolean publica = path.contains("/api/auth/login")
-                || path.contains("/api/auth/cadastro")
-                || path.contains("/api/auth/recuperar-senha")
-                || path.contains("/api/auth/redefinir-senha")
-                || path.contains("/api/categorias")
-                || path.contains("/api/produtos")
-                || path.contains("/api/cupons/validar");
 
         Request.Builder builder = original.newBuilder()
                 .header("Accept", "application/json");
 
         // Só adiciona o token se a rota NÃO for pública
-        if (!publica) {
+        if (!ehPublica(original.method(), original.url().encodedPath())) {
             String token = TokenStorage.getToken(context);
             if (token != null && !token.isEmpty()) {
                 builder.header("Authorization", "Bearer " + token);
@@ -42,5 +32,28 @@ public class AuthInterceptor implements Interceptor {
         }
 
         return chain.proceed(builder.build());
+    }
+
+    /**
+     * Espelha as regras permitAll do SecurityConfig da API.
+     * Antes qualquer caminho contendo "/api/produtos" era tratado como público — inclusive
+     * POST /api/produtos/{id}/avaliacoes, que exige login: a avaliação ia sem token,
+     * voltava 401 e o app deslogava o usuário.
+     */
+    static boolean ehPublica(String metodo, String path) {
+        if (path.startsWith("/api/auth/login")
+                || path.startsWith("/api/auth/cadastro")
+                || path.startsWith("/api/auth/recuperar-senha")
+                || path.startsWith("/api/auth/redefinir-senha")) {
+            return true;
+        }
+        if ("POST".equals(metodo) && path.equals("/api/cupons/validar")) return true;
+        if ("GET".equals(metodo)) {
+            return path.equals("/api/cupons/ativos")
+                    || path.startsWith("/api/categorias")
+                    || path.startsWith("/api/produtos")
+                    || path.startsWith("/api/estoque");
+        }
+        return false;
     }
 }

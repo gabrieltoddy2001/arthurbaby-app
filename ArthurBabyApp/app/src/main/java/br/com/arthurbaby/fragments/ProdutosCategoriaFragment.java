@@ -1,5 +1,6 @@
 package br.com.arthurbaby.fragments;
 
+import br.com.arthurbaby.utils.ErrorUtils;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,6 +81,7 @@ public class ProdutosCategoriaFragment extends Fragment {
                     @Override
                     public void onResponse(Call<PageResponse<ProdutoResponse>> call,
                                            Response<PageResponse<ProdutoResponse>> response) {
+                        if (!isAdded()) return;
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().content != null) {
                             rv.setAdapter(new ProdutoAdapter(
@@ -101,8 +103,9 @@ public class ProdutosCategoriaFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
+                        if (!isAdded()) return;
                         Toast.makeText(requireContext(),
-                                "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

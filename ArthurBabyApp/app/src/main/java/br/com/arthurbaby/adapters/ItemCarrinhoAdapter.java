@@ -54,7 +54,7 @@ public class ItemCarrinhoAdapter extends RecyclerView.Adapter<ItemCarrinhoAdapte
             h.tvVariacao.setVisibility(View.GONE);
         }
 
-        h.tvPreco.setText(MoedaUtils.formatar(item.getProduto().getPreco()));
+        h.tvPreco.setText(MoedaUtils.formatar(item.getPrecoUnitario()));
         h.tvQtd.setText(String.valueOf(item.getQuantidade()));
 
         // Carrega imagem com fade-in

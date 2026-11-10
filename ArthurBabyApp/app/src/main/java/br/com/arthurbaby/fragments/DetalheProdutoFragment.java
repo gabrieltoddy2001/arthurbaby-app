@@ -1,5 +1,6 @@
 package br.com.arthurbaby.fragments;
 
+import br.com.arthurbaby.utils.ErrorUtils;
 import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import br.com.arthurbaby.network.dto.ProdutoResponse;
 import br.com.arthurbaby.repositories.CarrinhoRepository;
 import br.com.arthurbaby.repositories.FavoritoRepository;
 import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.AvaliacaoUtils;
 import br.com.arthurbaby.utils.MoedaUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,11 +71,8 @@ public class DetalheProdutoFragment extends Fragment {
         TextView tvNome = v.findViewById(R.id.tvNome);
         TextView tvMarca = v.findViewById(R.id.tvMarca);
         TextView tvPreco = v.findViewById(R.id.tvPreco);
-        TextView tvPrecoAntigo = v.findViewById(R.id.tvPrecoAntigo);
         TextView tvDescricao = v.findViewById(R.id.tvDescricao);
         TextView tvQtd = v.findViewById(R.id.tvQtd);
-        TextView tvEstrelas = v.findViewById(R.id.tvEstrelas);
-        TextView tvAvaliacao = v.findViewById(R.id.tvAvaliacao);
         ImageView img = v.findViewById(R.id.imgProduto);
         ImageView btnFav = v.findViewById(R.id.btnFavoritoDetalhe);
         ImageView btnCompartilhar = v.findViewById(R.id.btnCompartilhar);
@@ -83,17 +82,10 @@ public class DetalheProdutoFragment extends Fragment {
             tvMarca.setText("Marca: " + produto.getMarca());
             tvDescricao.setText(produto.getDescricao());
             tvPreco.setText(MoedaUtils.formatar(produto.getPreco()));
-            tvEstrelas.setText("★★★★★");
-            tvAvaliacao.setText("(5.0)");
+            mostrarAvaliacao(v);
+            mostrarPrecoAntigo(v);
 
             carregarImagem(img, produto.getImagemUrl());
-
-            if (produto.getPreco().doubleValue() < 50 && produto.temEstoque()) {
-                tvPrecoAntigo.setVisibility(View.VISIBLE);
-                tvPrecoAntigo.setText(MoedaUtils.formatar(produto.getPreco().doubleValue() * 1.3));
-                tvPrecoAntigo.setPaintFlags(tvPrecoAntigo.getPaintFlags()
-                        | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-            }
 
             boolean logado = AuthGuard.estaLogado(requireContext());
             btnFav.setVisibility(logado ? View.VISIBLE : View.GONE);
@@ -140,21 +132,7 @@ public class DetalheProdutoFragment extends Fragment {
             }
         });
 
-        v.findViewById(R.id.btnAddCarrinho).setOnClickListener(x -> {
-            if (produto != null && produto.temEstoque()) {
-                Variacao variacao = null;
-                if (tamSel != null || corSel != null || modSel != null) {
-                    variacao = new Variacao(
-                            tamSel != null ? tamSel : "-",
-                            corSel != null ? corSel : "-",
-                            modSel != null ? modSel : "-");
-                }
-                CarrinhoRepository.getInstance().adicionar(produto, qtd, variacao, variacaoIdSel);
-                Toast.makeText(requireContext(),
-                        qtd + " item(ns) adicionado(s)", Toast.LENGTH_SHORT).show();
-                requireActivity().getSupportFragmentManager().popBackStack();
-            }
-        });
+        v.findViewById(R.id.btnAddCarrinho).setOnClickListener(x -> adicionarAoCarrinho());
 
         return v;
     }
@@ -175,27 +153,26 @@ public class DetalheProdutoFragment extends Fragment {
                     TextView tvNome = v.findViewById(R.id.tvNome);
                     TextView tvPreco = v.findViewById(R.id.tvPreco);
                     TextView tvDescricao = v.findViewById(R.id.tvDescricao);
-                    TextView tvAvaliacao = v.findViewById(R.id.tvAvaliacao);
                     ImageView img = v.findViewById(R.id.imgProduto);
 
                     tvNome.setText(atualizado.getNome());
                     tvDescricao.setText(atualizado.getDescricao());
                     tvPreco.setText(MoedaUtils.formatar(atualizado.getPreco()));
-
-                    if (atualizado.getAvaliacao() > 0) {
-                        tvAvaliacao.setText("(" + atualizado.getAvaliacao() + ".0)");
-                    }
+                    mostrarAvaliacao(v);
+                    mostrarPrecoAntigo(v);
 
                     if (atualizado.getImagemUrl() != null && !atualizado.getImagemUrl().isEmpty()) {
                         carregarImagem(img, atualizado.getImagemUrl());
                     }
 
                     desenharVariacoes(v);
+                    atualizarPrecoVariacao();
                 }
             }
 
             @Override
             public void onFailure(Call<ProdutoResponse> call, Throwable t) {
+                if (!isAdded()) return;
                 // Silencioso
             }
         });
@@ -254,6 +231,10 @@ public class DetalheProdutoFragment extends Fragment {
                 .setView(container)
                 .setPositiveButton("Enviar", (d, w) -> {
                     int nota = (int) ratingBar.getRating();
+                    if (nota < 1) {
+                        Toast.makeText(requireContext(), "Escolha de 1 a 5 estrelas.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     String comentario = etComentario.getText().toString().trim();
                     enviarAvaliacao(nota, comentario);
                 })
@@ -273,8 +254,11 @@ public class DetalheProdutoFragment extends Fragment {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         br.com.arthurbaby.utils.LoadingUtils.esconder();
+                        if (!isAdded()) return;
                         if (response.isSuccessful()) {
                             Toast.makeText(requireContext(), "Avaliação enviada! Obrigado.", Toast.LENGTH_LONG).show();
+                            // Atualiza a média exibida
+                            if (getView() != null) carregarProdutoBackend(getView());
                         } else {
                             Toast.makeText(requireContext(), br.com.arthurbaby.utils.ErrorUtils.extrairMensagem(response), Toast.LENGTH_LONG).show();
                         }
@@ -282,7 +266,8 @@ public class DetalheProdutoFragment extends Fragment {
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         br.com.arthurbaby.utils.LoadingUtils.esconder();
-                        Toast.makeText(requireContext(), "Erro: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (!isAdded()) return;
+                        Toast.makeText(requireContext(), ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -308,6 +293,7 @@ public class DetalheProdutoFragment extends Fragment {
                     tamSel = t;
                     atualizarChips(cTam, t);
                     atualizarVariacaoIdSel();
+                    atualizarPrecoVariacao();
                 }));
             }
             if (tamSel == null) {
@@ -326,6 +312,7 @@ public class DetalheProdutoFragment extends Fragment {
                     corSel = c;
                     atualizarChips(cCor, c);
                     atualizarVariacaoIdSel();
+                    atualizarPrecoVariacao();
                 }));
             }
             if (corSel == null) {
@@ -344,6 +331,7 @@ public class DetalheProdutoFragment extends Fragment {
                     modSel = m;
                     atualizarChips(cMod, m);
                     atualizarVariacaoIdSel();
+                    atualizarPrecoVariacao();
                 }));
             }
             if (modSel == null) {
@@ -359,16 +347,97 @@ public class DetalheProdutoFragment extends Fragment {
 
     private void atualizarVariacaoIdSel() {
         variacaoIdSel = null;
-        if (produto == null) return;
+        Produto.VariacaoReal var = variacaoSelecionada();
+        if (var != null) variacaoIdSel = var.id;
+    }
+
+    /** Variação que corresponde a tamanho/cor/modelo escolhidos, ou null se a combinação não existe. */
+    private Produto.VariacaoReal variacaoSelecionada() {
+        if (produto == null) return null;
         for (Produto.VariacaoReal var : produto.getVariacoes()) {
             boolean tamOk = (tamSel == null) || tamSel.equals(var.tamanho);
             boolean corOk = (corSel == null) || corSel.equals(var.cor);
             boolean modOk = (modSel == null) || modSel.equals(var.modelo);
-            if (tamOk && corOk && modOk) {
-                variacaoIdSel = var.id;
+            if (tamOk && corOk && modOk) return var;
+        }
+        return null;
+    }
+
+    /** Preço exibido = preço próprio da variação, quando houver (mesma regra do back). */
+    private void atualizarPrecoVariacao() {
+        View v = getView();
+        if (v == null || produto == null) return;
+        Produto.VariacaoReal var = variacaoSelecionada();
+        java.math.BigDecimal preco = var != null && var.preco != null ? var.preco : produto.getPreco();
+        ((TextView) v.findViewById(R.id.tvPreco)).setText(MoedaUtils.formatar(preco));
+    }
+
+    private void mostrarAvaliacao(View v) {
+        TextView tvEstrelas = v.findViewById(R.id.tvEstrelas);
+        TextView tvAvaliacao = v.findViewById(R.id.tvAvaliacao);
+        tvEstrelas.setText(AvaliacaoUtils.estrelas(produto.getAvaliacao()));
+        tvAvaliacao.setText(AvaliacaoUtils.nota(produto.getAvaliacao(), "(sem avaliações)"));
+    }
+
+    /** Preço "de" riscado somente quando há preço promocional real (antes: preço x 1,3 inventado). */
+    private void mostrarPrecoAntigo(View v) {
+        TextView tvPrecoAntigo = v.findViewById(R.id.tvPrecoAntigo);
+        if (produto.temDesconto()) {
+            tvPrecoAntigo.setVisibility(View.VISIBLE);
+            tvPrecoAntigo.setText(MoedaUtils.formatar(produto.getPrecoOriginal()));
+            tvPrecoAntigo.setPaintFlags(tvPrecoAntigo.getPaintFlags()
+                    | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+        } else {
+            tvPrecoAntigo.setVisibility(View.GONE);
+        }
+    }
+
+    private void adicionarAoCarrinho() {
+        if (produto == null) return;
+        if (produto.isEsgotado()) {
+            Toast.makeText(requireContext(), "Produto esgotado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Produto.VariacaoReal var = null;
+        if (!produto.getVariacoes().isEmpty()) {
+            var = variacaoSelecionada();
+            if (var == null) {
+                Toast.makeText(requireContext(),
+                        "Essa combinação de tamanho/cor/modelo não está disponível.",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int jaNoCarrinho = CarrinhoRepository.getInstance()
+                    .quantidadeNoCarrinho(produto.getId(), var.id);
+            int disponivel = var.estoqueAtual - jaNoCarrinho;
+            if (disponivel <= 0) {
+                Toast.makeText(requireContext(),
+                        jaNoCarrinho > 0 ? "Todo o estoque dessa opção já está no seu carrinho."
+                                : "Sem estoque para essa opção.",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (qtd > disponivel) {
+                Toast.makeText(requireContext(),
+                        "Só há " + disponivel + " unidade(s) disponível(is) dessa opção.",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
         }
+
+        Variacao variacao = null;
+        if (tamSel != null || corSel != null || modSel != null) {
+            variacao = new Variacao(
+                    tamSel != null ? tamSel : "-",
+                    corSel != null ? corSel : "-",
+                    modSel != null ? modSel : "-");
+        }
+        CarrinhoRepository.getInstance().adicionar(produto, qtd, variacao,
+                var != null ? var.id : null, var != null ? var.preco : null);
+        Toast.makeText(requireContext(),
+                qtd + " item(ns) adicionado(s)", Toast.LENGTH_SHORT).show();
+        requireActivity().getSupportFragmentManager().popBackStack();
     }
 
     private void esconderSecao(View root, View container) {

@@ -21,6 +21,7 @@ import br.com.arthurbaby.R;
 import br.com.arthurbaby.models.Produto;
 import br.com.arthurbaby.repositories.FavoritoRepository;
 import br.com.arthurbaby.utils.AuthGuard;
+import br.com.arthurbaby.utils.AvaliacaoUtils;
 import br.com.arthurbaby.utils.MoedaUtils;
 
 public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
@@ -66,8 +67,21 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
                     h.itemView.getContext(), R.color.placeholder_produto));
         }
 
-        boolean emPromocao = p.getPreco().doubleValue() < 50 && p.temEstoque();
+        // Selo e preço riscado vêm dos dados reais do back (antes: qualquer produto < R$ 50 era "promoção")
+        boolean emPromocao = p.isPromocao() && p.temEstoque();
         h.tvSeloPromocao.setVisibility(emPromocao ? View.VISIBLE : View.GONE);
+        if (h.tvPrecoAntigo != null) {
+            if (p.temDesconto()) {
+                h.tvPrecoAntigo.setVisibility(View.VISIBLE);
+                h.tvPrecoAntigo.setText(MoedaUtils.formatar(p.getPrecoOriginal()));
+                h.tvPrecoAntigo.setPaintFlags(h.tvPrecoAntigo.getPaintFlags()
+                        | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                h.tvPrecoAntigo.setVisibility(View.GONE);
+            }
+        }
+        if (h.tvEstrelas != null) h.tvEstrelas.setText(AvaliacaoUtils.estrelas(p.getAvaliacao()));
+        if (h.tvAvaliacao != null) h.tvAvaliacao.setText(AvaliacaoUtils.nota(p.getAvaliacao(), ""));
         h.tvSeloEsgotado.setVisibility(p.isEsgotado() ? View.VISIBLE : View.GONE);
 
         boolean logado = AuthGuard.estaLogado(h.itemView.getContext());
@@ -104,10 +118,13 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
 
     static class VH extends RecyclerView.ViewHolder {
         ImageView img, btnFavorito;
-        TextView tvNome, tvPreco, tvSeloPromocao, tvSeloEsgotado;
+        TextView tvNome, tvPreco, tvSeloPromocao, tvSeloEsgotado, tvPrecoAntigo, tvEstrelas, tvAvaliacao;
 
         VH(View v) {
             super(v);
+            tvPrecoAntigo = v.findViewById(R.id.tvPrecoAntigo);
+            tvEstrelas = v.findViewById(R.id.tvEstrelas);
+            tvAvaliacao = v.findViewById(R.id.tvAvaliacao);
             img = v.findViewById(R.id.imgProduto);
             btnFavorito = v.findViewById(R.id.btnFavorito);
             tvNome = v.findViewById(R.id.tvNome);
