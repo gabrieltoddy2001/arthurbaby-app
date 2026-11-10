@@ -1,0 +1,38 @@
+START TRANSACTION;
+UPDATE pedido SET cliente_id = 3 WHERE id = 1 AND cliente_id = 11;
+UPDATE pedido_status_historico SET usuario_id = 3 WHERE pedido_id = 1 AND usuario_id = 11;
+UPDATE movimentacao_estoque SET usuario_id = 3 WHERE usuario_id = 11 AND (observacao = 'Pedido PED-2026-0001' OR observacao = 'Cancelamento do pedido PED-2026-0001');
+UPDATE pedido SET cliente_id = 4 WHERE id = 2 AND cliente_id = 13;
+UPDATE pedido_status_historico SET usuario_id = 4 WHERE pedido_id = 2 AND usuario_id = 13;
+UPDATE movimentacao_estoque SET usuario_id = 4 WHERE usuario_id = 13 AND (observacao = 'Pedido PED-2026-0002' OR observacao = 'Cancelamento do pedido PED-2026-0002');
+UPDATE pedido SET cliente_id = 3 WHERE id = 8 AND cliente_id = 4;
+UPDATE pedido_status_historico SET usuario_id = 3 WHERE pedido_id = 8 AND usuario_id = 4;
+UPDATE movimentacao_estoque SET usuario_id = 3 WHERE usuario_id = 4 AND (observacao = 'Pedido AB20261018190636712' OR observacao = 'Cancelamento do pedido AB20261018190636712');
+UPDATE pedido SET cliente_id = 10 WHERE id = 13 AND cliente_id = 3;
+UPDATE pedido_status_historico SET usuario_id = 10 WHERE pedido_id = 13 AND usuario_id = 3;
+UPDATE movimentacao_estoque SET usuario_id = 10 WHERE usuario_id = 3 AND (observacao = 'Pedido PED-EX-0004' OR observacao = 'Cancelamento do pedido PED-EX-0004');
+UPDATE pedido SET cliente_id = 12 WHERE id = 14 AND cliente_id = 4;
+UPDATE pedido_status_historico SET usuario_id = 12 WHERE pedido_id = 14 AND usuario_id = 4;
+UPDATE movimentacao_estoque SET usuario_id = 12 WHERE usuario_id = 4 AND (observacao = 'Pedido PED-EX-0005' OR observacao = 'Cancelamento do pedido PED-EX-0005');
+UPDATE pedido SET cliente_id = 13 WHERE id = 15 AND cliente_id = 6;
+UPDATE pedido_status_historico SET usuario_id = 13 WHERE pedido_id = 15 AND usuario_id = 6;
+UPDATE movimentacao_estoque SET usuario_id = 13 WHERE usuario_id = 6 AND (observacao = 'Pedido PED-EX-0006' OR observacao = 'Cancelamento do pedido PED-EX-0006');
+UPDATE pedido SET cliente_id = 11 WHERE id = 16 AND cliente_id = 6;
+UPDATE pedido_status_historico SET usuario_id = 11 WHERE pedido_id = 16 AND usuario_id = 6;
+UPDATE movimentacao_estoque SET usuario_id = 11 WHERE usuario_id = 6 AND (observacao = 'Pedido PED-EX-0007' OR observacao = 'Cancelamento do pedido PED-EX-0007');
+UPDATE pedido SET cliente_id = 13 WHERE id = 17 AND cliente_id = 9;
+UPDATE pedido_status_historico SET usuario_id = 13 WHERE pedido_id = 17 AND usuario_id = 9;
+UPDATE movimentacao_estoque SET usuario_id = 13 WHERE usuario_id = 9 AND (observacao = 'Pedido PED-EX-0008' OR observacao = 'Cancelamento do pedido PED-EX-0008');
+UPDATE pedido SET cliente_id = 3 WHERE id = 18 AND cliente_id = 12;
+UPDATE pedido_status_historico SET usuario_id = 3 WHERE pedido_id = 18 AND usuario_id = 12;
+UPDATE movimentacao_estoque SET usuario_id = 3 WHERE usuario_id = 12 AND (observacao = 'Pedido AB20261110001954370' OR observacao = 'Cancelamento do pedido AB20261110001954370');
+UPDATE pedido SET cliente_id = 3 WHERE id = 19 AND cliente_id = 13;
+UPDATE pedido_status_historico SET usuario_id = 3 WHERE pedido_id = 19 AND usuario_id = 13;
+UPDATE movimentacao_estoque SET usuario_id = 3 WHERE usuario_id = 13 AND (observacao = 'Pedido AB20261110001954611' OR observacao = 'Cancelamento do pedido AB20261110001954611');
+UPDATE pedido SET cliente_id = 3 WHERE id = 20 AND cliente_id = 9;
+UPDATE pedido_status_historico SET usuario_id = 3 WHERE pedido_id = 20 AND usuario_id = 9;
+UPDATE movimentacao_estoque SET usuario_id = 3 WHERE usuario_id = 9 AND (observacao = 'Pedido AB20261110002219700' OR observacao = 'Cancelamento do pedido AB20261110002219700');
+COMMIT;
+
+-- Remove os enderecos de teste criados junto com a redistribuicao
+DELETE FROM endereco WHERE usuario_id IN (3,4) AND logradouro IN ('Rua Professor Sabino Silva', 'Avenida Sete de Setembro');
