@@ -176,7 +176,7 @@ public class CadastroActivity extends AppCompatActivity {
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 LoadingUtils.esconder();
                 Toast.makeText(CadastroActivity.this,
-                        "Erro de conexão: " + t.getMessage(),
+                        ErrorUtils.mensagemFalha(t),
                         Toast.LENGTH_LONG).show();
             }
         });

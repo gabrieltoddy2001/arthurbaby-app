@@ -42,6 +42,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -54,6 +55,8 @@ import java.util.regex.Pattern;
 public class AdminCrudService {
     private static final TypeReference<Map<String, Object>> JSON = new TypeReference<>() {};
     private static final Pattern BCRYPT = Pattern.compile("^\\$2[aby]?\\$\\d{2}\\$.{53}$");
+    /** Palavras so com letras (qualquer idioma), separadas por espaco, hifen, apostrofo ou ". ". */
+    private static final Pattern NOME_PESSOA = Pattern.compile("^\\p{L}+(?:(?:\\. ?| |[-'’])\\p{L}+)*\\.?$");
 
     private final Map<String, RecursoAdmin> recursos;
     private final ObjectMapper mapper;
@@ -141,12 +144,46 @@ public class AdminCrudService {
     private void prepararUsuario(Object entity, Object existente) {
         if (!(entity instanceof Usuario usuario)) return;
         usuario.setEmail(AuthService.normalizarEmail(usuario.getEmail()));
+        usuario.setNomeCompleto(validarNome(usuario.getNomeCompleto()));
+        if (existente instanceof Usuario atual) {
+            // O painel nao edita enderecos nem aceites: preserva os dados do cadastro em vez de apaga-los
+            usuario.setEnderecos(new java.util.ArrayList<>(atual.getEnderecos()));
+            usuario.setCriadoEm(atual.getCriadoEm());
+            usuario.setAceiteTermoUso(atual.isAceiteTermoUso());
+            usuario.setDataAceiteTermoUso(atual.getDataAceiteTermoUso());
+            usuario.setAceiteLgpd(atual.isAceiteLgpd());
+            usuario.setDataAceiteLgpd(atual.getDataAceiteLgpd());
+        } else {
+            usuario.getEnderecos().forEach(endereco -> endereco.setUsuario(usuario));
+        }
         String senha = usuario.getSenha();
         if (senha == null || senha.isBlank()) {
             if (existente instanceof Usuario atual) usuario.setSenha(atual.getSenha());
+            else throw new IllegalArgumentException("Senha inicial e obrigatoria");
+        } else if (!BCRYPT.matcher(senha).matches() && senha.length() < 6) {
+            throw new IllegalArgumentException("A senha deve ter pelo menos 6 caracteres");
         } else if (!BCRYPT.matcher(senha).matches()) {
             usuario.setSenha(encoder.encode(senha));
         }
+    }
+
+    /**
+     * Nome de pessoa: so letras (com acento), separadas por espaco, hifen, apostrofo ou ponto de abreviacao
+     * (ex.: "Ana Clara", "Maria D'Avila", "Joao P. Souza"). Recusa numeros, simbolos e emojis.
+     * Devolve o nome sem espacos sobrando.
+     */
+    static String validarNome(String nome) {
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException("Nome do usuário é obrigatório.");
+        }
+        String limpo = Normalizer.normalize(nome, Normalizer.Form.NFC).strip().replaceAll("\\s+", " ");
+        if (limpo.length() > 150) {
+            throw new IllegalArgumentException("O nome deve ter no máximo 150 caracteres.");
+        }
+        if (!NOME_PESSOA.matcher(limpo).matches() || limpo.codePoints().filter(Character::isLetter).count() < 2) {
+            throw new IllegalArgumentException("Nome inválido: use apenas letras e espaços (hífen, apóstrofo e ponto de abreviação são aceitos).");
+        }
+        return limpo;
     }
 
     /**
@@ -157,6 +194,27 @@ public class AdminCrudService {
         if (!(entity instanceof Produto produto)) return;
         produto.getImagens().forEach(imagem -> imagem.setProduto(produto));
         produto.getVariacoes().forEach(variacao -> variacao.setProduto(produto));
+
+        // O estoque é controlado por variação: produto sem variação venderia sem baixa nem conferência de estoque
+        if (produto.getVariacoes().isEmpty()) {
+            throw new IllegalArgumentException("Cadastre pelo menos uma variação (tamanho/cor/modelo): o estoque é controlado por variação.");
+        }
+        java.util.Set<String> skus = new java.util.HashSet<>();
+        for (var variacao : produto.getVariacoes()) {
+            String sku = variacao.getSku() == null ? "" : variacao.getSku().trim().toUpperCase();
+            if (sku.isEmpty()) throw new IllegalArgumentException("Informe o SKU de cada variação.");
+            if (!skus.add(sku)) throw new IllegalArgumentException("SKU repetido nas variações: " + variacao.getSku().trim() + ".");
+            if (variacao.getEstoqueAtual() < 0) throw new IllegalArgumentException("O estoque não pode ficar negativo (SKU " + variacao.getSku().trim() + ").");
+        }
+        // Status automático: ATIVO sem saldo vira ESGOTADO; ESGOTADO com saldo volta a ATIVO. INATIVO não muda.
+        int saldo = produto.getVariacoes().stream()
+                .filter(v -> v.getStatus() != br.com.arthurbaby.entity.Enums.VariacaoStatus.INATIVA)
+                .mapToInt(br.com.arthurbaby.entity.ProdutoVariacao::getEstoqueAtual).sum();
+        if (produto.getStatus() == br.com.arthurbaby.entity.Enums.ProdutoStatus.ATIVO && saldo <= 0) {
+            produto.setStatus(br.com.arthurbaby.entity.Enums.ProdutoStatus.ESGOTADO);
+        } else if (produto.getStatus() == br.com.arthurbaby.entity.Enums.ProdutoStatus.ESGOTADO && saldo > 0) {
+            produto.setStatus(br.com.arthurbaby.entity.Enums.ProdutoStatus.ATIVO);
+        }
         if (existente instanceof Produto atual) {
             produto.setCriadoEm(atual.getCriadoEm());
             if (produto.getAvaliacao() == null) produto.setAvaliacao(atual.getAvaliacao());

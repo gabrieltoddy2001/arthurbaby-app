@@ -17,6 +17,8 @@ const ICONES = {
     relatorios: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/><polyline points="22 6 13 15 9 11 2 18"/></svg>',
     configuracoes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
     auditoria: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+    novoPedido: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>',
+    menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>',
     sair: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
   };
   
@@ -25,8 +27,8 @@ const ICONES = {
     if (!usuario) return null;
   
     const menu = [
-      { secao: 'Geral' },
-      { href: 'dashboard.html',    label: 'Dashboard',   icone: 'dashboard', chave: 'dashboard' },
+      { secao: 'Geral', somenteAdmin: true },
+      { href: 'dashboard.html',    label: 'Dashboard',   icone: 'dashboard', chave: 'dashboard', somenteAdmin: true },
   
       { secao: 'Cadastros' },
       { href: 'categorias.html',   label: 'Categorias',  icone: 'categorias', chave: 'categorias' },
@@ -36,17 +38,24 @@ const ICONES = {
   
       { secao: 'Operações' },
       { href: 'estoque.html',      label: 'Estoque',     icone: 'estoque', chave: 'estoque' },
+      { href: 'pedido-novo.html',  label: 'Novo pedido', icone: 'novoPedido', chave: 'pedido-novo' },
       { href: 'pedidos.html',      label: 'Pedidos',     icone: 'pedidos', chave: 'pedidos' },
       { href: 'clientes.html',     label: 'Clientes',    icone: 'clientes', chave: 'clientes' },
   
-      { secao: 'Sistema' },
-      { href: 'usuarios.html',     label: 'Usuários internos', icone: 'usuarios', chave: 'usuarios' },
-      { href: 'relatorios.html',   label: 'Relatórios',  icone: 'relatorios', chave: 'relatorios' },
-      { href: 'configuracoes.html',label: 'Configurações', icone: 'configuracoes', chave: 'configuracoes' },
-      { href: 'auditoria.html',    label: 'Auditoria',   icone: 'auditoria', chave: 'auditoria' },
+      { secao: 'Sistema', somenteAdmin: true },
+      { href: 'usuarios.html',     label: 'Usuários internos', icone: 'usuarios', chave: 'usuarios', somenteAdmin: true },
+      { href: 'relatorios.html',   label: 'Relatórios',  icone: 'relatorios', chave: 'relatorios', somenteAdmin: true },
+      { href: 'configuracoes.html',label: 'Configurações', icone: 'configuracoes', chave: 'configuracoes', somenteAdmin: true },
+      { href: 'auditoria.html',    label: 'Auditoria',   icone: 'auditoria', chave: 'auditoria', somenteAdmin: true },
     ];
-  
-    const sidebar = menu.map(item => {
+
+    // Vendedor não acessa as telas de Geral e Sistema (nem pelo endereço direto)
+    if (!ehAdmin(usuario) && PAGINAS_SOMENTE_ADMIN.includes(paginaAtiva)) {
+      window.location.replace(paginaInicial(usuario));
+      return null;
+    }
+
+    const sidebar = menu.filter(item => !item.somenteAdmin || ehAdmin(usuario)).map(item => {
       if (item.secao) return `<div class="secao">${item.secao}</div>`;
       const svg = ICONES[item.icone] || '';
       return `<a href="${item.href}" class="${item.chave === paginaAtiva ? 'ativo' : ''}">
@@ -56,7 +65,9 @@ const ICONES = {
   
     const html = `
       <aside class="sidebar">
-        <h2>ArthurBaby</h2>
+        <a href="${paginaInicial(usuario)}" class="sidebar-logo" title="Lojão Arthur Baby">
+          <img src="assets/logo-arthurbaby.png" alt="Lojão Arthur Baby">
+        </a>
         ${sidebar}
         <a href="#" class="sair" onclick="logout(); return false;">
           ${ICONES.sair}<span>Sair</span>
@@ -64,13 +75,65 @@ const ICONES = {
       </aside>
       <main class="main">
         <div class="header">
-          <h1>${tituloPagina}</h1>
+          <div class="header-titulo">
+            <button type="button" class="btn-menu" aria-label="Abrir menu" onclick="alternarMenu()">${ICONES.menu}</button>
+            <h1>${tituloPagina}</h1>
+          </div>
           <span class="usuario">${usuario.nome} (${usuario.perfil})</span>
         </div>
         <div id="conteudo"></div>
       </main>
+      <div class="sidebar-fundo" onclick="alternarMenu(false)"></div>
     `;
   
     document.querySelector('.app').innerHTML = html;
+    document.title = `${tituloPagina} — ArthurBaby Admin`;
+    garantirFavicon();
     return usuario;
+  }
+
+  /* Menu lateral no celular/tablet (a sidebar fica escondida abaixo de 900px) */
+  function alternarMenu(abrir) {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+    const aberta = abrir ?? !sidebar.classList.contains('aberta');
+    sidebar.classList.toggle('aberta', aberta);
+    document.body.classList.toggle('menu-aberto', aberta);
+  }
+
+  function garantirFavicon() {
+    if (document.querySelector('link[rel="icon"]')) return;
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    link.href = 'assets/favicon.png';
+    document.head.appendChild(link);
+  }
+
+  /* Redefine a senha de um usuário (cliente ou interno). A API grava o hash BCrypt. */
+  async function redefinirSenhaUsuario(u, aoConcluir) {
+    const nova = prompt(`Nova senha para "${u.nome || u.nomeCompleto}" (mínimo 6 caracteres):`);
+    if (nova === null) return;
+    if (nova.length < 6) { alert('A senha deve ter pelo menos 6 caracteres.'); return; }
+    try {
+      await adminApi.atualizar('usuarios', u.id, { ...u, senha: nova });
+      try {
+        await adminApi.criar('auditoria', {
+          usuario: getUsuario()?.nome || 'Administrador',
+          acao: 'REDEFINIR_SENHA',
+          entidade: 'Usuario',
+          entidadeId: u.id,
+          descricao: `Redefiniu a senha de ${u.nome || u.nomeCompleto} (${u.email})`,
+        });
+      } catch (_) { /* auditoria não bloqueia a operação */ }
+      alert('Senha redefinida. Informe a nova senha ao usuário por um canal seguro.');
+      if (aoConcluir) aoConcluir();
+    } catch (err) {
+      alert('Erro ao redefinir senha: ' + err.message);
+    }
+  }
+
+  /* Formatação compartilhada */
+  function formatarMoeda(v) {
+    return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }

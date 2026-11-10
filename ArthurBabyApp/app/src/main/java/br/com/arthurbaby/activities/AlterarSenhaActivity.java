@@ -83,7 +83,7 @@ public class AlterarSenhaActivity extends AppCompatActivity {
                         public void onFailure(Call<Void> call, Throwable t) {
                             LoadingUtils.esconder();
                             Toast.makeText(AlterarSenhaActivity.this,
-                                    "Erro de conexão: " + t.getMessage(),
+                                    ErrorUtils.mensagemFalha(t),
                                     Toast.LENGTH_LONG).show();
                         }
                     });

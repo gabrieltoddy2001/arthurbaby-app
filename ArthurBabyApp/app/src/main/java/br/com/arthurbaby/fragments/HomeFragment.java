@@ -171,6 +171,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(Call<List<CategoriaResponse>> call,
                                    Response<List<CategoriaResponse>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     categoriaAdapter = new CategoriaIconeAdapter(
                             Conversor.paraCategorias(response.body()),
@@ -193,6 +194,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CategoriaResponse>> call, Throwable t) {
+                if (!isAdded()) return;
                 onFinish.run();
             }
         });
@@ -203,6 +205,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onResponse(Call<PageResponse<ProdutoResponse>> call,
                                            Response<PageResponse<ProdutoResponse>> response) {
+                        if (!isAdded()) return;
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().content != null) {
                             List<Produto> produtos = Conversor.paraProdutos(response.body().content);
@@ -225,6 +228,7 @@ public class HomeFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
+                        if (!isAdded()) return;
                         onFinish.run();
                     }
                 });
@@ -236,6 +240,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(Call<List<CategoriaResponse>> call,
                                    Response<List<CategoriaResponse>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     categoriaAdapter = new CategoriaIconeAdapter(
                             Conversor.paraCategorias(response.body()),
@@ -256,6 +261,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CategoriaResponse>> call, Throwable t) {
+                if (!isAdded()) return;
                 // silencioso
             }
         });
@@ -268,6 +274,7 @@ public class HomeFragment extends Fragment {
                     @Override
                     public void onResponse(Call<PageResponse<ProdutoResponse>> call,
                                            Response<PageResponse<ProdutoResponse>> response) {
+                        if (!isAdded()) return;
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().content != null) {
                             List<Produto> produtos = Conversor.paraProdutos(response.body().content);
@@ -287,6 +294,7 @@ public class HomeFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
+                        if (!isAdded()) return;
                         // silencioso
                     }
                 });

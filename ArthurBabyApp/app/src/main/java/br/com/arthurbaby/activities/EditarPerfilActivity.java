@@ -75,7 +75,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
             public void onFailure(Call<UsuarioResponse> call, Throwable t) {
                 LoadingUtils.esconder();
                 Toast.makeText(EditarPerfilActivity.this,
-                        "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -126,7 +126,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
             public void onFailure(Call<UsuarioResponse> call, Throwable t) {
                 LoadingUtils.esconder();
                 Toast.makeText(EditarPerfilActivity.this,
-                        "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                        ErrorUtils.mensagemFalha(t), Toast.LENGTH_LONG).show();
             }
         });
     }

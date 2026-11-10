@@ -1,5 +1,6 @@
 package br.com.arthurbaby.fragments;
 
+import br.com.arthurbaby.utils.ErrorUtils;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,6 +65,8 @@ public class CategoriasFragment extends Fragment {
                                    Response<List<CategoriaResponse>> response) {
                 LoadingView.esconder(progressBar, rv);
 
+                if (!isAdded()) return;
+
                 if (response.isSuccessful() && response.body() != null) {
                     adapter = new CategoriaAdapter(
                             Conversor.paraCategorias(response.body()),
@@ -87,8 +90,9 @@ public class CategoriasFragment extends Fragment {
             @Override
             public void onFailure(Call<List<CategoriaResponse>> call, Throwable t) {
                 LoadingView.esconder(progressBar, rv);
+                if (!isAdded()) return;
                 Toast.makeText(requireContext(),
-                        "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
             }
         });
     }

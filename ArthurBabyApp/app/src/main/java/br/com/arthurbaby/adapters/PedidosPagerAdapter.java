@@ -15,13 +15,33 @@ public class PedidosPagerAdapter extends FragmentStateAdapter {
     private final List<Pedido> emAndamento;
     private final List<Pedido> finalizados;
 
+    /** Gera ids novos a cada adapter, para que um novo filtro recrie as listas em vez de reaproveitar as antigas. */
+    private static long geracao = 0;
+    private final long base;
+
     public PedidosPagerAdapter(@NonNull FragmentActivity activity,
                                List<Pedido> emAndamento,
                                List<Pedido> finalizados) {
         super(activity);
         this.emAndamento = emAndamento;
         this.finalizados = finalizados;
+        this.base = (++geracao) * 10;
     }
+
+    public PedidosPagerAdapter(@NonNull Fragment host,
+                               List<Pedido> emAndamento,
+                               List<Pedido> finalizados) {
+        super(host);
+        this.emAndamento = emAndamento;
+        this.finalizados = finalizados;
+        this.base = (++geracao) * 10;
+    }
+
+    @Override
+    public long getItemId(int position) { return base + position; }
+
+    @Override
+    public boolean containsItem(long itemId) { return itemId == base || itemId == base + 1; }
 
     @NonNull
     @Override

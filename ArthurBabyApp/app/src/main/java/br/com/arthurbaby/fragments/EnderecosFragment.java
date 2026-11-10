@@ -81,6 +81,8 @@ public class EnderecosFragment extends Fragment {
                                    Response<List<EnderecoResponse>> response) {
                 LoadingView.esconder(progressBar, rv, btnNovo);
 
+                if (!isAdded()) return;
+
                 if (response.isSuccessful() && response.body() != null) {
                     adapter = new EnderecoAdapter(
                             Conversor.paraEnderecos(response.body()),
@@ -95,8 +97,9 @@ public class EnderecosFragment extends Fragment {
             @Override
             public void onFailure(Call<List<EnderecoResponse>> call, Throwable t) {
                 LoadingView.esconder(progressBar, rv, btnNovo);
+                if (!isAdded()) return;
                 Toast.makeText(requireContext(),
-                        "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -113,6 +116,7 @@ public class EnderecosFragment extends Fragment {
                     api.removerEndereco(clienteId, e.getId())
                             .enqueue(new Callback<Void>() {
                                 @Override public void onResponse(Call<Void> call, Response<Void> response) {
+                                    if (!isAdded()) return;
                                     if (response.isSuccessful()) {
                                         Toast.makeText(requireContext(),
                                                 "Endereço removido", Toast.LENGTH_SHORT).show();
@@ -124,8 +128,9 @@ public class EnderecosFragment extends Fragment {
                                     }
                                 }
                                 @Override public void onFailure(Call<Void> call, Throwable t) {
+                                    if (!isAdded()) return;
                                     Toast.makeText(requireContext(),
-                                            "Erro: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                            ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                                 }
                             });
                 })
@@ -181,6 +186,7 @@ public class EnderecosFragment extends Fragment {
                     ApiService api = RetrofitClient.getApi(requireContext());
                     api.criarEndereco(clienteId, req).enqueue(new Callback<EnderecoResponse>() {
                         @Override public void onResponse(Call<EnderecoResponse> call, Response<EnderecoResponse> response) {
+                            if (!isAdded()) return;
                             if (response.isSuccessful()) {
                                 Toast.makeText(requireContext(),
                                         "Endereço salvo", Toast.LENGTH_SHORT).show();
@@ -192,8 +198,9 @@ public class EnderecosFragment extends Fragment {
                             }
                         }
                         @Override public void onFailure(Call<EnderecoResponse> call, Throwable t) {
+                            if (!isAdded()) return;
                             Toast.makeText(requireContext(),
-                                    "Erro: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                    ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                         }
                     });
                 })

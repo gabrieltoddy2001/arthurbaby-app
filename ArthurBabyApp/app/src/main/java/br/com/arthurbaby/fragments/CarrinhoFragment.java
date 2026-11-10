@@ -51,6 +51,9 @@ public class CarrinhoFragment extends Fragment {
     private double descontoAplicado = 0;
     private String cupomAplicado = null;
     private boolean freteGratisPorCupom = false;
+    /** Subtotal sobre o qual o cupom foi validado; se o carrinho mudar, o cupom precisa ser revalidado. */
+    private double subtotalDoCupom = 0;
+    private LinearLayout rowDesconto;
 
     @Nullable
     @Override
@@ -78,7 +81,7 @@ public class CarrinhoFragment extends Fragment {
         RadioGroup rgRecebimento = v.findViewById(R.id.rgRecebimento);
         RadioButton rbEntrega = v.findViewById(R.id.rbEntrega);
         RadioButton rbRetirada = v.findViewById(R.id.rbRetirada);
-        LinearLayout rowDesconto = v.findViewById(R.id.rowDesconto);
+        rowDesconto = v.findViewById(R.id.rowDesconto);
         TextView tvDesconto = v.findViewById(R.id.tvDesconto);
 
         if ("ENTREGA".equals(repo.getFormaRecebimento())) rbEntrega.setChecked(true);
@@ -108,12 +111,15 @@ public class CarrinhoFragment extends Fragment {
                                                Response<CupomValidacaoResponse> response) {
                             LoadingUtils.esconder();
 
+                            if (!isAdded()) return;
+
                             if (response.isSuccessful() && response.body() != null) {
                                 CupomValidacaoResponse c = response.body();
 
                                 if (c.valido) {
                                     descontoAplicado = c.desconto != null ? c.desconto.doubleValue() : 0;
                                     cupomAplicado = c.codigo;
+                                    subtotalDoCupom = repo.getSubtotal();
                                     freteGratisPorCupom = c.freteGratis;
 
                                     if (descontoAplicado > 0) {
@@ -144,8 +150,9 @@ public class CarrinhoFragment extends Fragment {
                         @Override
                         public void onFailure(Call<CupomValidacaoResponse> call, Throwable t) {
                             LoadingUtils.esconder();
+                            if (!isAdded()) return;
                             Toast.makeText(requireContext(),
-                                    "Erro de conexão: " + t.getMessage(),
+                                    ErrorUtils.mensagemFalha(t),
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -203,10 +210,14 @@ public class CarrinhoFragment extends Fragment {
                 public void onResponse(Call<PedidoResponse> call, Response<PedidoResponse> response) {
                     LoadingUtils.esconder();
 
+                    // Pedido criado: esvazia o carrinho mesmo que o usuário já tenha saído da tela,
+                    // para não permitir enviar o mesmo pedido de novo
+                    if (response.isSuccessful() && response.body() != null) repo.limpar();
+
+                    if (!isAdded()) return;
+
                     if (response.isSuccessful() && response.body() != null) {
                         PedidoResponse pedido = response.body();
-
-                        repo.limpar();
 
                         ConfirmaPedidoFragment frag = ConfirmaPedidoFragment.newInstance(
                                 pedido.numero,
@@ -232,8 +243,9 @@ public class CarrinhoFragment extends Fragment {
                 @Override
                 public void onFailure(Call<PedidoResponse> call, Throwable t) {
                     LoadingUtils.esconder();
+                    if (!isAdded()) return;
                     Toast.makeText(requireContext(),
-                            "Erro de conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                            ErrorUtils.mensagemFalha(t), Toast.LENGTH_LONG).show();
                 }
             });
         });
@@ -244,6 +256,18 @@ public class CarrinhoFragment extends Fragment {
 
     private void atualizarTotal() {
         double subtotal = repo.getSubtotal();
+
+        // Itens alterados depois de aplicar o cupom: o desconto exibido ficaria errado
+        if (cupomAplicado != null && Math.abs(subtotal - subtotalDoCupom) > 0.001) {
+            cupomAplicado = null;
+            descontoAplicado = 0;
+            freteGratisPorCupom = false;
+            if (rowDesconto != null) rowDesconto.setVisibility(View.GONE);
+            if (isAdded()) {
+                Toast.makeText(requireContext(),
+                        "Carrinho alterado. Aplique o cupom novamente.", Toast.LENGTH_SHORT).show();
+            }
+        }
         double frete = freteGratisPorCupom ? 0 : repo.getFrete();
         double total = subtotal + frete - descontoAplicado;
 

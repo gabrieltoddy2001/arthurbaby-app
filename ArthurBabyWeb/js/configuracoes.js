@@ -9,9 +9,9 @@
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
    
      try {
-       // O config é um objeto único (não é uma lista)
-       // Pega direto do MOCK_DB
-       config = MOCK_DB.configuracoes || {};
+       // A configuração é um registro único na tabela configuracao_loja
+       const lista = await adminApi.listar('configuracoes-loja');
+       config = lista[0] || {};
        renderForm();
      } catch (err) {
        conteudo.innerHTML = `<div class="alert alert-erro">Erro: ${err.message}</div>`;
@@ -21,149 +21,128 @@
    function renderForm() {
      const conteudo = document.getElementById('conteudo');
    
+     const corP = escapeAttr(config.corPrimaria || '#37B6B0');
+     const corD = escapeAttr(config.corDestaque || '#ED83A4');
      conteudo.innerHTML = `
-       <div class="form-produto">
+       <div class="form-produto form-compacto">
          <div class="form-header">
-           <h1>Configurações da loja</h1>
+           <p class="texto-sec">
+             Dados exibidos no app do cliente e usados nos contatos da loja.
+             ${config.atualizadoEm ? `Última alteração: ${new Date(config.atualizadoEm).toLocaleString('pt-BR')}.` : ''}
+           </p>
            <div>
              <button class="btn btn-primary" onclick="salvar()" id="btn-salvar">Salvar alterações</button>
            </div>
          </div>
-   
+
          <div id="alerta-config" class="alert alert-sucesso hidden"></div>
-   
-         <!-- ===== DADOS DA LOJA ===== -->
+
          <div class="card">
-           <h3 class="secao-titulo">Dados da loja</h3>
-           <div class="grid-2">
+           <h3 class="secao-titulo">Dados da loja, contato e redes sociais</h3>
+           <div class="grid-4">
              <div class="field">
-               <label>Nome fantasia *</label>
+               <label for="c-nomeFantasia">Nome fantasia *</label>
                <input type="text" id="c-nomeFantasia" value="${escapeAttr(config.nomeFantasia || '')}">
              </div>
              <div class="field">
-               <label>Razão social</label>
+               <label for="c-razaoSocial">Razão social</label>
                <input type="text" id="c-razaoSocial" value="${escapeAttr(config.razaoSocial || '')}">
              </div>
              <div class="field">
-               <label>CNPJ</label>
+               <label for="c-cnpj">CNPJ</label>
                <input type="text" id="c-cnpj" value="${escapeAttr(config.cnpj || '')}" placeholder="00.000.000/0000-00">
              </div>
              <div class="field">
-               <label>Telefone</label>
+               <label for="c-telefone">Telefone</label>
                <input type="text" id="c-telefone" value="${escapeAttr(config.telefone || '')}" placeholder="(71) 99999-9999">
              </div>
              <div class="field">
-               <label>WhatsApp</label>
+               <label for="c-whatsapp">WhatsApp</label>
                <input type="text" id="c-whatsapp" value="${escapeAttr(config.whatsapp || '')}" placeholder="(71) 99999-9999">
              </div>
              <div class="field">
-               <label>E-mail</label>
+               <label for="c-email">E-mail</label>
                <input type="email" id="c-email" value="${escapeAttr(config.email || '')}">
              </div>
              <div class="field">
-               <label>E-mail para pedidos</label>
+               <label for="c-emailPedidos">E-mail para pedidos</label>
                <input type="email" id="c-emailPedidos" value="${escapeAttr(config.emailPedidos || '')}">
              </div>
-           </div>
-         </div>
-   
-         <!-- ===== REDES SOCIAIS ===== -->
-         <div class="card">
-           <h3 class="secao-titulo">Redes sociais</h3>
-           <div class="grid-3">
              <div class="field">
-               <label>Instagram</label>
+               <label for="c-instagram">Instagram</label>
                <input type="text" id="c-instagram" value="${escapeAttr(config.instagram || '')}" placeholder="@loja">
              </div>
-             <div class="field">
-               <label>Shopee</label>
+             <div class="field" style="grid-column: span 2;">
+               <label for="c-shopeeUrl">Shopee</label>
                <input type="url" id="c-shopeeUrl" value="${escapeAttr(config.shopeeUrl || '')}" placeholder="https://...">
              </div>
-             <div class="field">
-               <label>Facebook</label>
+             <div class="field" style="grid-column: span 2;">
+               <label for="c-facebookUrl">Facebook</label>
                <input type="url" id="c-facebookUrl" value="${escapeAttr(config.facebookUrl || '')}" placeholder="https://...">
              </div>
            </div>
          </div>
-   
-         <!-- ===== ENDEREÇO ===== -->
-         <div class="card">
-           <h3 class="secao-titulo">Endereço da loja física</h3>
-           <div class="grid-3">
-             <div class="field">
-               <label>CEP</label>
-               <input type="text" id="c-cep" value="${escapeAttr(config.cep || '')}" placeholder="00000-000">
-             </div>
-             <div class="field" style="grid-column: span 2;">
-               <label>Logradouro</label>
-               <input type="text" id="c-logradouro" value="${escapeAttr(config.logradouro || '')}">
-             </div>
-             <div class="field">
-               <label>Número</label>
-               <input type="text" id="c-numero" value="${escapeAttr(config.numero || '')}">
-             </div>
-             <div class="field">
-               <label>Complemento</label>
-               <input type="text" id="c-complemento" value="${escapeAttr(config.complemento || '')}">
-             </div>
-             <div class="field">
-               <label>Bairro</label>
-               <input type="text" id="c-bairro" value="${escapeAttr(config.bairro || '')}">
-             </div>
-             <div class="field">
-               <label>Cidade</label>
-               <input type="text" id="c-cidade" value="${escapeAttr(config.cidade || '')}">
-             </div>
-             <div class="field">
-               <label>UF</label>
-               <input type="text" id="c-uf" value="${escapeAttr(config.uf || '')}" maxlength="2" placeholder="BA">
-             </div>
-           </div>
-         </div>
-   
-         <!-- ===== CORES ===== -->
-         <div class="card">
-           <h3 class="secao-titulo">Cores da marca</h3>
-           <p style="color:var(--texto-secundario);font-size:.9rem;margin-bottom:1rem;">
-             Essas cores são usadas no app do cliente e no painel administrativo.
-           </p>
-   
-           <div class="grid-2">
-             <div class="field">
-               <label>Cor primária (verde)</label>
-               <div style="display:flex; gap:.5rem; align-items:center;">
-                 <input type="color" id="c-corPrimaria-picker"
-                        value="${escapeAttr(config.corPrimaria || '#37B6B0')}"
-                        style="width:50px; height:40px; padding:0; border:1px solid var(--borda); border-radius:6px; cursor:pointer;">
-                 <input type="text" id="c-corPrimaria" value="${escapeAttr(config.corPrimaria || '#37B6B0')}"
-                        style="flex:1;" maxlength="7">
+
+         <div class="linha-cards">
+           <div class="card">
+             <h3 class="secao-titulo">Endereço da loja física</h3>
+             <div class="grid-4">
+               <div class="field">
+                 <label for="c-cep">CEP</label>
+                 <input type="text" id="c-cep" value="${escapeAttr(config.cep || '')}" placeholder="00000-000">
                </div>
-             </div>
-             <div class="field">
-               <label>Cor de destaque (rosa)</label>
-               <div style="display:flex; gap:.5rem; align-items:center;">
-                 <input type="color" id="c-corDestaque-picker"
-                        value="${escapeAttr(config.corDestaque || '#ED83A4')}"
-                        style="width:50px; height:40px; padding:0; border:1px solid var(--borda); border-radius:6px; cursor:pointer;">
-                 <input type="text" id="c-corDestaque" value="${escapeAttr(config.corDestaque || '#ED83A4')}"
-                        style="flex:1;" maxlength="7">
+               <div class="field" style="grid-column: span 3;">
+                 <label for="c-logradouro">Logradouro</label>
+                 <input type="text" id="c-logradouro" value="${escapeAttr(config.logradouro || '')}">
+               </div>
+               <div class="field">
+                 <label for="c-numero">Número</label>
+                 <input type="text" id="c-numero" value="${escapeAttr(config.numero || '')}">
+               </div>
+               <div class="field" style="grid-column: span 3;">
+                 <label for="c-complemento">Complemento</label>
+                 <input type="text" id="c-complemento" value="${escapeAttr(config.complemento || '')}">
+               </div>
+               <div class="field" style="grid-column: span 2;">
+                 <label for="c-bairro">Bairro</label>
+                 <input type="text" id="c-bairro" value="${escapeAttr(config.bairro || '')}">
+               </div>
+               <div class="field">
+                 <label for="c-cidade">Cidade</label>
+                 <input type="text" id="c-cidade" value="${escapeAttr(config.cidade || '')}">
+               </div>
+               <div class="field">
+                 <label for="c-uf">UF</label>
+                 <input type="text" id="c-uf" value="${escapeAttr(config.uf || '')}" maxlength="2" placeholder="BA">
                </div>
              </div>
            </div>
-   
-           <!-- Preview das cores -->
-           <div style="margin-top:1.5rem;">
-             <label style="font-size:.85rem;font-weight:600;color:var(--texto-secundario);display:block;margin-bottom:.5rem;">
-               Preview
-             </label>
-             <div style="background:#fff; border:1px solid var(--borda); border-radius:var(--radius); overflow:hidden;">
-               <div id="preview-header" style="background:${escapeAttr(config.corPrimaria || '#37B6B0')}; color:#fff; padding:1rem;">
+
+           <div class="card">
+             <h3 class="secao-titulo">Cores da marca (app e painel)</h3>
+             <div class="grid-2">
+               <div class="field">
+                 <label for="c-corPrimaria">Cor primária (verde)</label>
+                 <div class="cor-campo">
+                   <input type="color" id="c-corPrimaria-picker" value="${corP}" aria-label="Escolher cor primária">
+                   <input type="text" id="c-corPrimaria" value="${corP}" maxlength="7">
+                 </div>
+               </div>
+               <div class="field">
+                 <label for="c-corDestaque">Cor de destaque (rosa)</label>
+                 <div class="cor-campo">
+                   <input type="color" id="c-corDestaque-picker" value="${corD}" aria-label="Escolher cor de destaque">
+                   <input type="text" id="c-corDestaque" value="${corD}" maxlength="7">
+                 </div>
+               </div>
+             </div>
+             <div class="preview-cores">
+               <div id="preview-header" style="background:${corP};">
                  <strong>ArthurBaby</strong> — Tudo para seu bebê!
                </div>
-               <div style="padding:1rem; background:var(--superficie);">
-                 <button id="preview-botao" style="background:${escapeAttr(config.corDestaque || '#ED83A4')}; color:#fff; border:none; padding:.5rem 1rem; border-radius:6px; font-weight:600; cursor:pointer;">
-                   Comprar agora
-                 </button>
+               <div class="preview-corpo">
+                 <span class="texto-mini">Prévia</span>
+                 <button type="button" id="preview-botao" style="background:${corD};">Comprar agora</button>
                </div>
              </div>
            </div>
@@ -236,10 +215,11 @@
      btn.textContent = 'Salvando...';
    
      try {
-       // Configurações não são uma lista — é um objeto único.
-       // Salvamos direto no MOCK_DB e persistimos.
-       MOCK_DB.configuracoes = novoConfig;
-       salvarMock();
+       // Mantém campos que esta tela não edita (logo, demais cores) mesclando com o registro atual
+       const corpo = { ...config, ...novoConfig };
+       config = config.id
+         ? await adminApi.atualizar('configuracoes-loja', config.id, corpo)
+         : await adminApi.criar('configuracoes-loja', corpo);
    
        alerta.className = 'alert alert-sucesso';
        alerta.textContent = '✅ Configurações salvas com sucesso!';

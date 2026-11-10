@@ -89,6 +89,8 @@ public class FavoritoRepository {
         if (agoraFavorito) {
             api.adicionarFavorito(req).enqueue(new Callback<FavoritoResponse>() {
                 @Override public void onResponse(Call<FavoritoResponse> call, Response<FavoritoResponse> response) {
+                    // 409 = já era favorito (continua favorito); outros erros revertem o cache
+                    if (!response.isSuccessful() && response.code() != 409) idsFavoritos.remove(produtoId);
                     if (onUpdate != null) onUpdate.run();
                 }
                 @Override public void onFailure(Call<FavoritoResponse> call, Throwable t) {
@@ -100,6 +102,8 @@ public class FavoritoRepository {
         } else {
             api.removerFavorito(clienteId, produtoId).enqueue(new Callback<Void>() {
                 @Override public void onResponse(Call<Void> call, Response<Void> response) {
+                    // 404 = já não era favorito; outros erros revertem o cache
+                    if (!response.isSuccessful() && response.code() != 404) idsFavoritos.add(produtoId);
                     if (onUpdate != null) onUpdate.run();
                 }
                 @Override public void onFailure(Call<Void> call, Throwable t) {

@@ -84,18 +84,28 @@ public class Conversor {
             }
         }
 
+        // Mesma regra do back (PedidoService): o promocional, quando existe, é o preço cobrado
+        BigDecimal precoCobrado = p.precoPromocional != null ? p.precoPromocional : p.preco;
+
         Produto produto = new Produto(
                 p.id,
                 p.nome,
                 p.descricao,
-                p.precoPromocional != null ? p.precoPromocional : p.preco,
+                precoCobrado,
                 imagemUrl,
                 10,
                 marca
         );
 
-        // Avaliação
-        produto.setAvaliacao(p.avaliacao);
+        if (p.precoPromocional != null && p.preco != null
+                && p.preco.compareTo(p.precoPromocional) > 0) {
+            produto.setPrecoOriginal(p.preco);
+        }
+        produto.setPromocao(p.promocao || produto.temDesconto());
+        produto.setStatus(p.status);
+
+        // Avaliação (média 0 a 5, pode ser fracionária)
+        produto.setAvaliacao(p.avaliacao != null ? p.avaliacao.doubleValue() : 0);
 
         // Imagens (lista)
         if (p.imagens != null) {
@@ -178,18 +188,20 @@ public class Conversor {
         return out;
     }
 
-    private static Date parseData(String texto) {
+    /** Aceita "yyyy-MM-dd'T'HH:mm:ss[.fração]" (formato do back) e "yyyy-MM-dd". */
+    static Date parseData(String texto) {
         if (texto == null || texto.isEmpty()) return new Date();
         try {
-            if (texto.contains(".")) {
-                int idx = texto.indexOf(".");
-                String base = texto.substring(0, idx);
-                String frac = texto.substring(idx + 1);
-                if (frac.length() > 3) frac = frac.substring(0, 3);
-                texto = base + "." + frac;
+            String base = texto;
+            String frac = "000";
+            int idx = texto.indexOf('.');
+            if (idx >= 0) {
+                base = texto.substring(0, idx);
+                frac = (texto.substring(idx + 1) + "000").substring(0, 3);
             }
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault());
-            return sdf.parse(texto);
+            if (base.length() == 10) base = base + "T00:00:00";
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US);
+            return sdf.parse(base + "." + frac);
         } catch (Exception e) {
             return new Date();
         }

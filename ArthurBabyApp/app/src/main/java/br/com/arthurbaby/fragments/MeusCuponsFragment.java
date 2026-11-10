@@ -37,6 +37,7 @@ public class MeusCuponsFragment extends Fragment {
         api.listarCuponsDisponiveis().enqueue(new Callback<List<CupomResponse>>() {
             @Override public void onResponse(Call<List<CupomResponse>> call, Response<List<CupomResponse>> response) {
                 LoadingView.esconder(progress, rv);
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     rv.setAdapter(new CupomAdapter(response.body()));
                 } else {
@@ -45,7 +46,8 @@ public class MeusCuponsFragment extends Fragment {
             }
             @Override public void onFailure(Call<List<CupomResponse>> call, Throwable t) {
                 LoadingView.esconder(progress, rv);
-                Toast.makeText(getContext(), "Erro: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                if (!isAdded()) return;
+                Toast.makeText(getContext(), ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
             }
         });
         return v;

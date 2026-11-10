@@ -46,6 +46,7 @@ public class MeusPedidosFragment extends Fragment {
 
     private String dataInicio = null;
     private String dataFim = null;
+    private TabLayoutMediator mediator;
 
     @Nullable
     @Override
@@ -111,15 +112,46 @@ public class MeusPedidosFragment extends Fragment {
                 (view, year, month, dayOfMonth) -> {
                     dataFim = String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, dayOfMonth);
 
+                    // Datas invertidas: troca em vez de devolver uma lista vazia
+                    if (dataFim.compareTo(dataInicio) < 0) {
+                        String tmp = dataInicio;
+                        dataInicio = dataFim;
+                        dataFim = tmp;
+                    }
+
                     // Mostra a barrinha com o filtro ativo
                     containerFiltro.setVisibility(View.VISIBLE);
-                    tvFiltroAtivo.setText("Filtro: " + dataInicio + " até " + dataFim);
+                    tvFiltroAtivo.setText("Filtro: " + formatarBr(dataInicio) + " até " + formatarBr(dataFim));
 
                     carregarPedidos();
                 }, ano, mes, dia);
 
         dialog.setTitle("Data de fim");
         dialog.show();
+    }
+
+    /** "2026-11-10" → "10/11/2026" */
+    private static String formatarBr(String iso) {
+        return iso.substring(8, 10) + "/" + iso.substring(5, 7) + "/" + iso.substring(0, 4);
+    }
+
+    private List<Pedido> filtrarPorData(List<Pedido> pedidos) {
+        if (dataInicio == null || dataFim == null) return pedidos;
+        java.text.SimpleDateFormat iso = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        List<Pedido> out = new ArrayList<>();
+        for (Pedido p : pedidos) {
+            if (p.getData() == null) continue;
+            String dia = iso.format(p.getData());
+            if (dia.compareTo(dataInicio) >= 0 && dia.compareTo(dataFim) <= 0) out.add(p);
+        }
+        return out;
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (mediator != null) mediator.detach();
+        mediator = null;
+        super.onDestroyView();
     }
 
     private void carregarPedidos() {
@@ -141,8 +173,11 @@ public class MeusPedidosFragment extends Fragment {
                                            Response<List<PedidoResponse>> response) {
                         LoadingView.esconder(progressBar, containerPedidos);
 
+                        if (!isAdded()) return;
+
                         if (response.isSuccessful() && response.body() != null) {
-                            List<Pedido> todos = Conversor.paraPedidos(response.body());
+                            // A API ignora dataInicio/dataFim: o filtro é aplicado aqui
+                            List<Pedido> todos = filtrarPorData(Conversor.paraPedidos(response.body()));
 
                             List<Pedido> emAndamento = new ArrayList<>();
                             List<Pedido> finalizados = new ArrayList<>();
@@ -156,12 +191,16 @@ public class MeusPedidosFragment extends Fragment {
                                 }
                             }
 
+                            // Hospeda as abas no próprio fragment (antes na Activity, o que reaproveitava
+                            // as listas antigas ao refiltrar) e evita empilhar mediators a cada recarga
+                            if (mediator != null) mediator.detach();
                             pager.setAdapter(new PedidosPagerAdapter(
-                                    requireActivity(), emAndamento, finalizados));
+                                    MeusPedidosFragment.this, emAndamento, finalizados));
 
-                            new TabLayoutMediator(tabs, pager, (tab, position) ->
-                                    tab.setText(position == 0 ? "Em andamento" : "Finalizado")
-                            ).attach();
+                            mediator = new TabLayoutMediator(tabs, pager, (tab, position) ->
+                                    tab.setText((position == 0 ? "Em andamento" : "Finalizado")
+                                            + " (" + (position == 0 ? emAndamento.size() : finalizados.size()) + ")"));
+                            mediator.attach();
                         } else {
                             Toast.makeText(requireContext(),
                                     ErrorUtils.extrairMensagem(response),
@@ -172,8 +211,9 @@ public class MeusPedidosFragment extends Fragment {
                     @Override
                     public void onFailure(Call<List<PedidoResponse>> call, Throwable t) {
                         LoadingView.esconder(progressBar, containerPedidos);
+                        if (!isAdded()) return;
                         Toast.makeText(requireContext(),
-                                "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

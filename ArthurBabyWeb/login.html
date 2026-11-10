@@ -4,12 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — ArthurBaby Admin</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="login-wrapper">
     <div class="login-box">
-      <h1>ArthurBaby</h1>
+      <div class="login-marca">
+        <img src="assets/favicon.png" alt="" class="login-icone">
+        <h1>ArthurBaby</h1>
+      </div>
       <p class="subtitulo">Painel Administrativo</p>
 
       <div id="alerta" class="alert alert-erro hidden"></div>
@@ -54,7 +58,7 @@
           document.getElementById('senha').value
         );
         salvarSessao(resp);
-        window.location.href = 'dashboard.html';
+        window.location.href = paginaInicial();
       } catch (err) {
         alerta.textContent = err.message || 'Falha no login';
         alerta.classList.remove('hidden');

@@ -1,5 +1,6 @@
 package br.com.arthurbaby.fragments;
 
+import br.com.arthurbaby.utils.ErrorUtils;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -52,6 +53,12 @@ public class PesquisaFragment extends Fragment {
     private String filtroAtual = "TODAS";
     private String termoAtual = "";
 
+    /** Espera o usuário parar de digitar antes de chamar a API (evita 1 requisição por letra). */
+    private static final long DEBOUNCE_MS = 400;
+    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable buscaAgendada = () -> buscarProdutos(termoAtual, null);
+    private Call<PageResponse<ProdutoResponse>> chamadaAtual;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -85,6 +92,8 @@ public class PesquisaFragment extends Fragment {
                 if (!termo.isEmpty()) {
                     BuscaStorage.adicionar(requireContext(), termo);
                     mostrarHistorico(false);
+                    handler.removeCallbacks(buscaAgendada);
+                    buscarProdutos(termoAtual, null);
                 }
                 return true;
             }
@@ -103,12 +112,16 @@ public class PesquisaFragment extends Fragment {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 termoAtual = s.toString();
                 if (termoAtual.trim().isEmpty()) {
+                    handler.removeCallbacks(buscaAgendada);
+                    cancelarChamada();
                     mostrarHistorico(true);
                     rvResultados.setVisibility(View.GONE);
                     tvInfo.setText("Digite para buscar");
                 } else {
                     mostrarHistorico(false);
-                    aplicarFiltro();
+                    pintarChips();
+                    handler.removeCallbacks(buscaAgendada);
+                    handler.postDelayed(buscaAgendada, DEBOUNCE_MS);
                 }
             }
             @Override public void afterTextChanged(Editable s) {}
@@ -119,6 +132,7 @@ public class PesquisaFragment extends Fragment {
         chipBaratos.setOnClickListener(x -> { filtroAtual = "BARATOS"; aplicarFiltro(); });
         chipLimpar.setOnClickListener(x -> {
             filtroAtual = "TODAS";
+            pintarChips();
             etBusca.setText("");
             termoAtual = "";
             mostrarHistorico(true);
@@ -192,37 +206,55 @@ public class PesquisaFragment extends Fragment {
     }
 
     private void aplicarFiltro() {
-        pintarChip(chipTodas, "TODAS".equals(filtroAtual));
-        pintarChip(chipPromocao, "PROMOCAO".equals(filtroAtual));
-        pintarChip(chipBaratos, "BARATOS".equals(filtroAtual));
+        pintarChips();
+        handler.removeCallbacks(buscaAgendada);
         buscarProdutos(termoAtual, null);
     }
 
+    private void pintarChips() {
+        pintarChip(chipTodas, "TODAS".equals(filtroAtual));
+        pintarChip(chipPromocao, "PROMOCAO".equals(filtroAtual));
+        pintarChip(chipBaratos, "BARATOS".equals(filtroAtual));
+    }
+
+    private void cancelarChamada() {
+        if (chamadaAtual != null) chamadaAtual.cancel();
+        chamadaAtual = null;
+        if (progressBar != null) progressBar.setVisibility(View.GONE);
+    }
+
+    /** Teto do filtro "Baratos". */
+    private static final java.math.BigDecimal PRECO_BARATO = new java.math.BigDecimal("50");
+
     private void buscarProdutos(String busca, Long categoriaId) {
+        if (!isAdded()) return;
+        // Uma resposta antiga não pode sobrescrever o resultado da busca mais recente
+        cancelarChamada();
         LoadingView.mostrar(progressBar, rvResultados);
 
+        String termo = busca != null && !busca.trim().isEmpty() ? busca.trim() : null;
+        // Filtros feitos pela própria API (antes "Promoção" era qualquer produto abaixo de R$ 50)
+        Boolean promocao = "PROMOCAO".equals(filtroAtual) ? Boolean.TRUE : null;
+        java.math.BigDecimal precoMax = "BARATOS".equals(filtroAtual) ? PRECO_BARATO : null;
+
         ApiService api = RetrofitClient.getApi(requireContext());
-        api.listarProdutos(busca, categoriaId, null, 0, 50)
-                .enqueue(new Callback<PageResponse<ProdutoResponse>>() {
+        Call<PageResponse<ProdutoResponse>> chamada =
+                api.listarProdutos(termo, categoriaId, null, precoMax, promocao, 0, 50);
+        chamadaAtual = chamada;
+        chamada.enqueue(new Callback<PageResponse<ProdutoResponse>>() {
                     @Override
                     public void onResponse(Call<PageResponse<ProdutoResponse>> call,
                                            Response<PageResponse<ProdutoResponse>> response) {
+                        if (call != chamadaAtual) return;
+                        chamadaAtual = null;
                         LoadingView.esconder(progressBar, rvResultados);
+                        if (!isAdded()) return;
 
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().content != null) {
 
-                            List<br.com.arthurbaby.models.Produto> produtos =
-                                    Conversor.paraProdutos(response.body().content);
-
                             List<br.com.arthurbaby.models.Produto> filtrados =
-                                    new java.util.ArrayList<>();
-                            for (br.com.arthurbaby.models.Produto p : produtos) {
-                                double preco = p.getPreco().doubleValue();
-                                if ("PROMOCAO".equals(filtroAtual) && preco >= 50) continue;
-                                if ("BARATOS".equals(filtroAtual) && preco > 50) continue;
-                                filtrados.add(p);
-                            }
+                                    Conversor.paraProdutos(response.body().content);
 
                             adapter = new ProdutoAdapter(filtrados, produto -> {
                                 // Salva no histórico quando o usuário clica em um produto
@@ -251,11 +283,21 @@ public class PesquisaFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
+                        if (call.isCanceled() || call != chamadaAtual) return;
+                        chamadaAtual = null;
                         LoadingView.esconder(progressBar, rvResultados);
+                        if (!isAdded()) return;
                         Toast.makeText(requireContext(),
-                                "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    @Override
+    public void onDestroyView() {
+        handler.removeCallbacks(buscaAgendada);
+        cancelarChamada();
+        super.onDestroyView();
     }
 
     private void pintarChip(TextView chip, boolean ativo) {
