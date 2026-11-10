@@ -58,7 +58,7 @@
           document.getElementById('senha').value
         );
         salvarSessao(resp);
-        window.location.href = 'dashboard.html';
+        window.location.href = paginaInicial();
       } catch (err) {
         alerta.textContent = err.message || 'Falha no login';
         alerta.classList.remove('hidden');

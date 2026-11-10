@@ -27,8 +27,8 @@ const ICONES = {
     if (!usuario) return null;
   
     const menu = [
-      { secao: 'Geral' },
-      { href: 'dashboard.html',    label: 'Dashboard',   icone: 'dashboard', chave: 'dashboard' },
+      { secao: 'Geral', somenteAdmin: true },
+      { href: 'dashboard.html',    label: 'Dashboard',   icone: 'dashboard', chave: 'dashboard', somenteAdmin: true },
   
       { secao: 'Cadastros' },
       { href: 'categorias.html',   label: 'Categorias',  icone: 'categorias', chave: 'categorias' },
@@ -42,16 +42,16 @@ const ICONES = {
       { href: 'pedidos.html',      label: 'Pedidos',     icone: 'pedidos', chave: 'pedidos' },
       { href: 'clientes.html',     label: 'Clientes',    icone: 'clientes', chave: 'clientes' },
   
-      { secao: 'Sistema' },
-      { href: 'usuarios.html',     label: 'Usuários internos', icone: 'usuarios', chave: 'usuarios' },
+      { secao: 'Sistema', somenteAdmin: true },
+      { href: 'usuarios.html',     label: 'Usuários internos', icone: 'usuarios', chave: 'usuarios', somenteAdmin: true },
       { href: 'relatorios.html',   label: 'Relatórios',  icone: 'relatorios', chave: 'relatorios', somenteAdmin: true },
       { href: 'configuracoes.html',label: 'Configurações', icone: 'configuracoes', chave: 'configuracoes', somenteAdmin: true },
       { href: 'auditoria.html',    label: 'Auditoria',   icone: 'auditoria', chave: 'auditoria', somenteAdmin: true },
     ];
 
-    // Vendedor não acessa Relatórios, Configurações nem Auditoria (nem pelo endereço direto)
+    // Vendedor não acessa as telas de Geral e Sistema (nem pelo endereço direto)
     if (!ehAdmin(usuario) && PAGINAS_SOMENTE_ADMIN.includes(paginaAtiva)) {
-      window.location.replace('dashboard.html');
+      window.location.replace(paginaInicial(usuario));
       return null;
     }
 
@@ -65,7 +65,7 @@ const ICONES = {
   
     const html = `
       <aside class="sidebar">
-        <a href="dashboard.html" class="sidebar-logo" title="Lojão Arthur Baby">
+        <a href="${paginaInicial(usuario)}" class="sidebar-logo" title="Lojão Arthur Baby">
           <img src="assets/logo-arthurbaby.png" alt="Lojão Arthur Baby">
         </a>
         ${sidebar}
