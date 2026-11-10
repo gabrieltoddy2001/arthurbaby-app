@@ -42,6 +42,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -54,6 +55,8 @@ import java.util.regex.Pattern;
 public class AdminCrudService {
     private static final TypeReference<Map<String, Object>> JSON = new TypeReference<>() {};
     private static final Pattern BCRYPT = Pattern.compile("^\\$2[aby]?\\$\\d{2}\\$.{53}$");
+    /** Palavras so com letras (qualquer idioma), separadas por espaco, hifen, apostrofo ou ". ". */
+    private static final Pattern NOME_PESSOA = Pattern.compile("^\\p{L}+(?:(?:\\. ?| |[-'’])\\p{L}+)*\\.?$");
 
     private final Map<String, RecursoAdmin> recursos;
     private final ObjectMapper mapper;
@@ -141,9 +144,7 @@ public class AdminCrudService {
     private void prepararUsuario(Object entity, Object existente) {
         if (!(entity instanceof Usuario usuario)) return;
         usuario.setEmail(AuthService.normalizarEmail(usuario.getEmail()));
-        if (usuario.getNomeCompleto() == null || usuario.getNomeCompleto().isBlank()) {
-            throw new IllegalArgumentException("Nome do usuario e obrigatorio");
-        }
+        usuario.setNomeCompleto(validarNome(usuario.getNomeCompleto()));
         if (existente instanceof Usuario atual) {
             // O painel nao edita enderecos nem aceites: preserva os dados do cadastro em vez de apaga-los
             usuario.setEnderecos(new java.util.ArrayList<>(atual.getEnderecos()));
@@ -164,6 +165,25 @@ public class AdminCrudService {
         } else if (!BCRYPT.matcher(senha).matches()) {
             usuario.setSenha(encoder.encode(senha));
         }
+    }
+
+    /**
+     * Nome de pessoa: so letras (com acento), separadas por espaco, hifen, apostrofo ou ponto de abreviacao
+     * (ex.: "Ana Clara", "Maria D'Avila", "Joao P. Souza"). Recusa numeros, simbolos e emojis.
+     * Devolve o nome sem espacos sobrando.
+     */
+    static String validarNome(String nome) {
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException("Nome do usuário é obrigatório.");
+        }
+        String limpo = Normalizer.normalize(nome, Normalizer.Form.NFC).strip().replaceAll("\\s+", " ");
+        if (limpo.length() > 150) {
+            throw new IllegalArgumentException("O nome deve ter no máximo 150 caracteres.");
+        }
+        if (!NOME_PESSOA.matcher(limpo).matches() || limpo.codePoints().filter(Character::isLetter).count() < 2) {
+            throw new IllegalArgumentException("Nome inválido: use apenas letras e espaços (hífen, apóstrofo e ponto de abreviação são aceitos).");
+        }
+        return limpo;
     }
 
     /**
