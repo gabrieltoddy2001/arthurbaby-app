@@ -81,6 +81,11 @@ public class CarrinhoRepository {
         observadores.remove(o);
     }
 
+    /** Pede para os observadores se atualizarem (ex.: login/logout muda a exibição do contador). */
+    public void notificarAlteracao() {
+        notificar();
+    }
+
     private void notificar() {
         mainHandler.post(() -> {
             int total = getTotalItens();

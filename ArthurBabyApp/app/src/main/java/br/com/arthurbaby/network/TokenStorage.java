@@ -25,6 +25,8 @@ public class TokenStorage {
                 .putString(KEY_NOME, nome)
                 .putString(KEY_PERFIL, perfil)
                 .apply();
+        // Logou: o contador do carrinho volta a aparecer
+        br.com.arthurbaby.repositories.CarrinhoRepository.getInstance().notificarAlteracao();
     }
 
     public static String getToken(Context ctx) {
@@ -46,5 +48,7 @@ public class TokenStorage {
 
     public static void limpar(Context ctx) {
         prefs(ctx).edit().clear().apply();
+        // Saiu: o contador do carrinho some (os itens continuam salvos para o próximo login)
+        br.com.arthurbaby.repositories.CarrinhoRepository.getInstance().notificarAlteracao();
     }
 }

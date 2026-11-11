@@ -73,5 +73,6 @@ public class RecuperarSenhaActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.tvVoltar).setOnClickListener(v -> finish());
+        findViewById(R.id.btnVoltarRecuperar).setOnClickListener(v -> finish());
     }
 }

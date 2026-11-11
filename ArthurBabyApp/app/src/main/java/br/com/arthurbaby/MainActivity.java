@@ -22,10 +22,14 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
 
-    /** Mostra a quantidade de itens no ícone do carrinho (some quando está vazio). */
+    /**
+     * Mostra a quantidade de itens no ícone do carrinho.
+     * Some quando o carrinho está vazio ou ninguém está logado; os itens continuam
+     * salvos e o número volta ao fazer login de novo.
+     */
     private final CarrinhoRepository.OnCarrinhoAlterado contadorCarrinho = total -> {
         if (bottomNav == null) return;
-        if (total > 0) {
+        if (total > 0 && br.com.arthurbaby.utils.AuthGuard.estaLogado(this)) {
             BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.nav_carrinho);
             badge.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.verde_arthur));
             badge.setBadgeTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.branco));
@@ -52,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             trocarFragment(new HomeFragment());
         }
+
+        // Tocar de novo na aba atual recarrega a tela (busca os dados novamente)
+        bottomNav.setOnItemReselectedListener(item -> recarregarTelaAtual());
 
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment = null;
@@ -89,6 +96,28 @@ public class MainActivity extends AppCompatActivity {
                 getOnBackPressedDispatcher().onBackPressed();
             }
         });
+    }
+
+    /**
+     * Se a permissão de rede local (Android 17) for concedida com a tela já aberta,
+     * recarrega a tela: as buscas feitas antes da permissão falharam.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String[] permissions,
+                                           @androidx.annotation.NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (br.com.arthurbaby.utils.RedeLocalPermissao.foiConcedida(requestCode, grantResults)) {
+            recarregarTelaAtual();
+        }
+    }
+
+    /** Recria a view do fragment atual, o que refaz as chamadas à API. */
+    private void recarregarTelaAtual() {
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment atual = fm.findFragmentById(R.id.frameContainer);
+        if (atual == null || fm.isStateSaved()) return;
+        fm.beginTransaction().detach(atual).commitNow();
+        fm.beginTransaction().attach(atual).commitNow();
     }
 
     @Override

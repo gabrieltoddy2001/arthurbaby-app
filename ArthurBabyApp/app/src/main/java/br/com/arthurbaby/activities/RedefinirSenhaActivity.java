@@ -88,5 +88,6 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.tvVoltar).setOnClickListener(v -> finish());
+        findViewById(R.id.btnVoltarRedefinir).setOnClickListener(v -> finish());
     }
 }

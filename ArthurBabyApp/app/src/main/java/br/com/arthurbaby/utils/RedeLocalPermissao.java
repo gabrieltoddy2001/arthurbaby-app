@@ -17,15 +17,27 @@ import br.com.arthurbaby.network.RetrofitClient;
 public final class RedeLocalPermissao {
 
     private static final String PERMISSAO = "android.permission.ACCESS_LOCAL_NETWORK";
-    private static final int REQUEST_CODE = 4370;
+    public static final int REQUEST_CODE = 4370;
 
     private RedeLocalPermissao() {}
 
+    /** true quando a API está na rede local e a permissão ainda não foi concedida. */
+    public static boolean precisaPedir(Activity activity) {
+        if (Build.VERSION.SDK_INT < 37) return false;
+        if (!apiEmRedeLocal()) return false;
+        return activity.checkSelfPermission(PERMISSAO) != PackageManager.PERMISSION_GRANTED;
+    }
+
+    /** Pede a permissão; a resposta chega em onRequestPermissionsResult com {@link #REQUEST_CODE}. */
     public static void solicitarSeNecessario(Activity activity) {
-        if (Build.VERSION.SDK_INT < 37) return;
-        if (!apiEmRedeLocal()) return;
-        if (activity.checkSelfPermission(PERMISSAO) == PackageManager.PERMISSION_GRANTED) return;
+        if (!precisaPedir(activity)) return;
         activity.requestPermissions(new String[]{PERMISSAO}, REQUEST_CODE);
+    }
+
+    /** true se o resultado recebido concedeu a permissão de rede local. */
+    public static boolean foiConcedida(int requestCode, int[] resultados) {
+        return requestCode == REQUEST_CODE && resultados.length > 0
+                && resultados[0] == PackageManager.PERMISSION_GRANTED;
     }
 
     static boolean apiEmRedeLocal() {
