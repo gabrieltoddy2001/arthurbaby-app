@@ -33,6 +33,18 @@ import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
 
+    /**
+     * Layout das categorias na tela inicial:
+     * true  = uma linha com rolagem horizontal (barra de rolagem suave);
+     * false = grade com todas visíveis (5 colunas na maioria dos celulares).
+     */
+    private static final boolean CATEGORIAS_EM_LINHA = true;
+
+    private int dpHome(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
+    }
+
+
     private CategoriaIconeAdapter categoriaAdapter;
     private ProdutoAdapter produtoAdapter;
 
@@ -117,13 +129,32 @@ public class HomeFragment extends Fragment {
 
         // === CATEGORIAS ===
         RecyclerView rvCategorias = v.findViewById(R.id.rvCategorias);
-        rvCategorias.setLayoutManager(new LinearLayoutManager(
-                getContext(), LinearLayoutManager.HORIZONTAL, false));
+        if (CATEGORIAS_EM_LINHA) {
+            // Uma linha com rolagem horizontal; a barra suave embaixo indica que há mais categorias
+            rvCategorias.setLayoutManager(new LinearLayoutManager(
+                    getContext(), LinearLayoutManager.HORIZONTAL, false));
+            // A linha vai de ponta a ponta da tela (sem cortar o último ícone na margem),
+            // mas o primeiro ícone continua alinhado com o título "Categorias"
+            ViewGroup.MarginLayoutParams mlp =
+                    (ViewGroup.MarginLayoutParams) rvCategorias.getLayoutParams();
+            mlp.leftMargin = -dpHome(16);
+            mlp.rightMargin = -dpHome(16);
+            rvCategorias.setLayoutParams(mlp);
+            rvCategorias.setPadding(dpHome(16), 0, dpHome(16), dpHome(10));
+        } else {
+            // Grade: todas as categorias cabem na tela, sem rolar para o lado.
+            // Colunas conforme a largura do aparelho: 4 em telas estreitas, 5 nas comuns, mais em tablets.
+            float larguraDp = getResources().getConfiguration().screenWidthDp;
+            int colunas = Math.max(4, (int) ((larguraDp - 32) / 74));
+            rvCategorias.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(
+                    getContext(), colunas));
+            rvCategorias.setHorizontalScrollBarEnabled(false);
+        }
         categoriaAdapter = new CategoriaIconeAdapter(
                 new java.util.ArrayList<>(),
                 categoria -> {
                     ProdutosCategoriaFragment frag = ProdutosCategoriaFragment.newInstance(
-                            categoria.getId(), categoria.getNome());
+                            categoria.getId(), categoria.getNome(), categoria.getIconeRes());
                     requireActivity().getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.frameContainer, frag)
@@ -177,7 +208,7 @@ public class HomeFragment extends Fragment {
                             Conversor.paraCategorias(response.body()),
                             categoria -> {
                                 ProdutosCategoriaFragment frag = ProdutosCategoriaFragment.newInstance(
-                                        categoria.getId(), categoria.getNome());
+                                        categoria.getId(), categoria.getNome(), categoria.getIconeRes());
                                 requireActivity().getSupportFragmentManager()
                                         .beginTransaction()
                                         .replace(R.id.frameContainer, frag)
@@ -247,7 +278,7 @@ public class HomeFragment extends Fragment {
                             categoria -> {
                                 ProdutosCategoriaFragment frag =
                                         ProdutosCategoriaFragment.newInstance(
-                                                categoria.getId(), categoria.getNome());
+                                                categoria.getId(), categoria.getNome(), categoria.getIconeRes());
                                 requireActivity().getSupportFragmentManager()
                                         .beginTransaction()
                                         .replace(R.id.frameContainer, frag)

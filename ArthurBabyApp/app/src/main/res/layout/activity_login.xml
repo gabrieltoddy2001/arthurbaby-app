@@ -24,11 +24,9 @@
                 android:gravity="center"
                 android:paddingTop="24dp">
 
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@mipmap/ic_launcher"
-                    android:contentDescription="Logo" />
+                <br.com.arthurbaby.utils.LogoAnimadoView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -111,7 +109,7 @@
                     android:hint="Senha"
                     android:layout_marginTop="12dp"
                     app:passwordToggleEnabled="true"
-                    app:startIconDrawable="@drawable/ic_sair"
+                    app:startIconDrawable="@drawable/ic_cadeado"
                     app:startIconTint="@color/rosa_arthur"
                     app:boxStrokeColor="@color/rosa_arthur"
                     app:boxCornerRadiusTopStart="16dp"
@@ -127,16 +125,35 @@
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:id="@+id/tvEsqueciSenha"
-                    android:layout_width="wrap_content"
+                <!-- Lembrar e-mail/CPF + esqueci a senha -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Esqueci minha senha"
-                    android:textColor="@color/rosa_arthur"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="8dp"
-                    android:textSize="13sp"
-                    android:padding="4dp" />
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/cbLembrarLogin"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="true"
+                        android:text="Lembrar e-mail/CPF"
+                        android:textColor="@color/cinza_medio"
+                        android:textSize="13sp"
+                        app:buttonTint="@color/rosa_arthur"
+                        android:tooltipText="Preenche seu e-mail/CPF na próxima vez que entrar" />
+
+                    <TextView
+                        android:id="@+id/tvEsqueciSenha"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Esqueci minha senha"
+                        android:textColor="@color/rosa_arthur"
+                        android:textSize="13sp"
+                        android:padding="4dp" />
+                </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEntrar"

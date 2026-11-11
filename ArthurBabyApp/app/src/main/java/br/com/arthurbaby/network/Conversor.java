@@ -27,7 +27,9 @@ public class Conversor {
         Categoria cat = new Categoria(c.id, c.nome, iconeResPorNome(c.icone));
         if (c.subcategorias != null) {
             for (CategoriaResponse sub : c.subcategorias) {
-                Categoria subCat = new Categoria(sub.id, sub.nome, iconeResPorNome(sub.icone));
+                int iconeSub = iconeResPorNome(sub.icone);
+                if (iconeSub == 0) iconeSub = cat.getIconeRes(); // herda o ícone da categoria-pai
+                Categoria subCat = new Categoria(sub.id, sub.nome, iconeSub);
                 cat.addSubcategoria(subCat);
             }
         }

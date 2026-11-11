@@ -54,6 +54,9 @@ public class DetalhePedidoFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_detalhe_pedido, container, false);
 
+        v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
+
         if (getArguments() != null) {
             pedido = (Pedido) getArguments().getSerializable(ARG_PEDIDO);
         }

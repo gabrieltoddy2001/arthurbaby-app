@@ -161,10 +161,18 @@ public class PerfilFragment extends Fragment {
 
             Toast.makeText(requireContext(), "Até logo!", Toast.LENGTH_SHORT).show();
 
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.frameContainer, new HomeFragment())
-                    .commit();
+            // Seleciona "Início" no menu de baixo (ele mesmo abre a Home); antes o menu
+            // continuava marcando "Perfil" enquanto a tela mostrava a Home.
+            com.google.android.material.bottomnavigation.BottomNavigationView nav =
+                    requireActivity().findViewById(R.id.bottomNav);
+            if (nav != null) {
+                nav.setSelectedItemId(R.id.nav_home);
+            } else {
+                requireActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.frameContainer, new HomeFragment())
+                        .commit();
+            }
         });
 
         return v;

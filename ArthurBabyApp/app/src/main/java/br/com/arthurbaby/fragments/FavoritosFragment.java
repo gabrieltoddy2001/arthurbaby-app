@@ -47,7 +47,7 @@ public class FavoritosFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_favoritos, container, false);
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         rv = v.findViewById(R.id.rvFavoritos);
         tvVazio = v.findViewById(R.id.tvVazio);

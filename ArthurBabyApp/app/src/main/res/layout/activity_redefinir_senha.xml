@@ -12,14 +12,15 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
+        <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Redefinir Senha"
             android:textColor="@color/verde_arthur"
             android:textSize="26sp"
             android:textStyle="bold"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="24dp"
+            app:iconeTitulo="@drawable/ic_cadeado" />
 
         <TextView
             android:layout_width="wrap_content"

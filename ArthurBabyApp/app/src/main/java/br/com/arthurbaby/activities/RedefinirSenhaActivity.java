@@ -26,6 +26,7 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_redefinir_senha);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
 
         TextInputEditText etToken = findViewById(R.id.etToken);
         TextInputEditText etNovaSenha = findViewById(R.id.etNovaSenha);

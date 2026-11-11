@@ -1,6 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
 }
+
+// Endereço da API para celular físico: defina "api.url" no local.properties
+// (ex.: api.url=http://192.168.1.110:8080/). No emulador o app usa 10.0.2.2 automaticamente.
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val apiUrl: String = (localProps.getProperty("api.url") ?: "http://10.0.2.2:8080/")
+    .let { if (it.endsWith("/")) it else "$it/" }
 
 android {
     namespace = "br.com.arthurbaby"
@@ -16,6 +27,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "API_URL", "\"$apiUrl\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {

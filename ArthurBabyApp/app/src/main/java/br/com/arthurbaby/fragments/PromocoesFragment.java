@@ -37,7 +37,7 @@ public class PromocoesFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_promocoes, container, false);
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         rv = v.findViewById(R.id.rvPromocoes);
         rv.setLayoutManager(new GridLayoutManager(getContext(), 2));

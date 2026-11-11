@@ -128,7 +128,7 @@ public class DetalheProdutoFragment extends Fragment {
         }
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         v.findViewById(R.id.btnMais).setOnClickListener(x -> {
             qtd++;
@@ -540,6 +540,9 @@ public class DetalheProdutoFragment extends Fragment {
         btn.setImageResource(fav ? R.drawable.ic_favorito_preenchido : R.drawable.ic_favorito);
         btn.setColorFilter(ContextCompat.getColor(requireContext(),
                 fav ? R.color.coracao_ativo : R.color.coracao_inativo));
+        String dica = fav ? "Remover dos favoritos" : "Adicionar aos favoritos";
+        btn.setContentDescription(dica);
+        androidx.appcompat.widget.TooltipCompat.setTooltipText(btn, dica);
     }
 
     private int dp(int valor) {

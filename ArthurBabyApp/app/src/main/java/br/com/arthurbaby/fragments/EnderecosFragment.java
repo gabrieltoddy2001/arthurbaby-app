@@ -49,7 +49,7 @@ public class EnderecosFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_enderecos, container, false);
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         rv = v.findViewById(R.id.rvEnderecos);
         progressBar = v.findViewById(R.id.progressBar);
@@ -172,7 +172,8 @@ public class EnderecosFragment extends Fragment {
         container.addView(etUf);
 
         new AlertDialog.Builder(requireContext())
-                .setTitle("Novo endereço")
+                .setIcon(R.drawable.ic_endereco_titulo)
+                .setTitle("Novo Endereço")
                 .setView(container)
                 .setPositiveButton("Salvar", (d, w) -> {
                     EnderecoRequest req = new EnderecoRequest(

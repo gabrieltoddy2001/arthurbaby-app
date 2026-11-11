@@ -73,7 +73,7 @@ public class ItemCarrinhoAdapter extends RecyclerView.Adapter<ItemCarrinhoAdapte
                     h.itemView.getContext(), R.color.placeholder_produto));
         }
 
-        h.btnRemover.setImageResource(R.drawable.ic_sair);
+        h.btnRemover.setImageResource(R.drawable.ic_lixeira);
         h.btnRemover.setColorFilter(ContextCompat.getColor(
                 h.itemView.getContext(), R.color.vermelho_desconto));
 

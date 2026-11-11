@@ -48,6 +48,8 @@ public class PesquisaFragment extends Fragment {
 
     private View containerHistorico;
     private LinearLayout containerChipsHistorico;
+    private View estadoVazio;
+    private TextView tvVazioTitulo, tvVazioTexto;
     private TextView btnLimparHistorico;
 
     private String filtroAtual = "TODAS";
@@ -69,6 +71,9 @@ public class PesquisaFragment extends Fragment {
 
         etBusca = v.findViewById(R.id.etBusca);
         tvInfo = v.findViewById(R.id.tvResultadoInfo);
+        estadoVazio = v.findViewById(R.id.estadoVazio);
+        tvVazioTitulo = v.findViewById(R.id.tvVazioTitulo);
+        tvVazioTexto = v.findViewById(R.id.tvVazioTexto);
         rvResultados = v.findViewById(R.id.rvResultados);
         progressBar = v.findViewById(R.id.progressBar);
         chipTodas = v.findViewById(R.id.chipTodas);
@@ -81,7 +86,7 @@ public class PesquisaFragment extends Fragment {
         btnLimparHistorico = v.findViewById(R.id.btnLimparHistorico);
 
         v.findViewById(R.id.btnVoltarBusca).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         rvResultados.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
@@ -117,6 +122,7 @@ public class PesquisaFragment extends Fragment {
                     mostrarHistorico(true);
                     rvResultados.setVisibility(View.GONE);
                     tvInfo.setText("Digite para buscar");
+                    mostrarEstadoInicial();
                 } else {
                     mostrarHistorico(false);
                     pintarChips();
@@ -138,12 +144,16 @@ public class PesquisaFragment extends Fragment {
             mostrarHistorico(true);
             rvResultados.setVisibility(View.GONE);
             tvInfo.setText("Digite para buscar");
+            mostrarEstadoInicial();
         });
 
         // Estado inicial
+        pintarChips();
+        pintarChipLimpar();
         mostrarHistorico(true);
         rvResultados.setVisibility(View.GONE);
         tvInfo.setText("Digite para buscar");
+        mostrarEstadoInicial();
 
         return v;
     }
@@ -185,9 +195,10 @@ public class PesquisaFragment extends Fragment {
 
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(dp(20));
-        bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_fundo));
+        bg.setColor(ContextCompat.getColor(requireContext(), R.color.branco));
+        bg.setStroke(dp(1), ContextCompat.getColor(requireContext(), R.color.rosa_claro));
         chip.setBackground(bg);
-        chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_texto));
+        chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.rosa_escuro));
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -230,6 +241,7 @@ public class PesquisaFragment extends Fragment {
         if (!isAdded()) return;
         // Uma resposta antiga não pode sobrescrever o resultado da busca mais recente
         cancelarChamada();
+        estadoVazio.setVisibility(View.GONE);
         LoadingView.mostrar(progressBar, rvResultados);
 
         String termo = busca != null && !busca.trim().isEmpty() ? busca.trim() : null;
@@ -272,7 +284,12 @@ public class PesquisaFragment extends Fragment {
                             });
                             rvResultados.setAdapter(adapter);
 
-                            if (filtrados.isEmpty()) tvInfo.setText("Nenhum resultado encontrado");
+                            if (filtrados.isEmpty()) {
+                                tvInfo.setText("Nenhum resultado encontrado");
+                                rvResultados.setVisibility(View.GONE);
+                                mostrarEstadoVazio("Nenhum produto encontrado",
+                                        "Tente outra palavra ou remova o filtro. Temos muitas novidades esperando por você 💕");
+                            }
                             else if (filtrados.size() == 1) tvInfo.setText("1 resultado");
                             else tvInfo.setText(filtrados.size() + " resultados");
                         } else {
@@ -300,17 +317,41 @@ public class PesquisaFragment extends Fragment {
         super.onDestroyView();
     }
 
+    /** Filtro ativo em verde ArthurBaby; inativos em rosa suave. */
     private void pintarChip(TextView chip, boolean ativo) {
         GradientDrawable bg = new GradientDrawable();
-        bg.setCornerRadius(40f);
+        bg.setCornerRadius(dp(20));
         if (ativo) {
-            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado));
-            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado_texto));
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.verde_arthur));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.branco));
+            chip.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
-            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_fundo));
-            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_texto));
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.rosa_suave));
+            bg.setStroke(dp(1), ContextCompat.getColor(requireContext(), R.color.rosa_claro));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.rosa_escuro));
+            chip.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
         chip.setBackground(bg);
+    }
+
+    private void pintarChipLimpar() {
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(20));
+        bg.setColor(android.graphics.Color.TRANSPARENT);
+        bg.setStroke(dp(1), ContextCompat.getColor(requireContext(), R.color.cinza_borda));
+        chipLimpar.setBackground(bg);
+    }
+
+    private void mostrarEstadoInicial() {
+        mostrarEstadoVazio("O que o seu bebê precisa hoje?",
+                "Busque roupinhas, enxoval, acessórios e muito mais — feito com carinho para você.");
+    }
+
+    private void mostrarEstadoVazio(String titulo, String texto) {
+        if (estadoVazio == null) return;
+        tvVazioTitulo.setText(titulo);
+        tvVazioTexto.setText(texto);
+        estadoVazio.setVisibility(View.VISIBLE);
     }
 
     private int dp(int valor) {

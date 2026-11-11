@@ -20,24 +20,29 @@
             android:padding="16dp"
             android:background="@color/branco">
 
-            <TextView
+            <ImageButton
                 android:id="@+id/btnVoltar"
+                style="@style/BotaoVoltar"
+                app:tint="@color/texto_primario" />
+
+            <br.com.arthurbaby.utils.TituloComIcone
+                android:id="@+id/tvTitulo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="←"
-                android:textSize="26sp"
-                android:textColor="@color/texto_primario"
-                android:paddingEnd="12dp" />
-
-            <TextView
-                android:id="@+id/tvTitulo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Pedido"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/texto_primario" />
+                android:textColor="@color/texto_primario"
+                app:iconeTitulo="@drawable/ic_pedidos" />
+
+
+            <Space
+
+                android:layout_width="0dp"
+
+                android:layout_height="1dp"
+
+                android:layout_weight="1" />
         </LinearLayout>
 
         <LinearLayout
@@ -212,6 +217,8 @@
             <!-- BOTÃO CANCELAR PEDIDO -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancelarPedido"
+                android:tooltipText="Cancelar este pedido"
+                android:contentDescription="Cancelar este pedido"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="20dp"

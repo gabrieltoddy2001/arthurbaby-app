@@ -18,6 +18,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
 
         LinearLayout containerLogo = findViewById(R.id.containerLogo);
         Animation anim = AnimationUtils.loadAnimation(this, R.anim.splash_scale);

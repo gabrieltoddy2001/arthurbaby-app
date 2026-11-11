@@ -26,6 +26,7 @@ public class RecuperarSenhaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recuperar_senha);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
 
         TextInputEditText etEmail = findViewById(R.id.etEmailRecuperar);
         MaterialButton btnEnviar = findViewById(R.id.btnEnviar);

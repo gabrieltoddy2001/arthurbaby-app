@@ -35,7 +35,31 @@ public class CategoriaIconeAdapter extends RecyclerView.Adapter<CategoriaIconeAd
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_categoria_icone, parent, false);
+        if (parent instanceof RecyclerView) {
+            RecyclerView.LayoutManager lm = ((RecyclerView) parent).getLayoutManager();
+            boolean linha = lm instanceof androidx.recyclerview.widget.LinearLayoutManager
+                    && !(lm instanceof androidx.recyclerview.widget.GridLayoutManager)
+                    && ((androidx.recyclerview.widget.LinearLayoutManager) lm).getOrientation()
+                            == RecyclerView.HORIZONTAL;
+            if (linha) {
+                v.getLayoutParams().width = larguraItemEmLinha((RecyclerView) parent);
+            }
+        }
         return new VH(v);
+    }
+
+    /**
+     * Largura de cada categoria no modo "uma linha": divide a área visível em partes iguais
+     * para que, ao abrir a tela, apareçam 5 categorias inteiras (nenhuma cortada na borda).
+     * Em telas estreitas, onde cada uma ficaria com menos de 64dp, mostra 4.
+     */
+    private static int larguraItemEmLinha(RecyclerView rv) {
+        float densidade = rv.getResources().getDisplayMetrics().density;
+        int largura = rv.getWidth() > 0 ? rv.getWidth()
+                : rv.getResources().getDisplayMetrics().widthPixels;
+        int util = largura - rv.getPaddingLeft() - rv.getPaddingRight();
+        int porTela = util / 5 >= Math.round(64 * densidade) ? 5 : 4;
+        return util / porTela;
     }
 
     @Override

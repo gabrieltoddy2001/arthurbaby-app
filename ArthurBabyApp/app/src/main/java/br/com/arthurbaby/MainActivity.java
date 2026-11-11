@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import br.com.arthurbaby.fragments.CarrinhoFragment;
@@ -21,10 +22,27 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
 
+    /** Mostra a quantidade de itens no ícone do carrinho (some quando está vazio). */
+    private final CarrinhoRepository.OnCarrinhoAlterado contadorCarrinho = total -> {
+        if (bottomNav == null) return;
+        if (total > 0) {
+            BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.nav_carrinho);
+            badge.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.verde_arthur));
+            badge.setBadgeTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.branco));
+            badge.setMaxCharacterCount(3); // acima de 99 mostra "99+"
+            badge.setNumber(total);
+            badge.setVisible(true);
+        } else {
+            bottomNav.removeBadge(R.id.nav_carrinho);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
+        br.com.arthurbaby.utils.RedeLocalPermissao.solicitarSeNecessario(this);
 
         CarrinhoRepository.getInstance().carregar(this);
         FavoritoRepository.getInstance().sincronizar(this);
@@ -59,14 +77,30 @@ public class MainActivity extends AppCompatActivity {
                 Fragment atual = getSupportFragmentManager()
                         .findFragmentById(R.id.frameContainer);
                 if (!(atual instanceof HomeFragment)) {
-                    trocarFragment(new HomeFragment());
-                    bottomNav.setSelectedItemId(R.id.nav_home);
+                    // O listener do menu já troca para a Home (antes trocava duas vezes)
+                    if (bottomNav.getSelectedItemId() != R.id.nav_home) {
+                        bottomNav.setSelectedItemId(R.id.nav_home);
+                    } else {
+                        trocarFragment(new HomeFragment());
+                    }
                     return;
                 }
                 setEnabled(false);
                 getOnBackPressedDispatcher().onBackPressed();
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        CarrinhoRepository.getInstance().observar(contadorCarrinho);
+    }
+
+    @Override
+    protected void onStop() {
+        CarrinhoRepository.getInstance().pararDeObservar(contadorCarrinho);
+        super.onStop();
     }
 
     /**

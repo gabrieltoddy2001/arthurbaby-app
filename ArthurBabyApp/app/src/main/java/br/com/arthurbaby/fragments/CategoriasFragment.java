@@ -40,6 +40,9 @@ public class CategoriasFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_categorias, container, false);
 
+        v.findViewById(R.id.btnVoltarCategorias).setOnClickListener(x ->
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
+
         v.findViewById(R.id.atalhoBuscaCat).setOnClickListener(x ->
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
@@ -73,7 +76,7 @@ public class CategoriasFragment extends Fragment {
                             categoria -> {
                                 ProdutosCategoriaFragment frag =
                                         ProdutosCategoriaFragment.newInstance(
-                                                categoria.getId(), categoria.getNome());
+                                                categoria.getId(), categoria.getNome(), categoria.getIconeRes());
                                 requireActivity().getSupportFragmentManager()
                                         .beginTransaction()
                                         .replace(R.id.frameContainer, frag)
