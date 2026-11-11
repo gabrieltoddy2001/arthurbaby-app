@@ -23,13 +23,13 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNav;
 
     /**
-     * Mostra a quantidade de itens no ícone do carrinho.
-     * Some quando o carrinho está vazio ou ninguém está logado; os itens continuam
-     * salvos e o número volta ao fazer login de novo.
+     * Mostra a quantidade de itens no ícone do carrinho, com ou sem login: o carrinho
+     * fica salvo no aparelho e o login só é exigido ao finalizar o pedido.
+     * Some apenas quando o carrinho está vazio.
      */
     private final CarrinhoRepository.OnCarrinhoAlterado contadorCarrinho = total -> {
         if (bottomNav == null) return;
-        if (total > 0 && br.com.arthurbaby.utils.AuthGuard.estaLogado(this)) {
+        if (total > 0) {
             BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.nav_carrinho);
             badge.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.verde_arthur));
             badge.setBadgeTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.branco));
