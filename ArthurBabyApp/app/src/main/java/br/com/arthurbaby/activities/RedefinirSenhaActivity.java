@@ -26,6 +26,7 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_redefinir_senha);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
 
         TextInputEditText etToken = findViewById(R.id.etToken);
         TextInputEditText etNovaSenha = findViewById(R.id.etNovaSenha);
@@ -87,5 +88,6 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.tvVoltar).setOnClickListener(v -> finish());
+        findViewById(R.id.btnVoltarRedefinir).setOnClickListener(v -> finish());
     }
 }

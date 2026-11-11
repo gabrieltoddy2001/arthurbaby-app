@@ -26,7 +26,7 @@ public class MeusCuponsFragment extends Fragment {
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_meus_cupons, container, false);
-        v.findViewById(R.id.btnVoltar).setOnClickListener(x -> requireActivity().getSupportFragmentManager().popBackStack());
+        v.findViewById(R.id.btnVoltar).setOnClickListener(x -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         RecyclerView rv = v.findViewById(R.id.rvCupons);
         View progress = v.findViewById(R.id.progressBar);

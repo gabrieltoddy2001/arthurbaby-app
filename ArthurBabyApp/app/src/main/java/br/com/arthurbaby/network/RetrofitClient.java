@@ -15,11 +15,23 @@ public class RetrofitClient {
 
     /**
      * URL do backend.
-     * - 10.0.2.2 = localhost do PC, visto de dentro do emulador Android
-     * - localhost = quando usa adb reverse
-     * - IP da rede local = celular físico na mesma rede Wi-Fi do PC
+     * - Emulador: sempre http://10.0.2.2:8080/ (o localhost do PC visto de dentro do emulador)
+     * - Celular físico: "api.url" do local.properties (IP do PC na mesma rede Wi-Fi).
+     *   Antes o IP ficava fixo no código e, quando o IP do PC mudava, o login dava timeout.
      */
-    private static final String BASE_URL = "http://192.168.100.171:8080/";
+    static final String URL_EMULADOR = "http://192.168.100.171:8080/";
+    private static final String BASE_URL = ehEmulador() ? URL_EMULADOR : br.com.arthurbaby.BuildConfig.API_URL;
+
+    private static boolean ehEmulador() {
+        String fp = android.os.Build.FINGERPRINT;
+        String hw = android.os.Build.HARDWARE;
+        String produto = android.os.Build.PRODUCT;
+        return (fp != null && (fp.startsWith("generic") || fp.contains("emulator")))
+                || "goldfish".equals(hw) || "ranchu".equals(hw)
+                || (produto != null && (produto.contains("sdk") || produto.contains("emulator")));
+    }
+
+    public static String getBaseUrl() { return BASE_URL; }
 
     private static volatile Retrofit retrofit;
     private static volatile ApiService api;

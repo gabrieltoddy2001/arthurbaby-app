@@ -63,6 +63,9 @@ public class CarrinhoFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_carrinho, container, false);
 
+        v.findViewById(R.id.btnVoltarCarrinho).setOnClickListener(x ->
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
+
         repo = CarrinhoRepository.getInstance();
 
         rvCarrinho = v.findViewById(R.id.rvCarrinho);
@@ -255,6 +258,7 @@ public class CarrinhoFragment extends Fragment {
     }
 
     private void atualizarTotal() {
+        repo.salvarAlteracoes(); // persiste +/- e atualiza o contador do ícone
         double subtotal = repo.getSubtotal();
 
         // Itens alterados depois de aplicar o cupom: o desconto exibido ficaria errado

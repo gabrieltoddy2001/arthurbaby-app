@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import br.com.arthurbaby.fragments.CarrinhoFragment;
@@ -21,10 +22,31 @@ public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;
 
+    /**
+     * Mostra a quantidade de itens no ícone do carrinho, com ou sem login: o carrinho
+     * fica salvo no aparelho e o login só é exigido ao finalizar o pedido.
+     * Some apenas quando o carrinho está vazio.
+     */
+    private final CarrinhoRepository.OnCarrinhoAlterado contadorCarrinho = total -> {
+        if (bottomNav == null) return;
+        if (total > 0) {
+            BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.nav_carrinho);
+            badge.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.verde_arthur));
+            badge.setBadgeTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.branco));
+            badge.setMaxCharacterCount(3); // acima de 99 mostra "99+"
+            badge.setNumber(total);
+            badge.setVisible(true);
+        } else {
+            bottomNav.removeBadge(R.id.nav_carrinho);
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
+        br.com.arthurbaby.utils.RedeLocalPermissao.solicitarSeNecessario(this);
 
         CarrinhoRepository.getInstance().carregar(this);
         FavoritoRepository.getInstance().sincronizar(this);
@@ -34,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             trocarFragment(new HomeFragment());
         }
+
+        // Tocar de novo na aba atual recarrega a tela (busca os dados novamente)
+        bottomNav.setOnItemReselectedListener(item -> recarregarTelaAtual());
 
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment = null;
@@ -59,14 +84,52 @@ public class MainActivity extends AppCompatActivity {
                 Fragment atual = getSupportFragmentManager()
                         .findFragmentById(R.id.frameContainer);
                 if (!(atual instanceof HomeFragment)) {
-                    trocarFragment(new HomeFragment());
-                    bottomNav.setSelectedItemId(R.id.nav_home);
+                    // O listener do menu já troca para a Home (antes trocava duas vezes)
+                    if (bottomNav.getSelectedItemId() != R.id.nav_home) {
+                        bottomNav.setSelectedItemId(R.id.nav_home);
+                    } else {
+                        trocarFragment(new HomeFragment());
+                    }
                     return;
                 }
                 setEnabled(false);
                 getOnBackPressedDispatcher().onBackPressed();
             }
         });
+    }
+
+    /**
+     * Se a permissão de rede local (Android 17) for concedida com a tela já aberta,
+     * recarrega a tela: as buscas feitas antes da permissão falharam.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @androidx.annotation.NonNull String[] permissions,
+                                           @androidx.annotation.NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (br.com.arthurbaby.utils.RedeLocalPermissao.foiConcedida(requestCode, grantResults)) {
+            recarregarTelaAtual();
+        }
+    }
+
+    /** Recria a view do fragment atual, o que refaz as chamadas à API. */
+    private void recarregarTelaAtual() {
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment atual = fm.findFragmentById(R.id.frameContainer);
+        if (atual == null || fm.isStateSaved()) return;
+        fm.beginTransaction().detach(atual).commitNow();
+        fm.beginTransaction().attach(atual).commitNow();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        CarrinhoRepository.getInstance().observar(contadorCarrinho);
+    }
+
+    @Override
+    protected void onStop() {
+        CarrinhoRepository.getInstance().pararDeObservar(contadorCarrinho);
+        super.onStop();
     }
 
     /**

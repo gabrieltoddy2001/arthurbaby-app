@@ -30,6 +30,12 @@ public class CarrinhoRepository {
     private Context appContext;
     private boolean carregado = false;
 
+    /** Quem quer saber quando a quantidade de itens muda (ex.: contador no ícone do carrinho). */
+    public interface OnCarrinhoAlterado { void onAlterado(int totalItens); }
+    private final List<OnCarrinhoAlterado> observadores = new ArrayList<>();
+    private final android.os.Handler mainHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
+
     private CarrinhoRepository() {}
 
     public static CarrinhoRepository getInstance() {
@@ -62,6 +68,32 @@ public class CarrinhoRepository {
         } catch (Exception e) {
             android.util.Log.e("CARRINHO", "Erro ao carregar", e);
         }
+        notificar();
+    }
+
+    /** Registra um observador e já informa a quantidade atual. */
+    public void observar(OnCarrinhoAlterado o) {
+        if (!observadores.contains(o)) observadores.add(o);
+        o.onAlterado(getTotalItens());
+    }
+
+    public void pararDeObservar(OnCarrinhoAlterado o) {
+        observadores.remove(o);
+    }
+
+    private void notificar() {
+        mainHandler.post(() -> {
+            int total = getTotalItens();
+            for (OnCarrinhoAlterado o : new ArrayList<>(observadores)) o.onAlterado(total);
+        });
+    }
+
+    /**
+     * Para alterações feitas direto na lista (ex.: botões +/- da tela do carrinho):
+     * salva em disco e atualiza o contador.
+     */
+    public void salvarAlteracoes() {
+        persistir();
     }
 
     /**
@@ -69,6 +101,7 @@ public class CarrinhoRepository {
      * Chamado automaticamente em cada mutação.
      */
     private void persistir() {
+        notificar();
         if (appContext == null) return;
         try {
             SharedPreferences prefs = appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -180,5 +213,6 @@ public class CarrinhoRepository {
             SharedPreferences prefs = appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
             prefs.edit().clear().apply();
         }
+        notificar();
     }
 }

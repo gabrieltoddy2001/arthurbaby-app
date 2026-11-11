@@ -31,6 +31,7 @@ public class EditarPerfilActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_perfil);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
 
         etNome = findViewById(R.id.etNome);
         etEmail = findViewById(R.id.etEmail);

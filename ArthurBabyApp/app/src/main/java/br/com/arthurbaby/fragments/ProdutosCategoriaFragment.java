@@ -29,15 +29,22 @@ public class ProdutosCategoriaFragment extends Fragment {
 
     private static final String ARG_CATEGORIA_ID = "categoriaId";
     private static final String ARG_CATEGORIA_NOME = "categoriaNome";
+    private static final String ARG_CATEGORIA_ICONE = "categoriaIcone";
 
     private Long categoriaId;
     private String categoriaNome;
 
     public static ProdutosCategoriaFragment newInstance(Long id, String nome) {
+        return newInstance(id, nome, 0);
+    }
+
+    /** @param iconeRes ícone da categoria (R.drawable.ic_cat_*), mostrado depois do título; 0 = ícone genérico */
+    public static ProdutosCategoriaFragment newInstance(Long id, String nome, int iconeRes) {
         ProdutosCategoriaFragment f = new ProdutosCategoriaFragment();
         Bundle b = new Bundle();
         b.putLong(ARG_CATEGORIA_ID, id != null ? id : -1);
         b.putString(ARG_CATEGORIA_NOME, nome);
+        b.putInt(ARG_CATEGORIA_ICONE, iconeRes);
         f.setArguments(b);
         return f;
     }
@@ -64,8 +71,19 @@ public class ProdutosCategoriaFragment extends Fragment {
         TextView tvTitulo = v.findViewById(R.id.tvTitulo);
         tvTitulo.setText(categoriaNome);
 
+        int iconeRes = getArguments() != null ? getArguments().getInt(ARG_CATEGORIA_ICONE, 0) : 0;
+        android.widget.ImageView imgIcone = v.findViewById(R.id.imgIconeCategoria);
+        if (iconeRes != 0) {
+            imgIcone.setImageResource(iconeRes);
+        } else {
+            // Sem ícone próprio: ícone genérico de categorias em rosa
+            imgIcone.setImageResource(R.drawable.ic_categorias);
+            imgIcone.setColorFilter(androidx.core.content.ContextCompat.getColor(
+                    requireContext(), R.color.rosa_arthur));
+        }
+
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         RecyclerView rvProdutos = v.findViewById(R.id.rvProdutos);
         rvProdutos.setLayoutManager(new GridLayoutManager(getContext(), 2));

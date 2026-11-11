@@ -12,14 +12,28 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Seta de voltar + título (mesmo padrão das demais telas) -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Redefinir Senha"
-            android:textColor="@color/verde_arthur"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <ImageButton
+                android:id="@+id/btnVoltarRedefinir"
+                style="@style/BotaoVoltar"
+                app:tint="@color/texto_primario" />
+
+            <br.com.arthurbaby.utils.TituloComIcone
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Redefinir Senha"
+                android:textColor="@color/verde_arthur"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                app:iconeTitulo="@drawable/ic_cadeado" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -34,6 +48,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Código / Token"
+            app:startIconDrawable="@drawable/ic_check_circle"
+            app:startIconTint="@color/rosa_arthur"
             app:boxStrokeColor="@color/rosa_arthur"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -53,6 +69,8 @@
             android:hint="Nova senha"
             android:layout_marginTop="12dp"
             app:passwordToggleEnabled="true"
+            app:startIconDrawable="@drawable/ic_cadeado"
+            app:startIconTint="@color/rosa_arthur"
             app:boxStrokeColor="@color/rosa_arthur"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
@@ -81,10 +99,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Voltar para o login"
-            android:textColor="@color/verde_arthur"
+            android:textColor="@color/rosa_arthur"
             android:textStyle="bold"
+            android:padding="8dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="16dp" />
 
     </LinearLayout>
 </ScrollView>

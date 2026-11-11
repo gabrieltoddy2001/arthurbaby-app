@@ -20,23 +20,28 @@
             android:padding="16dp"
             android:background="@color/branco">
 
-            <TextView
+            <ImageButton
                 android:id="@+id/btnVoltar"
+                style="@style/BotaoVoltar"
+                app:tint="@color/texto_primario" />
+
+            <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="←"
-                android:textSize="26sp"
-                android:textColor="@color/texto_primario"
-                android:paddingEnd="12dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Sobre"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/texto_primario" />
+                android:textColor="@color/texto_primario"
+                app:iconeTitulo="@drawable/ic_info" />
+
+
+            <Space
+
+                android:layout_width="0dp"
+
+                android:layout_height="1dp"
+
+                android:layout_weight="1" />
         </LinearLayout>
 
         <!-- HERO -->
@@ -45,21 +50,19 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:paddingVertical="32dp"
+            android:paddingVertical="16dp"
             android:background="@drawable/bg_gradiente_header">
 
             <FrameLayout
-                android:layout_width="120dp"
-                android:layout_height="120dp"
+                android:layout_width="104dp"
+                android:layout_height="104dp"
                 android:background="@drawable/bg_circulo_branco_suave"
                 android:elevation="4dp">
 
-                <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_gravity="center"
-                    android:src="@mipmap/ic_launcher"
-                    android:contentDescription="Logo" />
+                <br.com.arthurbaby.utils.LogoAnimadoView
+                    android:layout_width="104dp"
+                    android:layout_height="104dp"
+                    android:layout_gravity="center" />
             </FrameLayout>
 
             <TextView
@@ -67,10 +70,10 @@
                 android:layout_height="wrap_content"
                 android:text="ARTHURBABY"
                 android:textStyle="bold"
-                android:textSize="24sp"
+                android:textSize="22sp"
                 android:textColor="@color/branco"
                 android:letterSpacing="0.1"
-                android:layout_marginTop="16dp" />
+                android:layout_marginTop="8dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -100,8 +103,8 @@
             android:textColor="@color/texto_primario"
             android:textSize="16sp"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -115,7 +118,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="8dp">
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="8dp">
 
                 <LinearLayout
                     android:id="@+id/tvWhatsapp"
@@ -123,18 +127,19 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:background="@drawable/bg_circulo_verde_suave">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_whatsapp"
                             app:tint="@color/verde_arthur"
@@ -156,18 +161,19 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:background="@drawable/bg_circulo_categoria_suave">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_email"
                             app:tint="@color/rosa_arthur"
@@ -189,18 +195,19 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:background="@drawable/bg_circulo_verde_suave">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_localizacao"
                             app:tint="@color/verde_arthur"
@@ -229,8 +236,8 @@
             android:textColor="@color/texto_primario"
             android:textSize="16sp"
             android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -244,7 +251,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="8dp">
+                android:paddingVertical="4dp"
+                android:paddingHorizontal="8dp">
 
                 <LinearLayout
                     android:id="@+id/tvInstagram"
@@ -252,18 +260,19 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:background="@drawable/bg_circulo_categoria_suave">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_instagram"
                             app:tint="@color/rosa_arthur"
@@ -285,18 +294,19 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:background="@drawable/bg_circulo_verde_suave">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_shopee"
                             app:tint="@color/verde_arthur"
@@ -318,18 +328,19 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
                         android:background="@drawable/bg_circulo_categoria_suave">
 
                         <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
                             android:layout_gravity="center"
                             android:src="@drawable/ic_info"
                             app:tint="@color/rosa_arthur"
@@ -356,6 +367,7 @@
             android:textColor="@color/cinza_texto"
             android:textSize="11sp"
             android:lineSpacingMultiplier="1.4"
-            android:padding="24dp" />
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="14dp" />
     </LinearLayout>
 </ScrollView>

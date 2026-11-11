@@ -57,7 +57,7 @@ public class MeusPedidosFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_meus_pedidos, container, false);
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         tabs = v.findViewById(R.id.tabsPedidos);
         pager = v.findViewById(R.id.viewPagerPedidos);

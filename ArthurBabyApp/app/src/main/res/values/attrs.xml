@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Título de tela com ícone depois do texto (br.com.arthurbaby.utils.TituloComIcone) -->
+    <declare-styleable name="TituloComIcone">
+        <!-- Ícone mostrado depois do título -->
+        <attr name="iconeTitulo" format="reference" />
+        <!-- true em cabeçalhos coloridos (degradê): ícone branco sobre círculo translúcido -->
+        <attr name="iconeClaro" format="boolean" />
+    </declare-styleable>
+</resources>

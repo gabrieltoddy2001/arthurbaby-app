@@ -20,6 +20,7 @@ import br.com.arthurbaby.network.dto.AuthRequest;
 import br.com.arthurbaby.network.dto.AuthResponse;
 import br.com.arthurbaby.utils.ErrorUtils;
 import br.com.arthurbaby.utils.LoadingUtils;
+import br.com.arthurbaby.utils.LoginLembrado;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -29,17 +30,29 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etLogin, etSenha;
     private MaterialButton btnEntrar;
     private TextView tvCadastrar, tvEsqueciSenha;
+    private android.widget.CheckBox cbLembrar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
+        br.com.arthurbaby.utils.RedeLocalPermissao.solicitarSeNecessario(this);
 
         etLogin = findViewById(R.id.etLogin);
         etSenha = findViewById(R.id.etSenha);
         btnEntrar = findViewById(R.id.btnEntrar);
         tvCadastrar = findViewById(R.id.tvCadastrar);
         tvEsqueciSenha = findViewById(R.id.tvEsqueciSenha);
+        cbLembrar = findViewById(R.id.cbLembrarLogin);
+
+        // Preenche o último e-mail/CPF usado (continua salvo depois do logout)
+        cbLembrar.setChecked(LoginLembrado.isLembrar(this));
+        String ultimoLogin = LoginLembrado.getLogin(this);
+        if (!ultimoLogin.isEmpty()) {
+            etLogin.setText(ultimoLogin);
+            etSenha.requestFocus();
+        }
 
         btnEntrar.setOnClickListener(v -> validarLogin());
 
@@ -74,6 +87,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         if (response.isSuccessful() && response.body() != null) {
                             AuthResponse auth = response.body();
+                            LoginLembrado.salvar(LoginActivity.this, login, cbLembrar.isChecked());
 
                             TokenStorage.salvar(
                                     LoginActivity.this,

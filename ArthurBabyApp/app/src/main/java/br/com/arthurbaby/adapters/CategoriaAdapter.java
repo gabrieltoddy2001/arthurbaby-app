@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,18 +56,21 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.VH> 
         h.containerSub.removeAllViews();
         if (c.temSubcategorias()) {
             for (Categoria sub : c.getSubcategorias()) {
+                float dp = h.itemView.getResources().getDisplayMetrics().density;
                 TextView chip = new TextView(h.itemView.getContext());
                 chip.setText(sub.getNome());
                 chip.setTextSize(12f);
-                chip.setPadding(28, 10, 28, 10);
-                chip.setBackgroundColor(0xFFFAD1DE);
+                chip.setMaxLines(1);
+                chip.setPadding((int) (12 * dp), (int) (5 * dp), (int) (12 * dp), (int) (5 * dp));
+                android.graphics.drawable.GradientDrawable fundo =
+                        new android.graphics.drawable.GradientDrawable();
+                fundo.setColor(0xFFFAD1DE);
+                fundo.setCornerRadius(14 * dp);
+                chip.setBackground(fundo);
                 chip.setTextColor(0xFFD56586);
-
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-                lp.setMargins(0, 0, 10, 0);
-                chip.setLayoutParams(lp);
+                chip.setLayoutParams(new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
 
                 chip.setOnClickListener(v -> listener.onClick(sub));
                 h.containerSub.addView(chip);
@@ -87,7 +89,7 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.VH> 
     static class VH extends RecyclerView.ViewHolder {
         ImageView icone;
         TextView tv, tvSeta;
-        LinearLayout containerSub;
+        ViewGroup containerSub;
 
         VH(View v) {
             super(v);

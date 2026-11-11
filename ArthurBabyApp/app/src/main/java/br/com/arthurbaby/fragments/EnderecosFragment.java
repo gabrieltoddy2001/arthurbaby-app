@@ -1,6 +1,5 @@
 package br.com.arthurbaby.fragments;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.List;
@@ -49,7 +49,7 @@ public class EnderecosFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_enderecos, container, false);
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         rv = v.findViewById(R.id.rvEnderecos);
         progressBar = v.findViewById(R.id.progressBar);
@@ -108,7 +108,7 @@ public class EnderecosFragment extends Fragment {
         Long clienteId = TokenStorage.getUsuarioId(requireContext());
         if (clienteId == null || e.getId() == null) return;
 
-        new AlertDialog.Builder(requireContext())
+        new MaterialAlertDialogBuilder(requireContext(), R.style.DialogArredondado)
                 .setTitle("Remover endereço")
                 .setMessage("Deseja remover este endereço?")
                 .setPositiveButton("Sim", (d, w) -> {
@@ -139,41 +139,21 @@ public class EnderecosFragment extends Fragment {
     }
 
     private void abrirDialogNovoEndereco() {
-        LinearLayout container = new LinearLayout(getContext());
-        container.setOrientation(LinearLayout.VERTICAL);
-        container.setPadding(40, 20, 40, 20);
+        // Formulário com campos arredondados (layout dialog_novo_endereco.xml)
+        View form = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_novo_endereco, null, false);
+        TextInputEditText etCep = form.findViewById(R.id.etCep);
+        TextInputEditText etLog = form.findViewById(R.id.etLogradouro);
+        TextInputEditText etNum = form.findViewById(R.id.etNumero);
+        TextInputEditText etComp = form.findViewById(R.id.etComplemento);
+        TextInputEditText etBairro = form.findViewById(R.id.etBairro);
+        TextInputEditText etCidade = form.findViewById(R.id.etCidade);
+        TextInputEditText etUf = form.findViewById(R.id.etUf);
 
-        TextInputEditText etCep = new TextInputEditText(getContext());
-        etCep.setHint("CEP");
-        container.addView(etCep);
-
-        TextInputEditText etLog = new TextInputEditText(getContext());
-        etLog.setHint("Logradouro");
-        container.addView(etLog);
-
-        TextInputEditText etNum = new TextInputEditText(getContext());
-        etNum.setHint("Número");
-        container.addView(etNum);
-
-        TextInputEditText etComp = new TextInputEditText(getContext());
-        etComp.setHint("Complemento");
-        container.addView(etComp);
-
-        TextInputEditText etBairro = new TextInputEditText(getContext());
-        etBairro.setHint("Bairro");
-        container.addView(etBairro);
-
-        TextInputEditText etCidade = new TextInputEditText(getContext());
-        etCidade.setHint("Cidade");
-        container.addView(etCidade);
-
-        TextInputEditText etUf = new TextInputEditText(getContext());
-        etUf.setHint("UF");
-        container.addView(etUf);
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Novo endereço")
-                .setView(container)
+        new MaterialAlertDialogBuilder(requireContext(), R.style.DialogArredondado)
+                .setIcon(R.drawable.ic_endereco_titulo)
+                .setTitle("Novo Endereço")
+                .setView(form)
                 .setPositiveButton("Salvar", (d, w) -> {
                     EnderecoRequest req = new EnderecoRequest(
                             texto(etCep), texto(etLog), texto(etNum),

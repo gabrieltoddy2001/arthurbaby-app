@@ -111,6 +111,9 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
         btn.setImageResource(fav ? R.drawable.ic_favorito_preenchido : R.drawable.ic_favorito);
         btn.setColorFilter(ContextCompat.getColor(btn.getContext(),
                 fav ? R.color.coracao_ativo : R.color.coracao_inativo));
+        String dica = fav ? "Remover dos favoritos" : "Adicionar aos favoritos";
+        btn.setContentDescription(dica);
+        androidx.appcompat.widget.TooltipCompat.setTooltipText(btn, dica);
     }
 
     @Override

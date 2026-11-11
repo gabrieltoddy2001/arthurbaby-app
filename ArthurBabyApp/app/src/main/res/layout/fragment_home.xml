@@ -58,13 +58,14 @@
 
         <ImageView
             android:id="@+id/btnFavoritos"
+            android:tooltipText="Meus favoritos"
+            android:contentDescription="Meus favoritos"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="6dp"
             android:background="@drawable/bg_circulo_branco_suave"
             android:src="@drawable/ic_favorito"
             app:tint="@color/rosa_arthur"
-            android:contentDescription="Favoritos"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -203,8 +204,14 @@
                 android:id="@+id/rvCategorias"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
+                android:clipToPadding="false"
+                android:scrollbars="horizontal"
+                android:scrollbarStyle="insideInset"
+                android:fadeScrollbars="false"
+                android:scrollbarSize="4dp"
+                android:scrollbarThumbHorizontal="@drawable/bg_rolagem_thumb"
+                android:scrollbarTrackHorizontal="@drawable/bg_rolagem_trilho"
                 android:nestedScrollingEnabled="false" />
 
             <!-- PRODUTOS EM DESTAQUE -->
@@ -213,7 +220,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="24dp">
+                android:layout_marginTop="16dp">
 
                 <TextView
                     android:layout_width="0dp"
