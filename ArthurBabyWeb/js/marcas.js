@@ -48,16 +48,16 @@
           <td>${m.id}</td>
           <td><strong>${escapeHtml(m.nome)}</strong></td>
           <td>
-            <span class="badge ${m.status === 'ATIVO' ? 'badge-ativo' : 'badge-inativo'}">
+            <span class="badge ${m.status === 'ATIVA' ? 'badge-ativo' : 'badge-inativo'}">
               ${m.status}
             </span>
           </td>
           <td>
             <div class="acoes-linha">
               <button class="btn-mini editar" onclick="editar(${m.id})">Editar</button>
-              <button class="btn-mini ${m.status === 'ATIVO' ? 'inativar' : 'ativar'}"
+              <button class="btn-mini ${m.status === 'ATIVA' ? 'inativar' : 'ativar'}"
                       onclick="alternar(${m.id})">
-                ${m.status === 'ATIVO' ? 'Inativar' : 'Ativar'}
+                ${m.status === 'ATIVA' ? 'Inativar' : 'Ativar'}
               </button>
             </div>
           </td>
@@ -91,8 +91,8 @@
            <div class="field">
              <label>Status</label>
              <select id="f-status">
-               <option value="ATIVO" ${marca?.status === 'ATIVO' || !editando ? 'selected' : ''}>ATIVO</option>
-               <option value="INATIVO" ${marca?.status === 'INATIVO' ? 'selected' : ''}>INATIVO</option>
+               <option value="ATIVA" ${marca?.status === 'ATIVA' || !editando ? 'selected' : ''}>ATIVA</option>
+               <option value="INATIVA" ${marca?.status === 'INATIVA' ? 'selected' : ''}>INATIVA</option>
              </select>
            </div>
            <div class="modal-acoes">
@@ -143,7 +143,7 @@
      try {
        await adminApi.atualizar(TIPO, id, {
          nome: marca.nome,
-         status: marca.status === 'ATIVO' ? 'INATIVO' : 'ATIVO',
+         status: marca.status === 'ATIVA' ? 'INATIVA' : 'ATIVA',
        });
        carregar();
      } catch (err) {

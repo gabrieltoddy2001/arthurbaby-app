@@ -29,11 +29,11 @@ public class CupomService {
     @Transactional(readOnly = true)
     public CupomValidacaoResponse validar(String codigo, BigDecimal subtotal) {
         String normalizado = normalizar(codigo);
-        if (normalizado == null) return invalido(null, "Informe o codigo do cupom");
-        if (subtotal == null || subtotal.signum() < 0) return invalido(normalizado, "Subtotal invalido");
+        if (normalizado == null) return invalido(null, "Informe o código do cupom.");
+        if (subtotal == null || subtotal.signum() < 0) return invalido(normalizado, "Subtotal inválido.");
 
         Optional<Cupom> encontrado = cupons.findByCodigoIgnoreCase(normalizado);
-        if (encontrado.isEmpty()) return invalido(normalizado, "Cupom inexistente");
+        if (encontrado.isEmpty()) return invalido(normalizado, "Cupom não encontrado. Confira o código digitado.");
         Cupom cupom = encontrado.get();
         String motivo = cupom.motivoInvalido(subtotal, LocalDateTime.now());
         if (motivo != null) {
@@ -59,9 +59,9 @@ public class CupomService {
     public Aplicacao aplicar(String codigo, BigDecimal subtotal) {
         String normalizado = normalizar(codigo);
         Cupom cupom = cupons.findByCodigoIgnoreCase(normalizado)
-                .orElseThrow(() -> new IllegalArgumentException("Cupom invalido"));
+                .orElseThrow(() -> new IllegalArgumentException("Cupom não encontrado. Confira o código digitado."));
         String motivo = cupom.motivoInvalido(subtotal, LocalDateTime.now());
-        if (motivo != null) throw new IllegalArgumentException("Cupom nao aplicavel: " + motivo);
+        if (motivo != null) throw new IllegalArgumentException("Cupom não aplicável: " + motivo);
         return calcular(cupom, subtotal);
     }
 

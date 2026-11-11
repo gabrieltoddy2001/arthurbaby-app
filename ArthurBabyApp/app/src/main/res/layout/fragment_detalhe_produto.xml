@@ -22,14 +22,23 @@
                 android:layout_height="280dp"
                 android:background="@color/branco">
 
-                <ImageView
-                    android:id="@+id/imgProduto"
+                <!-- Carrossel de imagens -->
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPagerImagens"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="16dp"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="Imagem do produto" />
+                    android:layout_margin="16dp" />
 
+                <!-- Bolinhas indicadoras -->
+                <LinearLayout
+                    android:id="@+id/indicadoresImagens"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="12dp"
+                    android:orientation="horizontal" />
+
+                <!-- Botões (mantidos iguais) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

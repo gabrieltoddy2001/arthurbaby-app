@@ -143,11 +143,11 @@
        : meusPedidos.map(p => `
            <div style="display:flex;justify-content:space-between;padding:.5rem .6rem;background:var(--superficie);border-radius:6px;margin-bottom:.4rem;font-size:.85rem;">
              <div>
-               <strong>${escapeHtml(p.numeroPedido)}</strong><br>
+               <a href="pedido-detalhe.html?id=${p.id}"><strong>${escapeHtml(p.numeroPedido)}</strong></a><br>
                <span style="color:var(--texto-secundario);">${formatarData(p.criadoEm)}</span>
              </div>
              <div style="text-align:right;">
-               <span class="badge ${badgeStatus(p.status)}">${p.status}</span><br>
+               <span class="badge ${classeStatus(p.status)}">${rotuloStatus(p.status)}</span><br>
                <strong>R$ ${formatarPreco(p.total)}</strong>
              </div>
            </div>
@@ -192,9 +192,10 @@
          ${pedidosHtml}
    
          <div class="modal-acoes" style="margin-top:1.5rem;justify-content:space-between;">
-           <button type="button" class="btn btn-accent" onclick="resetarSenha(${c.id})">
-             🔑 Resetar senha
-           </button>
+           <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+             <button type="button" class="btn btn-accent" onclick="resetarSenha(${c.id})">Redefinir senha</button>
+             ${c.status === 'ATIVO' ? `<button type="button" class="btn btn-primary" onclick="novoPedidoPara(${c.id})">+ Novo pedido</button>` : ''}
+           </div>
            <button type="button" class="btn btn-ghost" onclick="fecharModal()">Fechar</button>
          </div>
        </div>
@@ -231,33 +232,12 @@
      const c = clientes.find(x => x.id === id);
      if (!c) return;
    
-     if (!confirm(`Resetar a senha de "${c.nome}"?\n\nUma senha temporária será enviada para ${c.email}.`)) return;
-   
-     // Simula o envio de e-mail
-     alert(`✅ Senha temporária enviada para ${c.email}.\n\nO cliente deverá alterá-la no próximo login.`);
-   
-     // Registra na auditoria
-     registrarAuditoria({
-       usuario: getUsuario()?.nome || 'Administrador',
-       acao: 'RESETAR_SENHA',
-       entidade: 'Usuario',
-       entidadeId: id,
-       descricao: `Resetou a senha do cliente ${c.nome}`,
-     });
+     fecharModal();
+     redefinirSenhaUsuario(c, carregar);
    }
-   
-   /* ============================================
-      AUDITORIA (registra ação)
-      ============================================ */
-   async function registrarAuditoria(registro) {
-     try {
-       await adminApi.criar('auditoria', {
-         ...registro,
-         data: new Date().toISOString(),
-       });
-     } catch (e) {
-       console.warn('Falha ao registrar auditoria', e);
-     }
+
+   function novoPedidoPara(id) {
+     window.location.href = `pedido-novo.html?clienteId=${id}`;
    }
    
    function fecharModal() {

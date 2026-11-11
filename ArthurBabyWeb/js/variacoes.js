@@ -231,7 +231,7 @@
        if (cfg.temOrdem) body.ordem = Number(document.getElementById('f-ordem').value) || 0;
    
        try {
-         if (editando) await adminApi.atualizar(abaAtual, item.id, body);
+         if (editando) await adminApi.atualizar(abaAtual, item.id, { ...item, ...body });
          else await adminApi.criar(abaAtual, body);
          fecharModal();
          carregar();
@@ -261,7 +261,7 @@
      if (cfg.temOrdem) body.ordem = item.ordem ?? 0;
    
      try {
-       await adminApi.atualizar(abaAtual, id, body);
+       await adminApi.atualizar(abaAtual, id, { ...item, ...body });
        carregar();
      } catch (err) {
        alert('Erro: ' + err.message);

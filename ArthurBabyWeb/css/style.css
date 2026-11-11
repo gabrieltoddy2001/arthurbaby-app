@@ -260,6 +260,20 @@
      background-clip: text;
      letter-spacing: -0.02em;
    }
+   .login-marca {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: .6rem;
+     margin-bottom: .25rem;
+   }
+   .login-marca h1 { margin-bottom: 0; }
+   .login-icone {
+     width: 40px;
+     height: 40px;
+     object-fit: contain;
+     flex-shrink: 0;
+   }
    .login-box .subtitulo {
      text-align: center;
      color: var(--texto-secundario);
@@ -1081,3 +1095,270 @@
   box-shadow: 0 0 0 4px rgba(55, 182, 176, 0.12);
 }
 .acoes-topo input:hover { border-color: var(--verde); }
+/* ============================================
+   LOGO, MENU MOBILE E COMPONENTES NOVOS (nov/2026)
+   ============================================ */
+.sidebar a.sidebar-logo {
+  display: flex;
+  justify-content: center;
+  padding: .25rem .5rem 1.25rem;
+  margin-bottom: .75rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-radius: 0;
+  background: none;
+}
+.sidebar a.sidebar-logo:hover { background: none; }
+.sidebar a.sidebar-logo img {
+  width: 132px;
+  height: auto;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));
+  transition: transform .2s;
+}
+.sidebar a.sidebar-logo:hover img { transform: scale(1.03); }
+
+.login-logo {
+  display: block;
+  width: 170px;
+  height: auto;
+  margin: -.5rem auto 1rem;
+  filter: drop-shadow(0 8px 18px rgba(16,24,40,.18));
+}
+
+.header-titulo { display: flex; align-items: center; gap: .75rem; }
+.btn-menu {
+  display: none;
+  width: 40px; height: 40px;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--texto-primario);
+  cursor: pointer;
+  align-items: center; justify-content: center;
+}
+.btn-menu svg { width: 20px; height: 20px; stroke-width: 2; }
+.sidebar-fundo { display: none; }
+
+@media (max-width: 900px) {
+  .btn-menu { display: inline-flex; }
+  body.menu-aberto .sidebar-fundo {
+    display: block;
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, .45);
+    z-index: 40;
+  }
+  .grid-dashboard { grid-template-columns: 1fr !important; }
+}
+
+.badge-info { background: var(--info-bg); color: #1E40AF; }
+.badge-rosa { background: var(--rosa-claro); color: #9D174D; }
+.badge-verde { background: var(--verde-claro); color: var(--verde-escuro); }
+
+.texto-sec { color: var(--texto-secundario); font-size: .85rem; }
+.texto-mini { font-size: .75rem; color: var(--texto-secundario); }
+.dica { font-size: .75rem; color: var(--texto-secundario); margin-top: .25rem; }
+.campo-erro input, .campo-erro select { border-color: var(--erro) !important; }
+
+/* Resumo/indicadores compactos (pedidos, produto) */
+.resumo-linha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.resumo-item {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+}
+.resumo-item .rotulo { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texto-secundario); }
+.resumo-item .valor { font-size: 1.25rem; font-weight: 700; margin-top: .15rem; }
+.resumo-item.destaque { border-color: var(--verde); background: var(--verde-claro); }
+.resumo-item.alerta { border-color: #FCD34D; background: var(--alerta-bg); }
+
+/* Fluxo de status do pedido (stepper) */
+.fluxo-status {
+  display: flex;
+  gap: .25rem;
+  overflow-x: auto;
+  padding: .5rem 0 1rem;
+}
+.fluxo-etapa {
+  flex: 1;
+  min-width: 96px;
+  text-align: center;
+  font-size: .72rem;
+  color: var(--texto-terciario);
+  position: relative;
+}
+.fluxo-etapa .ponto {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  margin: 0 auto .35rem;
+  display: grid; place-items: center;
+  background: var(--superficie-alt);
+  border: 2px solid var(--borda);
+  font-weight: 700; font-size: .72rem;
+  position: relative; z-index: 1;
+}
+.fluxo-etapa::before {
+  content: '';
+  position: absolute;
+  top: 13px; left: -50%; right: 50%;
+  height: 2px;
+  background: var(--borda);
+}
+.fluxo-etapa:first-child::before { display: none; }
+.fluxo-etapa.feita { color: var(--verde-escuro); }
+.fluxo-etapa.feita .ponto { background: var(--verde); border-color: var(--verde); color: #fff; }
+.fluxo-etapa.feita::before { background: var(--verde); }
+.fluxo-etapa.atual { color: var(--texto-primario); font-weight: 700; }
+.fluxo-etapa.atual .ponto { background: #fff; border-color: var(--rosa); color: var(--rosa-escuro); box-shadow: 0 0 0 4px var(--rosa-claro); }
+
+.grid-detalhe { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; align-items: start; }
+.grid-detalhe > div { display: flex; flex-direction: column; gap: 1rem; }
+@media (max-width: 1100px) { .grid-detalhe { grid-template-columns: 1fr; } }
+
+.info-lista { display: grid; grid-template-columns: auto 1fr; gap: .35rem .9rem; font-size: .9rem; }
+.info-lista dt { color: var(--texto-secundario); }
+.info-lista dd { margin: 0; word-break: break-word; }
+
+/* Novo pedido */
+.busca-cliente { position: relative; }
+.sugestoes {
+  position: absolute; left: 0; right: 0; top: 100%;
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  box-shadow: var(--sombra-md, 0 8px 24px rgba(16,24,40,.12));
+  max-height: 280px; overflow-y: auto;
+  z-index: 30;
+}
+.sugestoes button {
+  display: block; width: 100%;
+  text-align: left;
+  padding: .6rem .8rem;
+  border: 0; background: none; cursor: pointer;
+  border-bottom: 1px solid var(--borda-suave);
+  font: inherit;
+}
+.sugestoes button:hover { background: var(--verde-claro); }
+.cliente-selecionado {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: .75rem 1rem;
+  border: 1px solid var(--verde);
+  background: var(--verde-claro);
+  border-radius: 10px;
+}
+.linha-add-item { display: grid; grid-template-columns: 2fr 1.5fr 90px auto; gap: .75rem; align-items: end; }
+@media (max-width: 900px) { .linha-add-item { grid-template-columns: 1fr; } }
+.qtd-input { width: 72px; }
+
+/* Produto: margem e estoque */
+.margem-box { font-size: .85rem; padding: .5rem .75rem; border-radius: 8px; background: var(--superficie-alt); margin-top: .5rem; }
+.margem-box.ruim { background: var(--erro-bg); color: #991B1B; }
+.margem-box.boa { background: var(--sucesso-bg); color: #065F46; }
+.gerador-variacoes { border: 1px dashed var(--borda); border-radius: 10px; padding: .9rem 1rem; margin-bottom: 1rem; background: var(--superficie-alt); }
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .35rem 0 .6rem; }
+.chip { display: inline-flex; align-items: center; gap: .3rem; padding: .25rem .6rem; border: 1px solid var(--borda); border-radius: 999px; background: #fff; font-size: .8rem; cursor: pointer; user-select: none; }
+.chip input { margin: 0; }
+.chip.marcado { border-color: var(--verde); background: var(--verde-claro); }
+.cor-amostra { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0,0,0,.15); }
+
+@media print {
+  .sidebar, .header, .no-print, .btn, .sidebar-fundo { display: none !important; }
+  .app { display: block; }
+  .main { padding: 0; }
+  .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  .grid-detalhe { grid-template-columns: 1fr; }
+}
+
+.tabela-rolavel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Relatorio em PDF */
+.relatorio-pdf { background: #fff; color: #1A2332; padding: 4px; font-size: 12px; }
+.relatorio-pdf-cabecalho {
+  display: flex; align-items: center; gap: 16px;
+  padding-bottom: 12px; margin-bottom: 16px;
+  border-bottom: 3px solid var(--verde);
+}
+.relatorio-pdf-cabecalho img { width: 86px; height: auto; }
+.relatorio-pdf-cabecalho h1 { font-size: 20px; margin: 0 0 4px; color: var(--verde-escuro); }
+.relatorio-pdf-cabecalho p { margin: 0; font-size: 11px; color: #64748B; }
+.relatorio-pdf .cards-kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.relatorio-pdf .kpi-card { box-shadow: none; border: 1px solid #E2E8F0; padding: 10px; transform: none; }
+.relatorio-pdf .kpi-card::before, .relatorio-pdf .kpi-card::after { display: none; }
+.relatorio-pdf .kpi-valor { font-size: 18px; }
+.relatorio-pdf .card { box-shadow: none; border: 1px solid #E2E8F0; }
+.relatorio-pdf .tabela { box-shadow: none; border: 1px solid #E2E8F0; }
+.relatorio-pdf .tabela th, .relatorio-pdf .tabela td { padding: 6px 8px; font-size: 11px; }
+.relatorio-pdf tr { page-break-inside: avoid; }
+.relatorio-pdf-rodape { margin-top: 16px; padding-top: 8px; border-top: 1px solid #E2E8F0; font-size: 10px; color: #94A3B8; text-align: center; }
+
+@media print {
+  body.imprimindo-relatorio .app { display: none !important; }
+  body.imprimindo-relatorio #area-impressao { display: block !important; }
+}
+#area-impressao { display: none; }
+
+/* Formularios: o espaco entre boxes vem so do gap (antes somava gap + margin-bottom do card) */
+.form-produto > .card,
+.grid-detalhe .card { margin-bottom: 0; }
+
+/* Card com lista suspensa (busca de cliente) fica acima dos cards seguintes */
+.card.card-sobreposto { position: relative; z-index: 20; }
+
+/* Cadastro de produto compacto */
+.form-compacto { gap: .75rem; }
+.form-compacto .form-header { padding-bottom: .6rem; margin-bottom: 0; }
+.form-compacto .card { padding: 1rem 1.25rem; }
+.form-compacto .secao-titulo { margin-bottom: .75rem; padding-bottom: .4rem; font-size: .8rem; }
+.form-compacto .secao-header { margin-bottom: .6rem; }
+.form-compacto .field { margin-bottom: .6rem; gap: .25rem; }
+.form-compacto .field input,
+.form-compacto .field select,
+.form-compacto .field textarea { padding: .5rem .75rem; }
+.form-compacto .grid-2,
+.form-compacto .grid-3 { gap: .25rem .9rem; }
+.form-compacto .grid-5 { gap: .25rem .6rem; }
+.form-compacto .checkboxes { margin-top: .25rem; }
+.form-compacto .margem-box { margin-top: .25rem; padding: .4rem .7rem; }
+.form-compacto .dica { margin-top: 0; }
+.linha-cards { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; align-items: stretch; }
+@media (max-width: 1100px) { .linha-cards { grid-template-columns: 1fr; } }
+.linha-cards .grid-5 { grid-template-columns: repeat(3, 1fr); }
+.linha-cards .card { margin-bottom: 0; }
+
+/* Configuracoes: grade de 4 colunas e cores compactas */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: .25rem .9rem; }
+@media (max-width: 1100px) { .grid-4 { grid-template-columns: 1fr 1fr; } .grid-4 > .field { grid-column: auto !important; } }
+@media (max-width: 600px) { .grid-4 { grid-template-columns: 1fr; } }
+.cor-campo { display: flex; gap: .5rem; align-items: center; }
+.cor-campo input[type="color"] { width: 44px; min-width: 44px; height: 36px; padding: 0; border: 1px solid var(--borda); border-radius: 6px; cursor: pointer; }
+.cor-campo input[type="text"] { flex: 1; }
+.preview-cores { border: 1px solid var(--borda); border-radius: var(--radius-sm, 8px); overflow: hidden; margin-top: .25rem; }
+.preview-cores #preview-header { color: #fff; padding: .55rem .9rem; font-size: .9rem; }
+.preview-corpo { display: flex; align-items: center; justify-content: space-between; padding: .5rem .9rem; background: #fff; }
+.preview-corpo button { color: #fff; border: none; padding: .4rem .9rem; border-radius: 6px; font-weight: 600; cursor: default; }
+
+/* ============================================
+   ESPACAMENTO PADRONIZADO ENTRE BOXES (todas as telas)
+   Mesmo ritmo da tela de Pedidos: .75rem entre blocos.
+   ============================================ */
+:root { --espaco-blocos: .75rem; }
+.card { margin-bottom: var(--espaco-blocos); padding: 1.25rem 1.375rem; }
+.cards-kpi { gap: var(--espaco-blocos); margin-bottom: var(--espaco-blocos); }
+.kpi-card { padding: .9rem 1.1rem; }
+.kpi-valor { font-size: 1.6rem; }
+.filtros { margin-bottom: var(--espaco-blocos); padding: .75rem 1rem; }
+.abas { margin-bottom: var(--espaco-blocos); }
+.resumo-linha { margin-bottom: var(--espaco-blocos); gap: var(--espaco-blocos); }
+.grid-dashboard { gap: var(--espaco-blocos); margin-bottom: var(--espaco-blocos); }
+.grid-dashboard > .card { margin-bottom: 0; }
+.header { margin-bottom: 1.25rem; padding-bottom: 1rem; }
+.secao-titulo { margin-bottom: .75rem; }
+#painel-relatorios > .tabela,
+#painel-relatorios > .card { margin-bottom: var(--espaco-blocos); }
+/* O "+" dos botoes de criacao ja vem no texto; o icone automatico duplicava e aparecia em "Gerar PDF" */
+.filtros .btn-primary::before,
+.filtros .btn-accent::before { content: none; display: none; }

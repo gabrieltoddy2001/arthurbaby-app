@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.arthurbaby.R;
+import br.com.arthurbaby.adapters.ImagemPagerAdapter;
 import br.com.arthurbaby.models.Produto;
 import br.com.arthurbaby.models.Variacao;
 import br.com.arthurbaby.network.ApiService;
@@ -48,6 +49,9 @@ public class DetalheProdutoFragment extends Fragment {
     private String modSel = null;
     private Long variacaoIdSel = null;
 
+    private androidx.viewpager2.widget.ViewPager2 viewPagerImagens;
+    private LinearLayout indicadoresImagens;
+
     public static DetalheProdutoFragment newInstance(Produto p) {
         DetalheProdutoFragment f = new DetalheProdutoFragment();
         Bundle b = new Bundle();
@@ -73,9 +77,11 @@ public class DetalheProdutoFragment extends Fragment {
         TextView tvPreco = v.findViewById(R.id.tvPreco);
         TextView tvDescricao = v.findViewById(R.id.tvDescricao);
         TextView tvQtd = v.findViewById(R.id.tvQtd);
-        ImageView img = v.findViewById(R.id.imgProduto);
         ImageView btnFav = v.findViewById(R.id.btnFavoritoDetalhe);
         ImageView btnCompartilhar = v.findViewById(R.id.btnCompartilhar);
+
+        viewPagerImagens = v.findViewById(R.id.viewPagerImagens);
+        indicadoresImagens = v.findViewById(R.id.indicadoresImagens);
 
         if (produto != null) {
             tvNome.setText(produto.getNome());
@@ -85,7 +91,8 @@ public class DetalheProdutoFragment extends Fragment {
             mostrarAvaliacao(v);
             mostrarPrecoAntigo(v);
 
-            carregarImagem(img, produto.getImagemUrl());
+            // ✅ TODAS as imagens
+            configurarImagens(produto.getImagens());
 
             boolean logado = AuthGuard.estaLogado(requireContext());
             btnFav.setVisibility(logado ? View.VISIBLE : View.GONE);
@@ -108,13 +115,15 @@ public class DetalheProdutoFragment extends Fragment {
                 btnCompartilhar.setOnClickListener(x -> compartilharProduto());
             }
 
-            // BOTÃO AVALIAR
-            com.google.android.material.button.MaterialButton btnAvaliar = v.findViewById(R.id.btnAvaliar);
+            com.google.android.material.button.MaterialButton btnAvaliar =
+                    v.findViewById(R.id.btnAvaliar);
             if (btnAvaliar != null && AuthGuard.estaLogado(requireContext())) {
                 btnAvaliar.setOnClickListener(x -> abrirDialogAvaliacao());
             } else if (btnAvaliar != null) {
-                btnAvaliar.setOnClickListener(x -> AuthGuard.mostrarDialogLogin(requireActivity(), "Entre para avaliar o produto."));
+                btnAvaliar.setOnClickListener(x -> AuthGuard.mostrarDialogLogin(
+                        requireActivity(), "Entre para avaliar o produto."));
             }
+
             carregarProdutoBackend(v);
         }
 
@@ -137,6 +146,57 @@ public class DetalheProdutoFragment extends Fragment {
         return v;
     }
 
+    // ============================================================
+    // NOVO: carrossel
+    // ============================================================
+    private void configurarImagens(List<String> urlsRecebidas) {
+        if (viewPagerImagens == null || indicadoresImagens == null) return;
+
+        List<String> urls = new ArrayList<>();
+        if (urlsRecebidas != null) {
+            for (String u : urlsRecebidas) {
+                if (u != null && !u.isEmpty()) urls.add(u);
+            }
+        }
+
+        indicadoresImagens.removeAllViews();
+        viewPagerImagens.setAdapter(null);
+
+        if (urls.isEmpty()) {
+            viewPagerImagens.setVisibility(View.GONE);
+            return;
+        }
+        viewPagerImagens.setVisibility(View.VISIBLE);
+        viewPagerImagens.setAdapter(new ImagemPagerAdapter(urls));
+
+        if (urls.size() <= 1) return;
+
+        for (int i = 0; i < urls.size(); i++) {
+            View dot = new View(requireContext());
+            int s = dp(6);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(s, s);
+            lp.setMargins(dp(3), 0, dp(3), 0);
+            dot.setLayoutParams(lp);
+            dot.setBackgroundResource(i == 0
+                    ? R.drawable.bg_dot_ativo
+                    : R.drawable.bg_dot_inativo);
+            indicadoresImagens.addView(dot);
+        }
+
+        viewPagerImagens.registerOnPageChangeCallback(
+                new androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        for (int i = 0; i < indicadoresImagens.getChildCount(); i++) {
+                            indicadoresImagens.getChildAt(i).setBackgroundResource(
+                                    i == position
+                                            ? R.drawable.bg_dot_ativo
+                                            : R.drawable.bg_dot_inativo);
+                        }
+                    }
+                });
+    }
+
     private void carregarProdutoBackend(View v) {
         ApiService api = RetrofitClient.getApi(requireContext());
         api.buscarProduto(produto.getId()).enqueue(new Callback<ProdutoResponse>() {
@@ -153,7 +213,6 @@ public class DetalheProdutoFragment extends Fragment {
                     TextView tvNome = v.findViewById(R.id.tvNome);
                     TextView tvPreco = v.findViewById(R.id.tvPreco);
                     TextView tvDescricao = v.findViewById(R.id.tvDescricao);
-                    ImageView img = v.findViewById(R.id.imgProduto);
 
                     tvNome.setText(atualizado.getNome());
                     tvDescricao.setText(atualizado.getDescricao());
@@ -161,9 +220,8 @@ public class DetalheProdutoFragment extends Fragment {
                     mostrarAvaliacao(v);
                     mostrarPrecoAntigo(v);
 
-                    if (atualizado.getImagemUrl() != null && !atualizado.getImagemUrl().isEmpty()) {
-                        carregarImagem(img, atualizado.getImagemUrl());
-                    }
+                    // ✅ TODAS as imagens novamente
+                    configurarImagens(atualizado.getImagens());
 
                     desenharVariacoes(v);
                     atualizarPrecoVariacao();
@@ -173,24 +231,8 @@ public class DetalheProdutoFragment extends Fragment {
             @Override
             public void onFailure(Call<ProdutoResponse> call, Throwable t) {
                 if (!isAdded()) return;
-                // Silencioso
             }
         });
-    }
-
-    private void carregarImagem(ImageView img, String url) {
-        if (url != null && !url.isEmpty()) {
-            com.bumptech.glide.Glide.with(this)
-                    .load(url)
-                    .transition(com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade(300))
-                    .placeholder(R.drawable.bg_imagem_produto)
-                    .error(R.drawable.bg_imagem_produto)
-                    .fitCenter()
-                    .into(img);
-        } else {
-            img.setImageDrawable(null);
-            img.setBackgroundResource(R.drawable.bg_imagem_produto);
-        }
     }
 
     private void compartilharProduto() {
@@ -249,7 +291,8 @@ public class DetalheProdutoFragment extends Fragment {
         br.com.arthurbaby.utils.LoadingUtils.mostrar(requireContext());
 
         ApiService api = RetrofitClient.getApi(requireContext());
-        api.avaliarProduto(produto.getId(), new br.com.arthurbaby.network.dto.AvaliacaoRequest(clienteId, nota, comentario))
+        api.avaliarProduto(produto.getId(),
+                        new br.com.arthurbaby.network.dto.AvaliacaoRequest(clienteId, nota, comentario))
                 .enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
@@ -257,17 +300,19 @@ public class DetalheProdutoFragment extends Fragment {
                         if (!isAdded()) return;
                         if (response.isSuccessful()) {
                             Toast.makeText(requireContext(), "Avaliação enviada! Obrigado.", Toast.LENGTH_LONG).show();
-                            // Atualiza a média exibida
                             if (getView() != null) carregarProdutoBackend(getView());
                         } else {
-                            Toast.makeText(requireContext(), br.com.arthurbaby.utils.ErrorUtils.extrairMensagem(response), Toast.LENGTH_LONG).show();
+                            Toast.makeText(requireContext(),
+                                    br.com.arthurbaby.utils.ErrorUtils.extrairMensagem(response),
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         br.com.arthurbaby.utils.LoadingUtils.esconder();
                         if (!isAdded()) return;
-                        Toast.makeText(requireContext(), ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(),
+                                ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -351,7 +396,6 @@ public class DetalheProdutoFragment extends Fragment {
         if (var != null) variacaoIdSel = var.id;
     }
 
-    /** Variação que corresponde a tamanho/cor/modelo escolhidos, ou null se a combinação não existe. */
     private Produto.VariacaoReal variacaoSelecionada() {
         if (produto == null) return null;
         for (Produto.VariacaoReal var : produto.getVariacoes()) {
@@ -363,7 +407,6 @@ public class DetalheProdutoFragment extends Fragment {
         return null;
     }
 
-    /** Preço exibido = preço próprio da variação, quando houver (mesma regra do back). */
     private void atualizarPrecoVariacao() {
         View v = getView();
         if (v == null || produto == null) return;
@@ -379,7 +422,6 @@ public class DetalheProdutoFragment extends Fragment {
         tvAvaliacao.setText(AvaliacaoUtils.nota(produto.getAvaliacao(), "(sem avaliações)"));
     }
 
-    /** Preço "de" riscado somente quando há preço promocional real (antes: preço x 1,3 inventado). */
     private void mostrarPrecoAntigo(View v) {
         TextView tvPrecoAntigo = v.findViewById(R.id.tvPrecoAntigo);
         if (produto.temDesconto()) {
@@ -471,9 +513,6 @@ public class DetalheProdutoFragment extends Fragment {
         return chip;
     }
 
-    /**
-     * Aplica estilo do chip respeitando o modo claro/escuro.
-     */
     private void aplicarEstiloChip(TextView chip, boolean selecionado) {
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(dp(20));

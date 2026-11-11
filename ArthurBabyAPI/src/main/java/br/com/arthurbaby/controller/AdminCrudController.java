@@ -16,6 +16,8 @@ import java.util.List;
  * da loja. O acesso é restrito aos perfis ADMINISTRADOR e VENDEDOR em {@code SecurityConfig}.
  * Como o corpo é livre ({@code Object}), o Swagger mostra um exemplo por tipo, injetado por
  * {@code OpenApiConfig#exemplosAdminCrud} a partir de {@code AdminCrudExemplos}.
+ * O parâmetro {@code {tipo}} aparece no Swagger como uma lista suspensa com os tipos aceitos,
+ * montada por {@code OpenApiConfig#comboboxTipoAdminCrud} (a partir das mesmas chaves de {@code AdminCrudExemplos}).
  */
 @RestController
 @RequestMapping(value = "/api/admin", produces = MediaType.APPLICATION_JSON_VALUE)

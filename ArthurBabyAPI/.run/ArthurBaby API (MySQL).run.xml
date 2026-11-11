@@ -1,0 +1,17 @@
+<!--
+  Configuracao de execucao compartilhada do IntelliJ (pasta .run/ vai para o Git).
+  Configuracao PRINCIPAL: roda a API com o perfil "mysql" (application-mysql.properties).
+  Exige o MySQL 8 rodando em localhost:3306 com usuario root / senha Admin321.
+-->
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ArthurBaby API (MySQL)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="br.com.arthurbaby.ArthurBabyApplication" />
+    <module name="arthurbaby-api" />
+    <!-- Ativa o perfil mysql, igual a -Dspring-boot.run.profiles=mysql no Maven -->
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=mysql" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
