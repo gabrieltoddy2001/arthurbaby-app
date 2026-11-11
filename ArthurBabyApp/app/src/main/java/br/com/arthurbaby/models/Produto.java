@@ -10,18 +10,14 @@ public class Produto implements Serializable {
     private Long id;
     private String nome;
     private String descricao;
-    /** Preço efetivamente cobrado (promocional, quando houver). */
     private BigDecimal preco;
     private String imagemUrl;
     private int estoque;
     private String marca;
 
-    // Campos vindos do back
     private double avaliacao;
-    /** Preço "de" (riscado) — só preenchido quando há preço promocional real menor que o normal. */
     private BigDecimal precoOriginal;
     private boolean promocao;
-    /** ATIVO, INATIVO ou ESGOTADO. */
     private String status;
     private List<String> imagens = new ArrayList<>();
     private List<VariacaoReal> variacoes = new ArrayList<>();
@@ -60,22 +56,23 @@ public class Produto implements Serializable {
     public List<String> getImagens() { return imagens; }
     public List<VariacaoReal> getVariacoes() { return variacoes; }
 
+    // NOVO: setters que faltavam
+    public void setImagemUrl(String imagemUrl) { this.imagemUrl = imagemUrl; }
     public void setAvaliacao(double avaliacao) { this.avaliacao = avaliacao; }
     public void setPrecoOriginal(BigDecimal precoOriginal) { this.precoOriginal = precoOriginal; }
     public void setPromocao(boolean promocao) { this.promocao = promocao; }
     public void setStatus(String status) { this.status = status; }
-    public void setImagens(List<String> imagens) { this.imagens = imagens != null ? imagens : new ArrayList<>(); }
-    public void setVariacoes(List<VariacaoReal> variacoes) { this.variacoes = variacoes != null ? variacoes : new ArrayList<>(); }
+    public void setImagens(List<String> imagens) {
+        this.imagens = imagens != null ? imagens : new ArrayList<>();
+    }
+    public void setVariacoes(List<VariacaoReal> variacoes) {
+        this.variacoes = variacoes != null ? variacoes : new ArrayList<>();
+    }
 
-    /** Há um preço "de" maior que o preço atual para exibir riscado. */
     public boolean temDesconto() {
         return precoOriginal != null && precoOriginal.compareTo(getPreco()) > 0;
     }
 
-    /**
-     * Esgotado quando o back marca o produto como ESGOTADO ou, se as variações
-     * já foram carregadas (tela de detalhe), quando nenhuma tem estoque.
-     */
     public boolean isEsgotado() {
         if ("ESGOTADO".equals(status)) return true;
         if (variacoes != null && !variacoes.isEmpty()) {
@@ -89,9 +86,6 @@ public class Produto implements Serializable {
 
     public boolean temEstoque() { return !isEsgotado(); }
 
-    /**
-     * Representa uma variação real do backend (com ID).
-     */
     public static class VariacaoReal implements Serializable {
         public Long id;
         public String sku;
