@@ -19,7 +19,7 @@ public class RetrofitClient {
      * - Celular físico: "api.url" do local.properties (IP do PC na mesma rede Wi-Fi).
      *   Antes o IP ficava fixo no código e, quando o IP do PC mudava, o login dava timeout.
      */
-    static final String URL_EMULADOR = "http://192.168.100.171:8080/";
+    static final String URL_EMULADOR = "http://10.0.2.2:8080/";
     private static final String BASE_URL = ehEmulador() ? URL_EMULADOR : br.com.arthurbaby.BuildConfig.API_URL;
 
     private static boolean ehEmulador() {
