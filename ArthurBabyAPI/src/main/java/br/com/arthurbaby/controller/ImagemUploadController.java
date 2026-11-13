@@ -1,5 +1,7 @@
 package br.com.arthurbaby.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +15,17 @@ import java.util.*;
 
 /** Upload administrativo e leitura pública das imagens de produtos. */
 @RestController
+@Tag(name = "Administração - Imagens", description = "Upload de arquivos de imagem para os produtos e leitura pública das imagens salvas.")
 public class ImagemUploadController {
+
     private final Path diretorio;
+
     public ImagemUploadController(@Value("${arthurbaby.upload.dir:uploads/produtos}") String caminho) {
         this.diretorio = Paths.get(caminho).toAbsolutePath().normalize();
     }
 
     @PostMapping(value = "/api/admin/imagens/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Fazer upload de imagem", description = "Recebe o arquivo (JPG, PNG, WEBP ou GIF até 5MB), valida o formato real do arquivo e retorna a URL pública.")
     public Map<String, String> upload(@RequestParam("arquivo") MultipartFile arquivo) throws IOException {
         if (arquivo.isEmpty() || arquivo.getSize() > 5L * 1024 * 1024) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Imagem vazia ou maior que 5 MB");
@@ -46,6 +52,7 @@ public class ImagemUploadController {
     }
 
     @GetMapping("/api/produtos/imagens/{nome}")
+    @Operation(summary = "Obter imagem", description = "Retorna o arquivo de imagem salvo no servidor para exibição no app ou no painel.")
     public ResponseEntity<org.springframework.core.io.Resource> obter(@PathVariable String nome) throws IOException {
         if (!nome.matches("[a-fA-F0-9-]{36}\\.(jpg|png|webp|gif)")) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
