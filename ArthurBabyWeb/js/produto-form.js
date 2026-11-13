@@ -210,8 +210,14 @@
          <div class="card">
            <div class="secao-header">
              <h3 class="secao-titulo">Imagens</h3>
-             <button type="button" class="btn btn-accent btn-sm" onclick="adicionarImagem()">+ Adicionar imagem</button>
+             <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+               <button type="button" class="btn btn-ghost btn-sm" onclick="adicionarImagem()">+ Adicionar URL</button>
+               <button type="button" class="btn btn-accent btn-sm" id="btn-upload-imagem" onclick="document.getElementById('arquivos-imagem').click()">Enviar fotos</button>
+               <input id="arquivos-imagem" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden onchange="enviarImagens(this)">
+             </div>
            </div>
+           <p class="texto-sec" style="margin:.5rem 0">Selecione fotos JPG, PNG, WEBP ou GIF (até 5 MB cada). A primeira foto será a principal. Você também pode continuar usando URLs.</p>
+           <div id="status-upload-imagem" role="status" aria-live="polite"></div>
            <div id="lista-imagens"></div>
          </div>
    
@@ -353,6 +359,45 @@
       IMAGENS
       ============================================ */
    
+   async function enviarImagens(input) {
+     const arquivos = Array.from(input.files || []);
+     input.value = '';
+     if (!arquivos.length) return;
+     const btn = document.getElementById('btn-upload-imagem');
+     const status = document.getElementById('status-upload-imagem');
+     const tipos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+     btn.disabled = true;
+     try {
+       for (let i = 0; i < arquivos.length; i++) {
+         const arquivo = arquivos[i];
+         if (!tipos.includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024 || !arquivo.size) {
+           throw new Error(`Arquivo inválido: ${arquivo.name}. Use JPG, PNG, WEBP ou GIF de até 5 MB.`);
+         }
+         status.textContent = `Enviando ${i + 1} de ${arquivos.length}: ${arquivo.name}`;
+         const dados = new FormData();
+         dados.append('arquivo', arquivo);
+         const resposta = await fetch(`${API_BASE}/admin/imagens/upload`, {
+           method: 'POST',
+           headers: { Authorization: `Bearer ${getToken() || ''}` },
+           body: dados
+         });
+         if (!resposta.ok) {
+           const erro = await resposta.json().catch(() => ({}));
+           throw new Error(erro.erro || `Falha no upload (${resposta.status})`);
+         }
+         const resultado = await resposta.json();
+         imagens.push({ url: resultado.url, descricao: arquivo.name, principal: imagens.length === 0 });
+         renderImagens();
+         marcarSujo(true);
+       }
+       status.textContent = `${arquivos.length} imagem(ns) enviada(s). Clique em Salvar para associar ao produto.`;
+     } catch (erro) {
+       status.textContent = `Erro: ${erro.message}. As imagens já enviadas permanecem na lista.`;
+     } finally {
+       btn.disabled = false;
+     }
+   }
+
    function renderImagens() {
      const div = document.getElementById('lista-imagens');
      if (!div) return;
