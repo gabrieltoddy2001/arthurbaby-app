@@ -272,7 +272,6 @@
              <h3 class="secao-titulo">Imagens</h3>
 
              <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
-               <button type="button" class="btn btn-ghost btn-sm" onclick="adicionarImagem()">+ Adicionar URL</button>
                <button type="button" class="btn btn-accent btn-sm" id="btn-upload-imagem"
                        onclick="document.getElementById('arquivos-imagem').click()">Enviar fotos</button>
                <input id="arquivos-imagem" type="file"
@@ -283,7 +282,6 @@
 
            <p class="texto-sec" style="margin:.5rem 0">
              Selecione fotos JPG, PNG, WEBP ou GIF (até 5 MB cada).
-             A primeira foto será a principal. Você também pode continuar usando URLs.
            </p>
 
            <div id="status-upload-imagem" role="status" aria-live="polite"></div>
@@ -638,10 +636,7 @@
          </div>
 
          <div class="campos-imagem">
-           <input type="text" id="img-url-${i}" placeholder="URL da imagem"
-                  value="${escapeAttr(img.url || '')}"
-                  oninput="imagens[${i}].url = this.value;"
-                  onblur="renderImagens();">
+           
 
            <input type="text" id="img-desc-${i}" placeholder="Descrição (opcional)"
                   value="${escapeAttr(img.descricao || '')}"
