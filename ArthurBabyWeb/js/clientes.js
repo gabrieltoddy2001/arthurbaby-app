@@ -10,12 +10,13 @@
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
    
      try {
-       const [usuarios, peds] = await Promise.all([
-         adminApi.listar('usuarios'),
+       const [lista, peds] = await Promise.all([
+         // Endpoint dedicado: o próprio servidor só retorna contas CLIENTE.
+         apiJson('/admin/clientes', {}, 'Erro ao listar clientes'),
          adminApi.listar('pedidos'),
        ]);
-       // Filtra só clientes
-       clientes = usuarios.filter(u => u.perfil === 'CLIENTE');
+       // Defesa adicional no navegador; usuários internos nunca são exibidos.
+       clientes = (Array.isArray(lista) ? lista : []).filter(u => u.perfil === 'CLIENTE');
        pedidos = peds;
        renderTudo();
      } catch (err) {
@@ -218,7 +219,11 @@
      if (!confirm(msg)) return;
    
      try {
-       await adminApi.atualizar('usuarios', id, { ...c, status: novoStatus });
+       // Não usa o CRUD genérico de usuários: evita mexer em contas administrativas.
+       await apiJson(`/admin/clientes/${id}/status`, {
+         method: 'PATCH',
+         body: JSON.stringify({ status: novoStatus }),
+       }, 'Erro ao alterar status do cliente');
        await carregar();
      } catch (err) {
        alert('Erro: ' + err.message);
@@ -228,12 +233,37 @@
    /* ============================================
       RESETAR SENHA
       ============================================ */
-   function resetarSenha(id) {
+   async function resetarSenha(id) {
      const c = clientes.find(x => x.id === id);
      if (!c) return;
-   
+
      fecharModal();
-     redefinirSenhaUsuario(c, carregar);
+     const nova = prompt(`Nova senha para "${c.nome}" (mínimo 6 caracteres):`);
+     if (nova === null) return;
+     if (nova.length < 6) {
+       alert('A senha deve ter pelo menos 6 caracteres.');
+       return;
+     }
+     try {
+       // Alteração restrita a CLIENTE no backend, sem regravar os dados cadastrais.
+       await apiJson(`/admin/clientes/${id}/senha`, {
+         method: 'PATCH',
+         body: JSON.stringify({ senha: nova }),
+       }, 'Erro ao redefinir a senha do cliente');
+       try {
+         await adminApi.criar('auditoria', {
+           usuario: getUsuario()?.nome || 'Administrador',
+           acao: 'REDEFINIR_SENHA',
+           entidade: 'Usuario',
+           entidadeId: c.id,
+           descricao: `Redefiniu a senha de ${c.nome} (${c.email})`,
+         });
+       } catch (_) { /* O log de auditoria não deve desfazer a troca da senha. */ }
+       alert('Senha redefinida. Informe a nova senha ao usuário por um canal seguro.');
+       await carregar();
+     } catch (err) {
+       alert('Erro ao redefinir senha: ' + err.message);
+     }
    }
 
    function novoPedidoPara(id) {

@@ -398,6 +398,18 @@
      }
    }
 
+   // Somente apresentação: não altera a URL usada para carregar ou salvar a imagem.
+   // URLs externas adicionadas manualmente continuam editáveis.
+   function imagemHospedadaArthurBaby(url) {
+     if (typeof url !== 'string' || !url.trim()) return false;
+     try {
+       const caminho = new URL(url, window.location.origin).pathname;
+       return /^\/api\/produtos\/imagens\/[a-f0-9-]{36}\.(?:jpg|png|webp|gif)$/i.test(caminho);
+     } catch (_) {
+       return false;
+     }
+   }
+
    function renderImagens() {
      const div = document.getElementById('lista-imagens');
      if (!div) return;
@@ -419,10 +431,14 @@
              : '<span style="font-size:.7rem;color:var(--texto-secundario);text-align:center;">sem<br>imagem</span>'}
          </div>
          <div class="campos-imagem">
-           <input type="text" id="img-url-${i}" placeholder="URL da imagem"
-                  value="${escapeAttr(img.url || '')}"
-                  oninput="imagens[${i}].url = this.value;"
-                  onblur="renderImagens();">
+           ${imagemHospedadaArthurBaby(img.url)
+             ? `<input type="text" id="img-url-${i}" value="Imagem enviada e armazenada no ArthurBaby"
+                       aria-label="Imagem armazenada no ArthurBaby" title="Imagem hospedada pelo sistema"
+                       readonly style="cursor:default;">`
+             : `<input type="text" id="img-url-${i}" placeholder="URL da imagem"
+                       value="${escapeAttr(img.url || '')}"
+                       oninput="imagens[${i}].url = this.value;"
+                       onblur="renderImagens();">`}
            <input type="text" id="img-desc-${i}" placeholder="Descrição (opcional)"
                   value="${escapeAttr(img.descricao || '')}"
                   oninput="imagens[${i}].descricao = this.value;">
