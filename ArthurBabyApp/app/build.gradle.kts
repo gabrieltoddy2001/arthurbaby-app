@@ -12,6 +12,10 @@ val localProps = Properties().apply {
 }
 val apiUrl: String = (localProps.getProperty("api.url") ?: "http://10.0.2.2:8080/")
     .let { if (it.endsWith("/")) it else "$it/" }
+// Endereço da API no emulador: 10.0.2.2 é o "localhost" do PC visto de dentro do emulador.
+// Só mude (api.url.emulador no local.properties) se a API rodar em outra porta.
+val apiUrlEmulador: String = (localProps.getProperty("api.url.emulador") ?: "http://10.0.2.2:8080/")
+    .let { if (it.endsWith("/")) it else "$it/" }
 
 android {
     namespace = "br.com.arthurbaby"
@@ -29,6 +33,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "API_URL", "\"$apiUrl\"")
+        buildConfigField("String", "API_URL_EMULADOR", "\"$apiUrlEmulador\"")
     }
 
     buildFeatures {

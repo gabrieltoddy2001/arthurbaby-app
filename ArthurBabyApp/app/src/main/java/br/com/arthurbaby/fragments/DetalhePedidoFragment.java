@@ -112,9 +112,10 @@ public class DetalhePedidoFragment extends Fragment {
                 v.findViewById(R.id.btnCancelarPedido);
         if (btnCancelar != null) {
             String status = pedido.getStatusAtual();
-            boolean podeCancelar = !"CANCELADO".equals(status)
-                    && !"ENTREGUE".equals(status)
-                    && !"EM_TRANSPORTE".equals(status);
+            // Mesma regra da API: o cliente cancela só até CONFIRMADO (antes de a loja separar os produtos)
+            boolean podeCancelar = java.util.Arrays.asList(
+                    "RASCUNHO", "PEDIDO_GERADO", "EM_ANALISE", "AGUARDANDO_CONFIRMACAO", "CONFIRMADO")
+                    .contains(status);
 
             if (podeCancelar) {
                 btnCancelar.setVisibility(View.VISIBLE);

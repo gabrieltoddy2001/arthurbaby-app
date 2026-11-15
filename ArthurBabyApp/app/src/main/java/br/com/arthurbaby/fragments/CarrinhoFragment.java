@@ -287,5 +287,47 @@ public class CarrinhoFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (adapter != null) atualizarTotal();
+        removerProdutosIndisponiveis();
+    }
+
+    /**
+     * O carrinho fica salvo no aparelho: um produto desativado pela loja depois de adicionado
+     * continuaria aparecendo. Ao abrir o carrinho, cada produto é conferido na API (404 = indisponível)
+     * e os itens dele são retirados, com aviso.
+     */
+    private void removerProdutosIndisponiveis() {
+        if (repo == null || repo.getItens().isEmpty() || !isAdded()) return;
+        java.util.Set<Long> ids = new java.util.LinkedHashSet<>();
+        for (ItemCarrinho item : repo.getItens()) {
+            if (item.getProduto() != null && item.getProduto().getId() != null) ids.add(item.getProduto().getId());
+        }
+        ApiService api = RetrofitClient.getApi(requireContext());
+        for (Long produtoId : ids) {
+            api.buscarProduto(produtoId).enqueue(new Callback<br.com.arthurbaby.network.dto.ProdutoResponse>() {
+                @Override
+                public void onResponse(Call<br.com.arthurbaby.network.dto.ProdutoResponse> call,
+                                       Response<br.com.arthurbaby.network.dto.ProdutoResponse> response) {
+                    if (!isAdded() || response.code() != 404) return;
+                    String nome = null;
+                    for (ItemCarrinho item : new ArrayList<>(repo.getItens())) {
+                        if (item.getProduto() != null && produtoId.equals(item.getProduto().getId())) {
+                            nome = item.getProduto().getNome();
+                            repo.remover(item);
+                        }
+                    }
+                    if (nome != null) {
+                        Toast.makeText(requireContext(),
+                                nome + " foi retirado do carrinho: não está mais disponível.",
+                                Toast.LENGTH_LONG).show();
+                        atualizarTotal();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<br.com.arthurbaby.network.dto.ProdutoResponse> call, Throwable t) {
+                    // Sem conexão: mantém o carrinho; a API confere tudo de novo ao finalizar o pedido
+                }
+            });
+        }
     }
 }
