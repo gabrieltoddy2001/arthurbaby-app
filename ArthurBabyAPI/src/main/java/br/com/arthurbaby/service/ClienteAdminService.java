@@ -17,10 +17,12 @@ import java.util.NoSuchElementException;
 public class ClienteAdminService {
     private final UsuarioRepository usuarios;
     private final PasswordEncoder encoder;
+    private final AuditoriaService auditoria;
 
-    public ClienteAdminService(UsuarioRepository usuarios, PasswordEncoder encoder) {
+    public ClienteAdminService(UsuarioRepository usuarios, PasswordEncoder encoder, AuditoriaService auditoria) {
         this.usuarios = usuarios;
         this.encoder = encoder;
+        this.auditoria = auditoria;
     }
 
     @Transactional(readOnly = true)
@@ -39,17 +41,21 @@ public class ClienteAdminService {
         }
         Usuario cliente = buscarCliente(id);
         cliente.setStatus(status);
-        return ClienteAdminResponse.from(usuarios.save(cliente));
+        ClienteAdminResponse resposta = ClienteAdminResponse.from(usuarios.save(cliente));
+        auditoria.registrar(status == UsuarioStatus.BLOQUEADO ? "BLOQUEAR" : "DESBLOQUEAR", "Usuario", id,
+                (status == UsuarioStatus.BLOQUEADO ? "Bloqueou" : "Desbloqueou") + " o cliente " + cliente.getNomeCompleto() + " (" + cliente.getEmail() + ")");
+        return resposta;
     }
 
     @Transactional
     public void redefinirSenha(Long id, String novaSenha) {
-        if (novaSenha == null || novaSenha.length() < 6) {
-            throw new IllegalArgumentException("A senha deve ter pelo menos 6 caracteres");
-        }
+        PoliticaSenha.validar(novaSenha);
         Usuario cliente = buscarCliente(id);
         cliente.setSenha(encoder.encode(novaSenha));
+        cliente.invalidarSessoes(); // derruba as sessões abertas com a senha antiga
         usuarios.save(cliente);
+        auditoria.registrar("RESETAR_SENHA", "Usuario", id,
+                "Redefiniu a senha do cliente " + cliente.getNomeCompleto() + " (" + cliente.getEmail() + ")");
     }
 
     private Usuario buscarCliente(Long id) {

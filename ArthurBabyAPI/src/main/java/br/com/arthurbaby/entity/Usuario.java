@@ -2,6 +2,7 @@ package br.com.arthurbaby.entity;
 
 import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Enums.UsuarioStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -44,8 +45,17 @@ public class Usuario implements UserDetails {
     private LocalDateTime dataAceiteLgpd;
     private LocalDateTime criadoEm;
     private LocalDateTime atualizadoEm;
+    /**
+     * Última troca de senha ou "sair": tokens JWT emitidos antes deste momento são recusados pelo JwtFilter.
+     * Nulo = nunca alterado. Não aparece em JSON e não é aceito no corpo das requisições.
+     */
+    @JsonIgnore @Column(columnDefinition = "DATETIME(6)")
+    private LocalDateTime credenciaisAlteradasEm;
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Endereco> enderecos = new ArrayList<>();
+
+    /** Invalida todas as sessões (tokens) já emitidas para este usuário. */
+    public void invalidarSessoes() { credenciaisAlteradasEm = LocalDateTime.now(); }
 
     @PrePersist void prePersist() { criadoEm = LocalDateTime.now(); atualizadoEm = criadoEm; }
     @PreUpdate void preUpdate() { atualizadoEm = LocalDateTime.now(); }

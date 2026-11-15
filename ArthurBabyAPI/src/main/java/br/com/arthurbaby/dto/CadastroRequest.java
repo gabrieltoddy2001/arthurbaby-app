@@ -12,7 +12,7 @@ public record CadastroRequest(
         @Schema(description = "E-mail (único no sistema)", example = "ana.souza@email.com") String email,
         @Schema(description = "CPF com ou sem máscara (único no sistema)", example = "529.982.247-25") String cpf,
         @Schema(description = "Telefone com DDD", example = "(71) 99339-9816") String telefone,
-        @Schema(description = "Senha de acesso", example = "123456") String senha,
+        @Schema(description = "Senha de acesso (8 a 72 caracteres, com letra e número)", example = "bebe2026") String senha,
         @Schema(description = "Aceite do termo de uso", example = "true") boolean aceiteTermoUso,
         @Schema(description = "Aceite da política de privacidade (LGPD)", example = "true") boolean aceiteLgpd,
         @Schema(description = "Endereço principal do cliente") EnderecoRequest endereco) {}

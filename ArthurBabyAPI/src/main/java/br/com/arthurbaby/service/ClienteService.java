@@ -24,7 +24,6 @@ public class ClienteService {
     private final PasswordEncoder encoder;
 
     /** Mesmo tamanho minimo exigido na redefinicao de senha (PasswordResetService). */
-    static final int TAMANHO_MINIMO_SENHA = 4;
 
     public ClienteService(UsuarioRepository usuarios, EnderecoRepository enderecos, PasswordEncoder encoder) {
         this.usuarios = usuarios;
@@ -68,8 +67,8 @@ public class ClienteService {
 
     /**
      * Troca a senha de um usuario ja autenticado (tela de Perfil do app).
-     * Regras: a senha atual precisa conferir com o hash BCrypt do banco e a nova precisa ter no minimo
-     * 4 caracteres; qualquer falha vira 400 (IllegalArgumentException) com a mensagem exibida pelo app.
+     * Regras: a senha atual precisa conferir com o hash BCrypt do banco e a nova precisa seguir a
+     * {@link PoliticaSenha} (8 a 72 caracteres, com letra e numero); qualquer falha vira 400 (IllegalArgumentException) com a mensagem exibida pelo app.
      * A nova senha nunca e gravada em texto puro: sempre passa pelo {@link PasswordEncoder}.
      */
     @Transactional
@@ -85,11 +84,10 @@ public class ClienteService {
         if (!encoder.matches(senhaAtual, usuario.getSenha())) {
             throw new IllegalArgumentException("Senha atual incorreta");
         }
-        if (novaSenha == null || novaSenha.isBlank() || novaSenha.length() < TAMANHO_MINIMO_SENHA) {
-            throw new IllegalArgumentException("A nova senha deve possuir no mínimo " + TAMANHO_MINIMO_SENHA + " caracteres.");
-        }
+        PoliticaSenha.validar(novaSenha, usuario.getEmail(), usuario.getCpf());
 
         usuario.setSenha(encoder.encode(novaSenha));
+        usuario.invalidarSessoes(); // tokens emitidos antes da troca deixam de valer
         usuarios.save(usuario);
     }
 

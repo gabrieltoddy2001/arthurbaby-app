@@ -1,34 +1,3 @@
--- =====================================================================
--- ArthurBaby API — Script de criacao do banco de dados (MySQL 8+)
--- =====================================================================
--- Banco:   arthurbaby
--- Usuario: root
--- Senha:   Admin321
---
--- Este script e um espelho manual do modelo mapeado pelas entidades
--- JPA (br.com.arthurbaby.entity). Em desenvolvimento a aplicacao usa
--- spring.jpa.hibernate.ddl-auto=update (ver application-mysql.properties)
--- e cria/atualiza as tabelas sozinha ao subir — ou seja, NAO e
--- obrigatorio rodar este script para a API funcionar.
---
--- Use este arquivo quando quiser:
---   - criar o banco manualmente (MySQL Workbench, DBeaver, linha de
---     comando) antes de subir a aplicacao;
---   - conferir/documentar a estrutura esperada das tabelas;
---   - popular dados de referencia (categorias, tamanhos, cores, marca,
---     configuracao da loja) sem depender do primeiro boot da API.
---
--- Os usuarios de teste (senha 123456 para todos: admin@arthurbaby.com.br,
--- vendedor@arthurbaby.com.br, ana.souza@email.com, mariana.santos@email.com
--- e maria.teste@exemplo.com) NAO estao neste script porque a senha
--- precisa ser gravada com hash BCrypt gerado pelo backend — eles sao
--- criados automaticamente pelo DataInitializer no primeiro boot, caso a
--- tabela `usuario` esteja vazia.
---
--- Como executar (linha de comando):
---   mysql -u root -p < arthurbaby_schema.sql
--- =====================================================================
-
 CREATE DATABASE IF NOT EXISTS arthurbaby
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_0900_ai_ci;
@@ -57,6 +26,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     token_recuperacao_senha_expira_em    DATETIME      NULL,
     criado_em                            DATETIME      NULL,
     atualizado_em                        DATETIME      NULL,
+    credenciais_alteradas_em             DATETIME(6)   NULL,
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

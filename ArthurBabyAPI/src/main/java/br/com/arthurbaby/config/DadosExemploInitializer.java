@@ -55,12 +55,14 @@ public class DadosExemploInitializer implements CommandLineRunner {
     private final MovimentacaoEstoqueRepository movimentacoes;
     private final AuditoriaRepository auditorias;
     private final PasswordEncoder encoder;
+    private final SenhaInicialSeed senhaInicial;
 
     public DadosExemploInitializer(UsuarioRepository usuarios, CategoriaRepository categorias, MarcaRepository marcas,
                                    TamanhoRepository tamanhos, CorRepository cores, ModeloRepository modelos,
                                    ProdutoRepository produtos, PedidoRepository pedidos, FavoritoRepository favoritos,
                                    AvaliacaoRepository avaliacoes, MovimentacaoEstoqueRepository movimentacoes,
-                                   AuditoriaRepository auditorias, PasswordEncoder encoder) {
+                                   AuditoriaRepository auditorias, PasswordEncoder encoder,
+                                   SenhaInicialSeed senhaInicial) {
         this.usuarios = usuarios;
         this.categorias = categorias;
         this.marcas = marcas;
@@ -74,6 +76,7 @@ public class DadosExemploInitializer implements CommandLineRunner {
         this.movimentacoes = movimentacoes;
         this.auditorias = auditorias;
         this.encoder = encoder;
+        this.senhaInicial = senhaInicial;
     }
 
     /** Uma transação só: ou a carga de exemplo entra inteira, ou nada entra. */
@@ -87,7 +90,7 @@ public class DadosExemploInitializer implements CommandLineRunner {
             return;
         }
 
-        // ---------- Clientes (senha 123456), cada um com um endereço principal ----------
+        // ---------- Clientes (senha SEED_SENHA_INICIAL), cada um com um endereço principal ----------
         Usuario beatriz = cliente("Beatriz Lima", "beatriz.lima@email.com", "(71) 98111-2233",
                 "41820-020", "Avenida Tancredo Neves", "1632", "Sala 1001", "Caminho das Árvores", "Próximo ao Shopping da Bahia");
         Usuario fernanda = cliente("Fernanda Rocha", "fernanda.rocha@email.com", "(71) 98222-3344",
@@ -184,14 +187,14 @@ public class DadosExemploInitializer implements CommandLineRunner {
 
     // ===================== Auxiliares =====================
 
-    /** Busca o cliente pelo e-mail; se não existir, cria com senha 123456 e um endereço principal. */
+    /** Busca o cliente pelo e-mail; se não existir, cria com a senha inicial do seed e um endereço principal. */
     private Usuario cliente(String nome, String email, String telefone, String cep, String logradouro, String numero,
                            String complemento, String bairro, String referencia) {
         Optional<Usuario> existente = usuarios.findByEmail(email);
         if (existente.isPresent()) return existente.get();
 
         Usuario u = new Usuario();
-        u.setNomeCompleto(nome); u.setEmail(email); u.setSenha(encoder.encode("123456")); u.setTelefone(telefone);
+        u.setNomeCompleto(nome); u.setEmail(email); u.setSenha(encoder.encode(senhaInicial.senha())); u.setTelefone(telefone);
         u.setPerfil(Perfil.CLIENTE); u.setAceiteTermoUso(true); u.setAceiteLgpd(true);
         Endereco e = new Endereco();
         e.setUsuario(u); e.setCep(cep); e.setLogradouro(logradouro); e.setNumero(numero); e.setComplemento(complemento);

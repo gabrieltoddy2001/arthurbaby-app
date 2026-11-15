@@ -54,7 +54,7 @@ public class PasswordResetService {
     @Transactional
     public void redefinirSenha(String token, String novaSenha) {
         if (token == null || token.isBlank()) throw new IllegalArgumentException("Token invalido");
-        if (novaSenha == null || novaSenha.length() < 4) throw new IllegalArgumentException("Senha deve ter ao menos 4 caracteres");
+        PoliticaSenha.validar(novaSenha);
         PasswordResetToken prt = tokens.findByToken(token.trim())
                 .orElseThrow(() -> new IllegalArgumentException("Token invalido"));
         if (prt.isUsado()) throw new IllegalArgumentException("Token ja foi usado");
@@ -62,6 +62,7 @@ public class PasswordResetService {
 
         Usuario usuario = prt.getUsuario();
         usuario.setSenha(encoder.encode(novaSenha));
+        usuario.invalidarSessoes(); // sessões abertas com a senha antiga deixam de valer
         usuarios.save(usuario);
 
         prt.setUsado(true);

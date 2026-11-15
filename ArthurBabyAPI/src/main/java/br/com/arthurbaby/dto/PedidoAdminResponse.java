@@ -42,7 +42,10 @@ public record PedidoAdminResponse(
         LocalDateTime atualizadoEm,
         LocalDateTime confirmadoEm,
         LocalDateTime canceladoEm,
-        List<Historico> historico) {
+        List<Historico> historico,
+        @Schema(description = "Status para os quais o pedido pode ir agora (regras de FluxoPedido), sem contar CANCELADO") List<String> proximosStatus,
+        @Schema(description = "Próxima etapa normal (botão Avançar do painel); nulo se finalizado", nullable = true) String proximaEtapa,
+        @Schema(description = "Equipe pode cancelar (qualquer etapa antes de ENTREGUE)") boolean podeCancelar) {
 
     public record EnderecoResumo(String cep, String logradouro, String numero, String complemento,
                                  String bairro, String cidade, String uf, String referencia) {}
@@ -76,7 +79,10 @@ public record PedidoAdminResponse(
                                 h.getUsuario() != null ? h.getUsuario().getId() : null,
                                 h.getUsuario() != null ? h.getUsuario().getNomeCompleto() : "Sistema",
                                 h.getCriadoEm()))
-                        .toList());
+                        .toList(),
+                br.com.arthurbaby.service.FluxoPedido.proximos(p).stream().map(Enum::name).toList(),
+                java.util.Optional.ofNullable(br.com.arthurbaby.service.FluxoPedido.proximaEtapa(p)).map(Enum::name).orElse(null),
+                !br.com.arthurbaby.service.FluxoPedido.finalizado(p.getStatus()));
     }
 
     private static EnderecoResumo enderecoPrincipal(Usuario c) {
