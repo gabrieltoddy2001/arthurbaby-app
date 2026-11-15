@@ -6,7 +6,7 @@ Backend Spring Boot para catalogo, clientes, favoritos, estoque e ordens de pedi
 
 - **JDK 21** (o projeto compila com Java 21; versoes mais novas como 25 nao sao suportadas pelo Lombok/Spring desta versao)
 - **Maven 3.9+** (ou o Maven embutido do IntelliJ)
-- **MySQL 8** rodando em `localhost:3306` (usuario `root`, senha `Admin321`). O banco padrao da API e o MySQL.
+- **MySQL 8** rodando em `localhost:3306` (usuario `root`; a senha fica fora do codigo, veja "Segredos"). O banco padrao da API e o MySQL.
 
 ### Abrindo no IntelliJ
 
@@ -38,9 +38,25 @@ Tambem e possivel usar o script `database/arthurbaby_schema.sql` para criar as t
 
 Swagger: http://localhost:8080/swagger-ui.html
 
+### Segredos (senha do banco, chave JWT, senha das contas de exemplo)
+
+Nenhuma senha fica no codigo. Copie `application-local.properties.example` para `application-local.properties`
+(na pasta `ArthurBabyAPI`; o arquivo esta no `.gitignore` e **nunca deve ser publicado**) e preencha:
+
+- `DB_PASSWORD`: senha do usuario do MySQL;
+- `JWT_SECRET`: chave de assinatura dos tokens, com no minimo 32 caracteres aleatorios
+  (gere com `python -c "import secrets;print(secrets.token_urlsafe(48))"`);
+- `SEED_SENHA_INICIAL`: senha das contas criadas pelos seeds (admin, vendedor, clientes de exemplo);
+- `IMAGEM_BASE_URL` (opcional): endereco gravado nas URLs das fotos de produto enviadas;
+- `IMAGEM_IMPORTAR_CAMINHO=true` (opcional, so em ambiente local): permite adicionar foto pelo caminho do arquivo.
+
+Variaveis de ambiente com os mesmos nomes tem prioridade. Sem `JWT_SECRET` a API gera uma chave aleatoria
+a cada inicio (todos precisam logar de novo); sem `SEED_SENHA_INICIAL` as contas de exemplo recebem uma
+senha aleatoria mostrada no log.
+
 ### Personalizar a conexao
 
-As credenciais padrao sao `root` / `Admin321`. Se o seu MySQL usar outra senha ou porta, defina antes de rodar:
+O usuario padrao e `root` e a senha vem de `DB_PASSWORD`. Se o seu MySQL usar outra porta ou usuario, defina antes de rodar:
 
 ```powershell
 $env:DB_URL="jdbc:mysql://localhost:3306/arthurbaby?createDatabaseIfNotExist=true"
@@ -68,8 +84,13 @@ Console H2: http://localhost:8080/h2-console
 
 ## Usuarios iniciais
 
-- Admin: `admin@arthurbaby.com.br` / `123456`
-- Cliente: `ana.souza@email.com` / `123456`
+- Admin: `admin@arthurbaby.com.br`
+- Vendedor: `vendedor@arthurbaby.com.br`
+- Cliente: `ana.souza@email.com`
+
+A senha dessas contas e a definida em `SEED_SENHA_INICIAL` (nos exemplos abaixo, `123456`).
+Senhas novas (cadastro, troca e redefinicao) seguem a politica: 8 a 72 caracteres, com letra e numero.
+Depois de 5 senhas erradas seguidas a conta fica bloqueada para login por 15 minutos.
 
 ## Fluxo minimo de teste
 
@@ -103,7 +124,7 @@ curl -X POST http://localhost:8080/api/categorias ^
 ```bash
 curl -X POST http://localhost:8080/api/auth/cadastro ^
   -H "Content-Type: application/json" ^
-  -d "{\"nomeCompleto\":\"Maria Silva\",\"email\":\"maria@teste.com\",\"cpf\":\"111.444.777-35\",\"telefone\":\"(71) 99999-0000\",\"senha\":\"123456\",\"aceiteTermoUso\":true,\"aceiteLgpd\":true,\"endereco\":{\"cep\":\"40020-455\",\"logradouro\":\"Av. Sete de Setembro\",\"numero\":\"548\",\"bairro\":\"Centro\",\"cidade\":\"Salvador\",\"uf\":\"BA\"}}"
+  -d "{\"nomeCompleto\":\"Maria Silva\",\"email\":\"maria@teste.com\",\"cpf\":\"111.444.777-35\",\"telefone\":\"(71) 99999-0000\",\"senha\":\"bebe2026\",\"aceiteTermoUso\":true,\"aceiteLgpd\":true,\"endereco\":{\"cep\":\"40020-455\",\"logradouro\":\"Av. Sete de Setembro\",\"numero\":\"548\",\"bairro\":\"Centro\",\"cidade\":\"Salvador\",\"uf\":\"BA\"}}"
 
 curl -X POST http://localhost:8080/api/auth/recuperar-senha ^
   -H "Content-Type: application/json" -d "{\"email\":\"maria@teste.com\"}"
@@ -174,7 +195,8 @@ o estoque (`MovimentacaoEstoque` do tipo `ESTORNO`). Cliente so ve/cancela os pr
 curl -X PUT http://localhost:8080/api/auth/alterar-senha \
   -H "Authorization: Bearer SEU_TOKEN" -H "Content-Type: application/json" \
   -d '{"senhaAtual": "123456", "novaSenha": "novaSenha123"}'
-# 200 {"mensagem":"Senha alterada com sucesso."} | 400 "Senha atual incorreta" ou nova senha < 4 caracteres
+# 200 {"mensagem":"Senha alterada com sucesso."} | 400 "Senha atual incorreta" ou nova senha fora da politica
+# (8 a 72 caracteres, com letra e numero). Tokens emitidos antes da troca deixam de valer (401).
 
 # Cupons ativos e dentro da validade (publico)
 curl http://localhost:8080/api/cupons/ativos

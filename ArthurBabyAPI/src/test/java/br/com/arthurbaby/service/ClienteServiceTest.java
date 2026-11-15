@@ -102,7 +102,10 @@ class ClienteServiceTest {
 
         IllegalArgumentException curta = assertThrows(IllegalArgumentException.class,
                 () -> service.alterarSenha(4L, new AlterarSenhaRequest("admin123", "abc")));
-        assertEquals("A nova senha deve possuir no mínimo 4 caracteres.", curta.getMessage());
+        assertEquals(PoliticaSenha.DESCRICAO, curta.getMessage());
+        // Sem número também é recusada (política: 8 a 72 caracteres, com letra e número)
+        assertThrows(IllegalArgumentException.class,
+                () -> service.alterarSenha(4L, new AlterarSenhaRequest("admin123", "somenteletras")));
         assertThrows(IllegalArgumentException.class,
                 () -> service.alterarSenha(4L, new AlterarSenhaRequest("admin123", "    ")));
         assertThrows(IllegalArgumentException.class,

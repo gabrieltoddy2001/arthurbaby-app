@@ -35,7 +35,7 @@ class AuthServiceTest {
         usuarios = mock(UsuarioRepository.class);
         encoder = mock(PasswordEncoder.class);
         jwt = mock(JwtService.class);
-        service = new AuthService(usuarios, encoder, jwt);
+        service = new AuthService(usuarios, encoder, jwt, new LimiteTentativasLogin());
     }
 
     @Test
@@ -46,16 +46,16 @@ class AuthServiceTest {
             salvo.setId(7L);
             return salvo;
         });
-        when(encoder.encode("senha-forte")).thenReturn("senha-hash");
+        when(encoder.encode("senha-forte1")).thenReturn("senha-hash");
         when(jwt.gerarToken(any(Usuario.class))).thenReturn("jwt-token");
 
         AuthResponse response = service.cadastrar(new CadastroRequest(
-                "Ana Lima", "  ANA@EXAMPLE.COM ", null, "11999990000", "senha-forte", true, true, null));
+                "Ana Lima", "  ANA@EXAMPLE.COM ", null, "11999990000", "senha-forte1", true, true, null));
 
         assertEquals("jwt-token", response.token());
         assertEquals(7L, response.usuarioId());
         assertEquals("Ana Lima", response.nome());
-        verify(encoder).encode("senha-forte");
+        verify(encoder).encode("senha-forte1");
         verify(usuarios).save(any(Usuario.class));
     }
 

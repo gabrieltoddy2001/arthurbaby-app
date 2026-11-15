@@ -56,7 +56,27 @@ class AdminCrudServiceTest {
                 mock(br.com.arthurbaby.repository.ConfiguracaoLojaRepository.class),
                 mock(br.com.arthurbaby.repository.FavoritoRepository.class),
                 mock(br.com.arthurbaby.repository.AuditoriaRepository.class),
-                mapper, encoder);
+                mapper, encoder,
+                new AuditoriaService(mock(br.com.arthurbaby.repository.AuditoriaRepository.class)),
+                mock(EstoqueService.class));
+        // O CRUD genérico confere o perfil de quem está logado: os testes rodam como ADMINISTRADOR
+        logarComo(br.com.arthurbaby.entity.Enums.Perfil.ADMINISTRADOR);
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+    }
+
+    private static void logarComo(br.com.arthurbaby.entity.Enums.Perfil perfil) {
+        Usuario logado = new Usuario();
+        logado.setId(999L);
+        logado.setNomeCompleto("Usuario Logado");
+        logado.setEmail("logado@arthurbaby.com.br");
+        logado.setPerfil(perfil);
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                        logado, null, logado.getAuthorities()));
     }
 
     @Test
@@ -121,10 +141,10 @@ class AdminCrudServiceTest {
 
     @Test
     void criarUsuarioCodificaSenhaEmTextoENormalizaEmail() {
-        when(encoder.encode("123456")).thenReturn("$2a$10$abcdefghijklmnopqrstuvabcdefghijklmnopqrstuvwxyz01234");
+        when(encoder.encode("senha2026")).thenReturn("$2a$10$abcdefghijklmnopqrstuvabcdefghijklmnopqrstuvwxyz01234");
         when(usuarios.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        service.criar("usuarios", Map.of("nomeCompleto", "Ana", "email", " ANA@Example.com ", "senha", "123456"));
+        service.criar("usuarios", Map.of("nomeCompleto", "Ana", "email", " ANA@Example.com ", "senha", "senha2026"));
 
         ArgumentCaptor<Usuario> salvo = ArgumentCaptor.forClass(Usuario.class);
         verify(usuarios).save(salvo.capture());
@@ -166,7 +186,7 @@ class AdminCrudServiceTest {
     @Test
     void criarUsuarioComNomeInvalidoNaoSalva() {
         assertThrows(IllegalArgumentException.class, () ->
-                service.criar("usuarios", Map.of("nomeCompleto", "Ana#1", "email", "ana@example.com", "senha", "123456")));
+                service.criar("usuarios", Map.of("nomeCompleto", "Ana#1", "email", "ana@example.com", "senha", "senha2026")));
 
         verify(usuarios, org.mockito.Mockito.never()).save(any(Usuario.class));
     }
@@ -185,5 +205,22 @@ class AdminCrudServiceTest {
         assertThrows(IllegalArgumentException.class, () -> service.buscar("desconhecido", 1L));
 
         verifyNoInteractions(categorias);
+    }
+
+    @Test
+    void vendedorNaoListaNemAlteraUsuarios() {
+        logarComo(br.com.arthurbaby.entity.Enums.Perfil.VENDEDOR);
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> service.listar("usuarios"));
+        assertThrows(org.springframework.security.access.AccessDeniedException.class,
+                () -> service.criar("usuarios", Map.of("nomeCompleto", "Novo Admin", "email", "x@x.com",
+                        "senha", "senha2026", "perfil", "ADMINISTRADOR")));
+        verifyNoInteractions(usuarios);
+    }
+
+    @Test
+    void auditoriaESomenteLeituraAteParaAdministrador() {
+        assertThrows(org.springframework.security.access.AccessDeniedException.class,
+                () -> service.criar("auditoria", Map.of("acao", "CRIAR", "descricao", "forjado")));
+        assertThrows(org.springframework.security.access.AccessDeniedException.class, () -> service.excluir("auditoria", 1L));
     }
 }

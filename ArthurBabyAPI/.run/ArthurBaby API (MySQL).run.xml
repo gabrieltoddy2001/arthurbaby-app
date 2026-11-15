@@ -1,7 +1,8 @@
 <!--
   Configuracao de execucao compartilhada do IntelliJ (pasta .run/ vai para o Git).
   Configuracao PRINCIPAL: roda a API com o perfil "mysql" (application-mysql.properties).
-  Exige o MySQL 8 rodando em localhost:3306 com usuario root / senha Admin321.
+  Exige o MySQL 8 rodando em localhost:3306 (usuario root). A senha vem de DB_PASSWORD, no
+  application-local.properties (pasta ArthurBabyAPI, fora do Git) ou em variavel de ambiente.
 -->
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ArthurBaby API (MySQL)" type="Application" factoryName="Application">

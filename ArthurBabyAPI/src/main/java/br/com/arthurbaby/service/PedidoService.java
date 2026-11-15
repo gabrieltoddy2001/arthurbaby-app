@@ -211,7 +211,8 @@ public class PedidoService {
     @Transactional
     public PedidoResponse alterarStatus(Long id, StatusPedidoRequest request, Usuario logado) {
         Pedido pedido = pedidos.findById(id).orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
-        Usuario usuario = request.usuarioId() == null ? logado : usuarios.findById(request.usuarioId()).orElse(logado);
+        // O responsável registrado no histórico é sempre quem está logado (usuarioId do corpo é ignorado)
+        Usuario usuario = logado;
         aplicarStatus(pedido, request, usuario);
         return PedidoResponse.de(pedidos.save(pedido));
     }
@@ -219,12 +220,12 @@ public class PedidoService {
     private void aplicarStatus(Pedido pedido, StatusPedidoRequest request, Usuario usuario) {
         if (request.status() == null) throw new IllegalArgumentException("Informe o novo status do pedido.");
         if (request.status() == PedidoStatus.CANCELADO) {
+            FluxoPedido.validarCancelamento(pedido, true); // alteração de status é sempre feita pela equipe
             cancelarSemSalvar(pedido, request.motivoCancelamento(), usuario, request.observacao());
             return;
         }
-        if (pedido.getStatus() == PedidoStatus.CANCELADO) throw new IllegalArgumentException("Pedido cancelado não pode mudar de status.");
-        if (pedido.getStatus() == PedidoStatus.ENTREGUE) throw new IllegalArgumentException("Pedido entregue não pode mudar de status.");
-        if (pedido.getStatus() == request.status()) throw new IllegalArgumentException("O pedido já está com o status " + request.status() + ".");
+        // Máquina de estados: avança na ordem (pulando só as etapas opcionais) ou volta uma etapa
+        FluxoPedido.validarTransicao(pedido, request.status());
         PedidoStatus anterior = pedido.getStatus();
         pedido.setStatus(request.status());
         if (request.status() == PedidoStatus.CONFIRMADO && pedido.getConfirmadoEm() == null) pedido.setConfirmadoEm(LocalDateTime.now());
@@ -239,6 +240,8 @@ public class PedidoService {
         Pedido pedido = pedidos.findByNumeroPedido(numeroPedido)
                 .orElseThrow(() -> new NoSuchElementException("Pedido não encontrado."));
         verificarAcesso(pedido, logado);
+        // Cliente só cancela até CONFIRMADO; a equipe, em qualquer etapa antes de ENTREGUE
+        FluxoPedido.validarCancelamento(pedido, equipeLoja(logado));
         return cancelar(pedido, motivo, logado, null);
     }
 

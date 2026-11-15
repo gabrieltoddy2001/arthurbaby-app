@@ -3,7 +3,7 @@
 -- =====================================================================
 -- Banco:   arthurbaby
 -- Usuario: root
--- Senha:   Admin321
+-- Senha:   a definida em DB_PASSWORD (variavel de ambiente ou application-local.properties)
 --
 -- Este script e um espelho manual do modelo mapeado pelas entidades
 -- JPA (br.com.arthurbaby.entity). Em desenvolvimento a aplicacao usa
@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     token_recuperacao_senha_expira_em    DATETIME      NULL,
     criado_em                            DATETIME      NULL,
     atualizado_em                        DATETIME      NULL,
+    credenciais_alteradas_em             DATETIME(6)   NULL,
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT uk_usuario_cpf UNIQUE (cpf)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -25,7 +25,10 @@ public class FavoritoService {
 
     @Transactional(readOnly = true)
     public List<FavoritoResponse> listar(Long clienteId) {
-        return favoritos.findByClienteId(clienteId).stream().map(FavoritoService::toResponse).toList();
+        // Produto desativado pela loja some dos favoritos (o registro fica guardado e volta se o produto for reativado)
+        return favoritos.findByClienteId(clienteId).stream()
+                .filter(f -> f.getProduto() == null || f.getProduto().getStatus() != br.com.arthurbaby.entity.Enums.ProdutoStatus.INATIVO)
+                .map(FavoritoService::toResponse).toList();
     }
 
     /** Idempotente: se o produto ja estiver favoritado, devolve o favorito existente. */
@@ -35,7 +38,9 @@ public class FavoritoService {
         Favorito favorito = favoritos.findByClienteIdAndProdutoId(clienteId, produtoId).orElseGet(() -> {
             Favorito novo = new Favorito();
             novo.setCliente(usuarios.findById(clienteId).orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado")));
-            novo.setProduto(produtos.findById(produtoId).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado")));
+            novo.setProduto(produtos.findById(produtoId)
+                    .filter(p -> p.getStatus() != br.com.arthurbaby.entity.Enums.ProdutoStatus.INATIVO)
+                    .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado")));
             return favoritos.save(novo);
         });
         return toResponse(favorito);

@@ -1,0 +1,23 @@
+# Copie este arquivo para "application-local.properties" (mesma pasta) e preencha.
+# O application-local.properties esta no .gitignore e nunca deve ser publicado.
+# Tambem e possivel definir os mesmos nomes como variaveis de ambiente (tem prioridade).
+
+# Senha do usuario do MySQL (perfil mysql)
+DB_PASSWORD=
+
+# Chave de assinatura dos tokens JWT: no minimo 32 caracteres aleatorios.
+# Gere uma com:  python -c "import secrets;print(secrets.token_urlsafe(48))"
+# Sem ela, a API gera uma chave aleatoria a cada inicio e todos precisam logar de novo apos reiniciar.
+JWT_SECRET=
+
+# Senha das contas criadas pelos seeds (admin, vendedor, clientes de exemplo).
+# Sem ela, a API gera uma senha aleatoria e mostra no log ao criar as contas.
+SEED_SENHA_INICIAL=
+
+# Adicionar imagem de produto pelo caminho do arquivo (ex.: C:\Fotos\produto.jpg). A API le o arquivo do
+# computador onde ELA roda, entao so faz sentido em ambiente local. Deixe false (padrao) em servidor publicado.
+IMAGEM_IMPORTAR_CAMINHO=false
+
+# Endereco usado nas URLs das fotos de produto enviadas (o app e o painel precisam alcancar esse endereco).
+# Ex.: http://192.168.0.10:8080 (IP deste PC na rede). Sem ele, vale o padrao do application.properties.
+# IMAGEM_BASE_URL=http://192.168.0.10:8080

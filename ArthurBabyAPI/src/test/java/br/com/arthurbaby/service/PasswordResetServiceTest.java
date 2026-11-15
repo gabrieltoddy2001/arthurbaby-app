@@ -84,9 +84,9 @@ class PasswordResetServiceTest {
         Usuario usuario = usuario();
         PasswordResetToken prt = token("token-valido", usuario, LocalDateTime.now().plusMinutes(5));
         when(tokens.findByToken("token-valido")).thenReturn(Optional.of(prt));
-        when(encoder.encode("nova-senha")).thenReturn("novo-hash");
+        when(encoder.encode("nova-senha1")).thenReturn("novo-hash");
 
-        service.redefinirSenha("token-valido", "nova-senha");
+        service.redefinirSenha("token-valido", "nova-senha1");
 
         assertEquals("novo-hash", usuario.getSenha());
         assertTrue(prt.isUsado());

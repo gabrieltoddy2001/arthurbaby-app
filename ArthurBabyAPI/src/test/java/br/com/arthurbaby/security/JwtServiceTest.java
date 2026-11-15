@@ -29,6 +29,8 @@ class JwtServiceTest {
         service = new JwtService();
         ReflectionTestUtils.setField(service, "secret", SECRET);
         ReflectionTestUtils.setField(service, "expirationMinutes", 30L);
+        ReflectionTestUtils.setField(service, "expirationMinutesEquipe", 30L);
+        ReflectionTestUtils.invokeMethod(service, "iniciarChave"); // @PostConstruct: monta a chave a partir do segredo
 
         usuario = new Usuario();
         usuario.setId(42L);
