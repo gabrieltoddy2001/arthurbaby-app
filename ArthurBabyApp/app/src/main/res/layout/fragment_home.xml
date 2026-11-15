@@ -67,6 +67,22 @@
             android:src="@drawable/ic_favorito"
             app:tint="@color/rosa_arthur"
             android:visibility="gone" />
+
+        <!-- Sair (só aparece logada), à direita do coração -->
+        <TextView
+            android:id="@+id/btnSairHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Sair"
+            android:textColor="@color/rosa_arthur"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:background="@drawable/bg_botao_branco"
+            android:contentDescription="Sair da conta"
+            android:visibility="gone" />
     </LinearLayout>
 
     <ProgressBar
