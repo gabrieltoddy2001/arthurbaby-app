@@ -26,9 +26,11 @@ import java.util.List;
 @Tag(name = "Administração - Pedidos", description = "Listagem, lançamento e alteração de status de pedidos pelo painel.")
 public class PedidoAdminController {
     private final PedidoService service;
+    private final br.com.arthurbaby.service.AuditoriaService auditoria;
 
-    public PedidoAdminController(PedidoService service) {
+    public PedidoAdminController(PedidoService service, br.com.arthurbaby.service.AuditoriaService auditoria) {
         this.service = service;
+        this.auditoria = auditoria;
     }
 
     @GetMapping
@@ -50,7 +52,9 @@ public class PedidoAdminController {
     @ApiResponses({@ApiResponse(responseCode = "200", description = "Pedido criado"),
             @ApiResponse(responseCode = "400", description = "Cliente ausente/inválido, sem itens, estoque insuficiente ou cupom inválido")})
     public PedidoAdminResponse criar(@RequestBody PedidoRequest request, @AuthenticationPrincipal Usuario logado) {
-        return service.criarPeloPainel(request, logado);
+        PedidoAdminResponse criado = service.criarPeloPainel(request, logado);
+        auditoria.registrar("CRIAR", "Pedido", criado.id(), "Lançou o pedido " + criado.numeroPedido() + " para " + criado.clienteNome());
+        return criado;
     }
 
     @PutMapping(value = "/{id}/status", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -59,6 +63,10 @@ public class PedidoAdminController {
     @ApiResponses({@ApiResponse(responseCode = "200"), @ApiResponse(responseCode = "400", description = "Transição inválida ou motivo ausente")})
     public PedidoAdminResponse alterarStatus(@PathVariable Long id, @RequestBody StatusPedidoRequest request,
                                              @AuthenticationPrincipal Usuario logado) {
-        return service.alterarStatusPeloPainel(id, request, logado);
+        PedidoAdminResponse pedido = service.alterarStatusPeloPainel(id, request, logado);
+        boolean cancelou = "CANCELADO".equals(pedido.status());
+        auditoria.registrar(cancelou ? "CANCELAR" : "ALTERAR_STATUS", "Pedido", pedido.id(),
+                (cancelou ? "Cancelou o pedido " : "Alterou o status do pedido ") + pedido.numeroPedido() + " para " + pedido.status());
+        return pedido;
     }
 }

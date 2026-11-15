@@ -37,7 +37,10 @@ import br.com.arthurbaby.repository.UsuarioRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeanWrapperImpl;
+import br.com.arthurbaby.entity.Enums.MovimentoEstoqueTipo;
+import br.com.arthurbaby.entity.Enums.Perfil;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,17 +53,61 @@ import java.util.regex.Pattern;
 /**
  * CRUD generico do painel admin. As entidades nunca saem do servico: sao convertidas em mapas JSON
  * dentro da transacao, entao colecoes lazy sao lidas enquanto a sessao do JPA esta aberta.
+ *
+ * <p>Matriz de permissoes (ver {@link Regra}); a mesma separacao por perfil tambem esta no SecurityConfig:</p>
+ * <ul>
+ *   <li>Catalogo (categorias, marcas, produtos, imagens, tamanhos, cores, modelos): ADMINISTRADOR e VENDEDOR
+ *       criam/editam; excluir so ADMINISTRADOR.</li>
+ *   <li>Usuarios e configuracoes da loja: somente ADMINISTRADOR, sem exclusao (desative pelo status).</li>
+ *   <li>Pedidos, itens, historicos, variacoes e movimentacoes de estoque: somente leitura aqui. Alteracoes
+ *       passam pelos endpoints dedicados, que aplicam as regras de negocio (estoque atomico, historico...).</li>
+ *   <li>Auditoria, enderecos e favoritos: somente leitura e somente ADMINISTRADOR. A auditoria e gravada pelo
+ *       servidor ({@link AuditoriaService}), nunca pelo navegador.</li>
+ * </ul>
  */
 @Service
 public class AdminCrudService {
     private static final TypeReference<Map<String, Object>> JSON = new TypeReference<>() {};
-    private static final Pattern BCRYPT = Pattern.compile("^\\$2[aby]?\\$\\d{2}\\$.{53}$");
     /** Palavras so com letras (qualquer idioma), separadas por espaco, hifen, apostrofo ou ". ". */
     private static final Pattern NOME_PESSOA = Pattern.compile("^\\p{L}+(?:(?:\\. ?| |[-'’])\\p{L}+)*\\.?$");
+
+    /** Quem pode ler e quem pode gravar cada tipo do CRUD generico. */
+    private enum Regra {
+        /** Leitura e escrita para a equipe (ADMINISTRADOR e VENDEDOR); excluir so o ADMINISTRADOR. */
+        EQUIPE_EDITA,
+        /** Leitura e escrita somente para o ADMINISTRADOR, sem exclusao. */
+        ADMIN_EDITA,
+        /** Equipe le; gravacao somente pelos endpoints dedicados. */
+        EQUIPE_LE,
+        /** Somente o ADMINISTRADOR le; ninguem grava pelo CRUD generico. */
+        ADMIN_LE
+    }
+
+    private static final Map<String, Regra> REGRAS = Map.ofEntries(
+            Map.entry("categorias", Regra.EQUIPE_EDITA),
+            Map.entry("marcas", Regra.EQUIPE_EDITA),
+            Map.entry("produtos", Regra.EQUIPE_EDITA),
+            Map.entry("produto-imagens", Regra.EQUIPE_EDITA),
+            Map.entry("tamanhos", Regra.EQUIPE_EDITA),
+            Map.entry("cores", Regra.EQUIPE_EDITA),
+            Map.entry("modelos", Regra.EQUIPE_EDITA),
+            Map.entry("usuarios", Regra.ADMIN_EDITA),
+            Map.entry("configuracoes-loja", Regra.ADMIN_EDITA),
+            Map.entry("produto-variacoes", Regra.EQUIPE_LE),
+            Map.entry("movimentacoes-estoque", Regra.EQUIPE_LE),
+            Map.entry("pedidos", Regra.EQUIPE_LE),
+            Map.entry("pedido-itens", Regra.EQUIPE_LE),
+            Map.entry("pedido-status-historicos", Regra.EQUIPE_LE),
+            Map.entry("auditoria", Regra.ADMIN_LE),
+            Map.entry("enderecos", Regra.ADMIN_LE),
+            Map.entry("favoritos", Regra.ADMIN_LE)
+    );
 
     private final Map<String, RecursoAdmin> recursos;
     private final ObjectMapper mapper;
     private final PasswordEncoder encoder;
+    private final AuditoriaService auditoriaService;
+    private final EstoqueService estoqueService;
 
     public AdminCrudService(UsuarioRepository usuarios, EnderecoRepository enderecos, CategoriaRepository categorias,
                             MarcaRepository marcas, ProdutoRepository produtos, ProdutoImagemRepository imagens,
@@ -68,9 +115,12 @@ public class AdminCrudService {
                             ProdutoVariacaoRepository variacoes, MovimentacaoEstoqueRepository movimentos,
                             PedidoRepository pedidos, PedidoItemRepository itens,
                             PedidoStatusHistoricoRepository historicos, ConfiguracaoLojaRepository configs,
-                            FavoritoRepository favoritos, AuditoriaRepository auditoria, ObjectMapper mapper, PasswordEncoder encoder) {
+                            FavoritoRepository favoritos, AuditoriaRepository auditoria, ObjectMapper mapper, PasswordEncoder encoder,
+                            AuditoriaService auditoriaService, EstoqueService estoqueService) {
         this.mapper = mapper;
         this.encoder = encoder;
+        this.auditoriaService = auditoriaService;
+        this.estoqueService = estoqueService;
         this.recursos = Map.ofEntries(
                 recurso("usuarios", usuarios, Usuario.class),
                 recurso("enderecos", enderecos, Endereco.class),
@@ -94,12 +144,16 @@ public class AdminCrudService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listar(String tipo) {
-        return recurso(tipo).repository().findAll().stream().map(this::json).toList();
+        RecursoAdmin recurso = recurso(tipo);
+        exigirLeitura(tipo);
+        return recurso.repository().findAll().stream().map(this::json).toList();
     }
 
     @Transactional(readOnly = true)
     public Map<String, Object> buscar(String tipo, Long id) {
-        return json(recurso(tipo).repository()
+        RecursoAdmin recurso = recurso(tipo);
+        exigirLeitura(tipo);
+        return json(recurso.repository()
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Registro nao encontrado")));
     }
@@ -107,42 +161,122 @@ public class AdminCrudService {
     @Transactional
     public Map<String, Object> criar(String tipo, Object body) {
         RecursoAdmin recurso = recurso(tipo);
+        exigirEscrita(tipo);
         Object entity = mapper.convertValue(body, recurso.entityClass());
+        new BeanWrapperImpl(entity).setPropertyValue("id", null); // POST sempre cria: nunca sobrescreve um id existente
         prepararUsuario(entity, null);
-        prepararProduto(entity, null);
-        return json(recurso.repository().save(entity));
+        java.util.Set<String> skusNovos = prepararProduto(entity, null);
+        Object salvo = recurso.repository().save(entity);
+        registrarEstoqueInicial(salvo, skusNovos);
+        auditoriaService.registrar("CRIAR", recurso.entityClass().getSimpleName(), idDe(salvo),
+                "Criou " + descrever(recurso, salvo));
+        return json(salvo);
     }
 
     @Transactional
     public Map<String, Object> atualizar(String tipo, Long id, Object body) {
         RecursoAdmin recurso = recurso(tipo);
+        exigirEscrita(tipo);
         Object existente = recurso.repository()
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Registro nao encontrado"));
 
         Object entity = mapper.convertValue(body, recurso.entityClass());
         new BeanWrapperImpl(entity).setPropertyValue("id", id);
-        prepararUsuario(entity, existente);
-        prepararProduto(entity, existente);
-        return json(recurso.repository().save(entity));
+        boolean trocouSenha = prepararUsuario(entity, existente);
+        java.util.Set<String> skusNovos = prepararProduto(entity, existente);
+        Object salvo = recurso.repository().save(entity);
+        registrarEstoqueInicial(salvo, skusNovos);
+        auditoriaService.registrar(trocouSenha ? "RESETAR_SENHA" : "ATUALIZAR", recurso.entityClass().getSimpleName(), id,
+                (trocouSenha ? "Redefiniu a senha de " : "Atualizou ") + descrever(recurso, salvo));
+        return json(salvo);
     }
 
     @Transactional
     public void excluir(String tipo, Long id) {
         RecursoAdmin recurso = recurso(tipo);
-        recurso.repository()
+        exigirAdmin();
+        if (REGRAS.get(tipo) != Regra.EQUIPE_EDITA) {
+            throw new AccessDeniedException("Exclusao nao permitida para " + tipo + ": desative o registro pelo status");
+        }
+        Object existente = recurso.repository()
                 .findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Registro nao encontrado"));
+        String descricao = "Excluiu " + descrever(recurso, existente);
         recurso.repository().deleteById(id);
+        auditoriaService.registrar("DELETAR", recurso.entityClass().getSimpleName(), id, descricao);
+    }
+
+    /* ---------------- Permissoes por perfil ---------------- */
+
+    private void exigirLeitura(String tipo) {
+        Regra regra = REGRAS.get(tipo);
+        if (regra == Regra.ADMIN_EDITA || regra == Regra.ADMIN_LE) exigirAdmin();
+        else exigirEquipe();
+    }
+
+    private void exigirEscrita(String tipo) {
+        Regra regra = REGRAS.get(tipo);
+        if (regra == Regra.EQUIPE_LE || regra == Regra.ADMIN_LE) {
+            throw new AccessDeniedException("O tipo " + tipo + " e somente leitura no CRUD generico: use o endpoint dedicado");
+        }
+        if (regra == Regra.ADMIN_EDITA) exigirAdmin();
+        else exigirEquipe();
+    }
+
+    private static Usuario exigirEquipe() {
+        Usuario logado = AuditoriaService.usuarioLogado();
+        if (logado == null || (logado.getPerfil() != Perfil.ADMINISTRADOR && logado.getPerfil() != Perfil.VENDEDOR)) {
+            throw new AccessDeniedException("Acesso restrito a ADMINISTRADOR ou VENDEDOR");
+        }
+        return logado;
+    }
+
+    private static Usuario exigirAdmin() {
+        Usuario logado = AuditoriaService.usuarioLogado();
+        if (logado == null || logado.getPerfil() != Perfil.ADMINISTRADOR) {
+            throw new AccessDeniedException("Acesso restrito ao ADMINISTRADOR");
+        }
+        return logado;
+    }
+
+    /* ---------------- Auditoria ---------------- */
+
+    private static Long idDe(Object entity) {
+        Object id = new BeanWrapperImpl(entity).getPropertyValue("id");
+        return id instanceof Long l ? l : null;
+    }
+
+    /** Ex.: "Produto #5 (Body Manga Curta)". Usa o primeiro campo de nome que a entidade tiver. */
+    private static String descrever(RecursoAdmin recurso, Object entity) {
+        BeanWrapperImpl bean = new BeanWrapperImpl(entity);
+        String rotulo = null;
+        for (String campo : List.of("nomeCompleto", "nome", "nomeFantasia", "sku", "url")) {
+            if (bean.isReadableProperty(campo) && bean.getPropertyValue(campo) != null) {
+                rotulo = String.valueOf(bean.getPropertyValue(campo));
+                break;
+            }
+        }
+        return recurso.entityClass().getSimpleName() + " #" + idDe(entity) + (rotulo == null ? "" : " (" + rotulo + ")");
     }
 
     private Map<String, Object> json(Object entity) {
         return mapper.convertValue(entity, JSON);
     }
 
-    /** Usuario criado/alterado pelo admin: senha em texto vira hash BCrypt; sem senha no corpo, mantem a atual. */
-    private void prepararUsuario(Object entity, Object existente) {
-        if (!(entity instanceof Usuario usuario)) return;
+    /**
+     * Usuario criado/alterado pelo ADMINISTRADOR: senha em texto vira hash BCrypt; sem senha no corpo, mantem a atual.
+     * Devolve true quando a senha foi trocada (para a auditoria registrar RESETAR_SENHA).
+     */
+    private boolean prepararUsuario(Object entity, Object existente) {
+        if (!(entity instanceof Usuario usuario)) return false;
+        if (usuario.getPerfil() == null) throw new IllegalArgumentException("Informe o perfil do usuario");
+        Usuario logado = AuditoriaService.usuarioLogado();
+        if (existente instanceof Usuario atual && logado != null && logado.getId().equals(atual.getId())
+                && (usuario.getPerfil() != atual.getPerfil() || usuario.getStatus() != atual.getStatus())) {
+            // Evita que o administrador perca o proprio acesso (ou que a loja fique sem administrador ativo)
+            throw new IllegalArgumentException("Voce nao pode alterar o proprio perfil nem o proprio status");
+        }
         usuario.setEmail(AuthService.normalizarEmail(usuario.getEmail()));
         usuario.setNomeCompleto(validarNome(usuario.getNomeCompleto()));
         if (existente instanceof Usuario atual) {
@@ -153,6 +287,7 @@ public class AdminCrudService {
             usuario.setDataAceiteTermoUso(atual.getDataAceiteTermoUso());
             usuario.setAceiteLgpd(atual.isAceiteLgpd());
             usuario.setDataAceiteLgpd(atual.getDataAceiteLgpd());
+            usuario.setCredenciaisAlteradasEm(atual.getCredenciaisAlteradasEm()); // campo fora do JSON: preserva
         } else {
             usuario.getEnderecos().forEach(endereco -> endereco.setUsuario(usuario));
         }
@@ -160,11 +295,13 @@ public class AdminCrudService {
         if (senha == null || senha.isBlank()) {
             if (existente instanceof Usuario atual) usuario.setSenha(atual.getSenha());
             else throw new IllegalArgumentException("Senha inicial e obrigatoria");
-        } else if (!BCRYPT.matcher(senha).matches() && senha.length() < 6) {
-            throw new IllegalArgumentException("A senha deve ter pelo menos 6 caracteres");
-        } else if (!BCRYPT.matcher(senha).matches()) {
-            usuario.setSenha(encoder.encode(senha));
+            return false;
         }
+        // Sempre texto puro: um hash pronto no corpo nao e aceito (impede gravar um hash conhecido)
+        PoliticaSenha.validar(senha, usuario.getEmail(), usuario.getCpf());
+        usuario.setSenha(encoder.encode(senha));
+        if (existente != null) usuario.invalidarSessoes(); // senha redefinida: derruba as sessões antigas
+        return existente != null;
     }
 
     /**
@@ -190,10 +327,24 @@ public class AdminCrudService {
      * Produto com imagens/variacoes aninhadas: o JSON nao traz a referencia de volta (campo WRITE_ONLY),
      * entao cada filho e ligado ao produto aqui. Na edicao, mantem campos que o painel nao envia.
      */
-    private void prepararProduto(Object entity, Object existente) {
-        if (!(entity instanceof Produto produto)) return;
+    private java.util.Set<String> prepararProduto(Object entity, Object existente) {
+        if (!(entity instanceof Produto produto)) return java.util.Set.of();
         produto.getImagens().forEach(imagem -> imagem.setProduto(produto));
         produto.getVariacoes().forEach(variacao -> variacao.setProduto(produto));
+
+        // Saldo de variacao existente so muda pela tela Estoque (gera movimentacao). Aqui o valor enviado e ignorado.
+        Map<Long, ProdutoVariacao> atuais = new java.util.HashMap<>();
+        if (existente instanceof Produto atual) atual.getVariacoes().forEach(v -> atuais.put(v.getId(), v));
+        java.util.Set<String> skusNovos = new java.util.HashSet<>();
+        for (var variacao : produto.getVariacoes()) {
+            if (variacao.getId() == null) {
+                if (variacao.getSku() != null) skusNovos.add(variacao.getSku().trim().toUpperCase());
+                continue;
+            }
+            ProdutoVariacao atual = atuais.get(variacao.getId());
+            if (atual == null) throw new IllegalArgumentException("Variacao " + variacao.getId() + " nao pertence a este produto.");
+            variacao.setEstoqueAtual(atual.getEstoqueAtual());
+        }
 
         // O estoque é controlado por variação: produto sem variação venderia sem baixa nem conferência de estoque
         if (produto.getVariacoes().isEmpty()) {
@@ -218,6 +369,20 @@ public class AdminCrudService {
         if (existente instanceof Produto atual) {
             produto.setCriadoEm(atual.getCriadoEm());
             if (produto.getAvaliacao() == null) produto.setAvaliacao(atual.getAvaliacao());
+        }
+        return skusNovos;
+    }
+
+    /** Estoque inicial de variacao nova entra no historico como ENTRADA, igual ao cadastro completo. */
+    private void registrarEstoqueInicial(Object salvo, java.util.Set<String> skusNovos) {
+        if (!(salvo instanceof Produto produto) || skusNovos.isEmpty()) return;
+        Usuario logado = AuditoriaService.usuarioLogado();
+        for (ProdutoVariacao variacao : produto.getVariacoes()) {
+            int inicial = variacao.getEstoqueAtual();
+            if (inicial > 0 && variacao.getSku() != null && skusNovos.contains(variacao.getSku().trim().toUpperCase())) {
+                estoqueService.registrar(produto, variacao, logado, MovimentoEstoqueTipo.ENTRADA, inicial, 0, inicial,
+                        "Estoque inicial do cadastro");
+            }
         }
     }
 

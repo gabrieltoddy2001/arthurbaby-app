@@ -1,0 +1,169 @@
+/* ============================================
+   produto-imagens.css — complementos da seção Imagens do formulário de produto.
+   O layout das linhas (.linha-imagem, .preview, .campos-imagem) continua em style.css;
+   aqui ficam só os estados de carregamento/envio, a ordenação e a visualização ampliada.
+   ============================================ */
+
+.img-status { min-height: 0; margin: .25rem 0; font-size: .85rem; color: var(--texto-secundario); }
+.img-status:empty { margin: 0; }
+.img-status-ok { color: var(--sucesso); }
+.img-status-erro { color: var(--erro); }
+
+/* Campo "link ou caminho do arquivo" */
+.img-link-linha { display: flex; gap: .5rem; margin: 0 0 .5rem; }
+.img-link-linha input {
+  flex: 1;
+  min-width: 0;
+  padding: .5rem .7rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--radius-sm);
+  font-size: .875rem;
+  font-family: inherit;
+}
+#btn-imagem-acao { min-width: 8.5rem; white-space: nowrap; }
+@media (max-width: 640px) { .img-link-linha { flex-direction: column; } }
+
+/* Importação por caminho: sem percentual, a barra fica em movimento */
+.img-progresso.indeterminado .img-progresso-barra { width: 35% !important; animation: img-vaivem 1.1s ease-in-out infinite alternate; }
+@keyframes img-vaivem { from { transform: translateX(-20%); } to { transform: translateX(210%); } }
+
+/* Arquivos sendo arrastados sobre o card de Imagens */
+#card-imagens.img-soltar { outline: 2px dashed var(--verde); outline-offset: -6px; background: var(--verde-claro); }
+
+/* Miniatura: esqueleto enquanto carrega */
+.linha-imagem .preview { position: relative; }
+.linha-imagem .preview img { transition: opacity .2s; }
+.linha-imagem .preview.carregando img { opacity: 0; }
+.linha-imagem .preview.carregando::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, var(--superficie-alt) 30%, #fff 50%, var(--superficie-alt) 70%);
+  background-size: 200% 100%;
+  animation: img-brilho 1.2s linear infinite;
+}
+@keyframes img-brilho { to { background-position: -200% 0; } }
+.linha-imagem .img-falha {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: var(--erro-bg);
+  color: var(--erro);
+  font-size: .65rem;
+  line-height: 1.25;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Progresso / erro de envio (no lugar do "Imagem principal" enquanto envia) */
+.img-envio { display: flex; align-items: center; gap: .6rem; font-size: .8rem; color: var(--texto-secundario); }
+.img-progresso { flex: 1; max-width: 240px; height: 6px; border-radius: 999px; background: var(--borda); overflow: hidden; }
+.img-progresso-barra { height: 100%; border-radius: inherit; background: var(--verde); transition: width .15s; }
+.img-envio-erro { color: var(--erro); flex-wrap: wrap; }
+.linha-imagem.com-erro { border-color: var(--erro); }
+
+/* "Imagem principal" + caminho/endereço da imagem na mesma linha */
+.linha-imagem .campos-imagem { min-width: 0; }
+.img-principal-linha { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+/* Caixinha com o caminho do arquivo ou o endereço da imagem */
+.img-origem {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  padding: .3rem .6rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--radius-sm);
+  background: var(--superficie-alt);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: Consolas, 'Cascadia Mono', 'SFMono-Regular', Menlo, monospace;
+  font-size: .74rem;
+  line-height: 1.35;
+  color: var(--texto-secundario);
+  text-decoration: none;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.img-origem::before { margin-right: .4rem; font-family: system-ui, sans-serif; }
+.img-origem-link::before { content: '🔗'; }
+.img-origem-arquivo::before { content: '📁'; }
+a.img-origem:hover { border-color: var(--verde); background: var(--verde-claro); color: var(--verde-escuro); }
+
+/* Ordem de exibição: ▲ ▼ e arrastar a linha */
+.img-acoes-linha { display: flex; align-items: center; gap: .3rem; }
+.img-ordem-btn {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--borda);
+  border-radius: var(--radius-sm);
+  background: var(--superficie);
+  color: var(--texto-secundario);
+  font-size: .7rem;
+  cursor: pointer;
+}
+.img-ordem-btn:hover:not(:disabled) { border-color: var(--verde); color: var(--verde-escuro); background: var(--verde-claro); }
+.img-ordem-btn:disabled { opacity: .4; cursor: default; }
+.linha-imagem[draggable="true"] { cursor: grab; }
+.linha-imagem.arrastando { opacity: .4; }
+.linha-imagem.alvo { border-color: var(--rosa); box-shadow: 0 0 0 3px var(--rosa-claro); }
+
+/* ----- Visualização ampliada (clique na miniatura) ----- */
+.img-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(15, 23, 42, .88);
+}
+.img-lightbox.aberto { display: flex; }
+.img-lightbox figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  max-width: min(1100px, calc(100vw - 8rem));
+}
+.lb-palco { position: relative; min-width: 120px; min-height: 120px; display: grid; place-items: center; }
+.lb-palco img {
+  max-width: 100%;
+  max-height: calc(100vh - 7rem);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: var(--sombra-lg);
+  object-fit: contain;
+}
+.lb-palco.carregando img { opacity: 0; }
+.lb-palco.carregando::after {
+  content: '';
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255, 255, 255, .3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: lb-girar .8s linear infinite;
+}
+@keyframes lb-girar { to { transform: rotate(360deg); } }
+.img-lightbox figcaption { color: #E2E8F0; font-size: .9rem; text-align: center; }
+.lb-fechar,
+.lb-nav { border: none; background: rgba(255, 255, 255, .12); color: #fff; cursor: pointer; border-radius: 50%; }
+.lb-fechar:hover,
+.lb-nav:hover { background: rgba(255, 255, 255, .25); }
+.lb-fechar { position: absolute; top: 1rem; right: 1rem; width: 2.5rem; height: 2.5rem; font-size: 1.1rem; }
+.lb-nav { width: 3rem; height: 3rem; font-size: 2rem; line-height: 1; flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .img-acoes-linha { justify-content: flex-end; }
+  .img-lightbox { gap: .25rem; padding: .5rem; }
+  .img-lightbox figure { max-width: calc(100vw - 5rem); }
+  .lb-nav { width: 2.25rem; height: 2.25rem; font-size: 1.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linha-imagem .preview.carregando::before, .lb-palco.carregando::after { animation: none; }
+}

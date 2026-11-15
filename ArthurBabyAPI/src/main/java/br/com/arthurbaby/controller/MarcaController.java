@@ -20,9 +20,11 @@ import java.util.Optional;
 public class MarcaController {
 
     private final MarcaRepository repository;
+    private final br.com.arthurbaby.service.AuditoriaService auditoria;
 
-    public MarcaController(MarcaRepository repository) {
+    public MarcaController(MarcaRepository repository, br.com.arthurbaby.service.AuditoriaService auditoria) {
         this.repository = repository;
+        this.auditoria = auditoria;
     }
 
     @GetMapping
@@ -34,7 +36,10 @@ public class MarcaController {
     @PostMapping
     @Operation(summary = "Cadastrar marca")
     public ResponseEntity<Marca> criar(@RequestBody Marca marca) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(marca));
+        marca.setId(null); // POST sempre cria: nunca sobrescreve um registro existente
+        Marca salvo = repository.save(marca);
+        auditoria.registrar("CRIAR", "Marca", salvo.getId(), "Criou Marca #" + salvo.getId() + " (" + salvo.getNome() + ")");
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PutMapping("/{id}")
@@ -43,7 +48,9 @@ public class MarcaController {
         return repository.findById(id).map(marca -> {
             marca.setNome(marcaAtualizada.getNome());
             if (marcaAtualizada.getStatus() != null) marca.setStatus(marcaAtualizada.getStatus());
-            return ResponseEntity.ok(repository.save(marca));
+            Marca salvo = repository.save(marca);
+            auditoria.registrar("ATUALIZAR", "Marca", id, "Atualizou Marca #" + id + " (" + salvo.getNome() + ")");
+            return ResponseEntity.ok(salvo);
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -53,6 +60,7 @@ public class MarcaController {
         if (!repository.existsById(id)) return ResponseEntity.notFound().build();
         try {
             repository.deleteById(id);
+            auditoria.registrar("DELETAR", "Marca", id, "Excluiu Marca #" + id);
             return ResponseEntity.noContent().build();
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("erro", "Não é possível excluir: esta marca está sendo usada por um produto."));

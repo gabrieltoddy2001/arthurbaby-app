@@ -19,8 +19,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Administração - Produtos", description = "Cadastro completo de produtos. Exige perfil ADMINISTRADOR ou VENDEDOR.")
 public class ProdutoAdminController {
     private final ProdutoAdminService service;
-    public ProdutoAdminController(ProdutoAdminService service) {
+    private final br.com.arthurbaby.service.AuditoriaService auditoria;
+    public ProdutoAdminController(ProdutoAdminService service, br.com.arthurbaby.service.AuditoriaService auditoria) {
         this.service = service;
+        this.auditoria = auditoria;
     }
 
     @PostMapping("/completo")
@@ -34,6 +36,8 @@ public class ProdutoAdminController {
             @ApiResponse(responseCode = "403", description = "Acesso negado: apenas perfis ADMINISTRADOR ou VENDEDOR")
     })
     public ProdutoDetalheResponse cadastrarCompleto(@RequestBody ProdutoCompletoRequest request, @AuthenticationPrincipal Usuario logado) {
-        return service.cadastrarCompleto(request, logado);
+        ProdutoDetalheResponse criado = service.cadastrarCompleto(request, logado);
+        auditoria.registrar("CRIAR", "Produto", criado.id(), "Criou Produto #" + criado.id() + " (" + criado.nome() + ")");
+        return criado;
     }
 }

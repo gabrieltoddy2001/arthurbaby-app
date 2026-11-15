@@ -18,11 +18,12 @@ async function init() {
   const conteudo = document.getElementById('conteudo');
   conteudo.innerHTML = '<div class="loading">Carregando clientes e produtos...</div>';
   try {
-    const [usuarios, prods] = await Promise.all([
-      adminApi.listar('usuarios'),
+    // /admin/clientes devolve só contas CLIENTE (o vendedor não tem acesso à lista de usuários internos)
+    const [listaClientes, prods] = await Promise.all([
+      apiJson('/admin/clientes', {}, 'Erro ao listar clientes'),
       adminApi.listar('produtos'),
     ]);
-    clientes = usuarios
+    clientes = (listaClientes || [])
       .filter(u => u.perfil === 'CLIENTE' && u.status === 'ATIVO')
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     produtos = prods

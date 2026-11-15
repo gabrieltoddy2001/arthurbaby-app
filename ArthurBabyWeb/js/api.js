@@ -310,6 +310,31 @@ const MensagensLoja = {
   produtoPrecisaVariacao: 'Cadastre pelo menos uma variação (tamanho/cor/modelo): o estoque é controlado por variação.',
 };
 
+/**
+ * Endereço de exibição de uma imagem de produto. As fotos enviadas ficam gravadas com o host do servidor que
+ * fez o upload (ex.: http://192.168.x.x:8080/api/produtos/imagens/<arquivo>); se esse host não for acessível
+ * desta máquina a imagem não carrega. Para essas, o painel usa sempre a API configurada em API_BASE.
+ * URLs externas (http/https de outros sites) ficam como estão. Não altera o que é gravado no produto.
+ */
+function urlImagem(url) {
+  if (!url) return '';
+  const m = String(url).trim().match(/^(?:https?:\/\/[^/]+)?\/api\/produtos\/imagens\/([A-Za-z0-9-]+\.(?:jpg|png|webp|gif))(?:\?.*)?$/i);
+  return m ? `${API_BASE}/produtos/imagens/${m[1]}` : String(url).trim();
+}
+
+/**
+ * Política de senha (a mesma da API, PoliticaSenha.java): 8 a 72 caracteres, com pelo menos uma letra e um número.
+ * Devolve a mensagem de erro, ou null se a senha estiver ok. A API valida de novo; aqui é só para avisar antes.
+ */
+const POLITICA_SENHA = 'De 8 a 72 caracteres, com pelo menos uma letra e um número.';
+function erroPoliticaSenha(senha) {
+  const s = senha || '';
+  if (s.length < 8 || s.length > 72 || !/\p{L}/u.test(s) || !/\d/.test(s)) {
+    return 'A senha deve ter de 8 a 72 caracteres, com pelo menos uma letra e um número.';
+  }
+  return null;
+}
+
 /* O estoque fica nas variações do produto; o saldo do produto é a soma delas. */
 function estoqueProduto(produto) {
   return (produto.variacoes || []).reduce((s, v) => s + (v.estoqueAtual || 0), 0);

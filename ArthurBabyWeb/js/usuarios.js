@@ -178,9 +178,9 @@
            ${!editando ? `
              <div class="field">
                <label>Senha inicial *</label>
-               <input type="password" id="u-senha" minlength="6" required autocomplete="new-password">
+               <input type="password" id="u-senha" minlength="8" maxlength="72" required autocomplete="new-password">
                <small style="color:var(--texto-secundario);font-size:.8rem;">
-                 Mínimo de 6 caracteres. Informe a senha ao usuário por um canal seguro.
+                 ${POLITICA_SENHA} Informe a senha ao usuário por um canal seguro.
                </small>
              </div>
            ` : ''}
@@ -219,7 +219,8 @@
      if (!body.email) return mostrarErroModal('O e-mail é obrigatório.');
      if (!usuario) {
        body.senha = document.getElementById('u-senha').value;
-       if (body.senha.length < 6) return mostrarErroModal('A senha inicial deve ter pelo menos 6 caracteres.');
+       const erroSenha = erroPoliticaSenha(body.senha);
+       if (erroSenha) return mostrarErroModal(erroSenha);
      }
    
      // Valida e-mail duplicado

@@ -238,10 +238,11 @@
      if (!c) return;
 
      fecharModal();
-     const nova = prompt(`Nova senha para "${c.nome}" (mínimo 6 caracteres):`);
+     const nova = prompt(`Nova senha para "${c.nome}"\n${POLITICA_SENHA}`);
      if (nova === null) return;
-     if (nova.length < 6) {
-       alert('A senha deve ter pelo menos 6 caracteres.');
+     const erroSenha = erroPoliticaSenha(nova);
+     if (erroSenha) {
+       alert(erroSenha);
        return;
      }
      try {
@@ -250,15 +251,7 @@
          method: 'PATCH',
          body: JSON.stringify({ senha: nova }),
        }, 'Erro ao redefinir a senha do cliente');
-       try {
-         await adminApi.criar('auditoria', {
-           usuario: getUsuario()?.nome || 'Administrador',
-           acao: 'REDEFINIR_SENHA',
-           entidade: 'Usuario',
-           entidadeId: c.id,
-           descricao: `Redefiniu a senha de ${c.nome} (${c.email})`,
-         });
-       } catch (_) { /* O log de auditoria não deve desfazer a troca da senha. */ }
+       // A auditoria é registrada pelo servidor (autor tirado do token), não pelo navegador.
        alert('Senha redefinida. Informe a nova senha ao usuário por um canal seguro.');
        await carregar();
      } catch (err) {
