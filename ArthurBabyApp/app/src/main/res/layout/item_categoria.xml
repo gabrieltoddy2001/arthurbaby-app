@@ -49,18 +49,21 @@
                 android:id="@+id/tvSeta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="›"
                 android:textSize="22sp"
                 android:textColor="@color/rosa_arthur" />
         </LinearLayout>
 
-        <LinearLayout
+        <!-- Subcategorias: quebram linha quando não cabem (antes sumiam à direita em telas menores) -->
+        <com.google.android.material.chip.ChipGroup
             android:id="@+id/containerSub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="10dp"
             android:layout_marginStart="68dp"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="8dp"
             android:visibility="gone" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

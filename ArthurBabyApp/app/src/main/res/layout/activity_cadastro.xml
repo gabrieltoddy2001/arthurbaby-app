@@ -20,23 +20,30 @@
             android:padding="16dp"
             android:background="@drawable/bg_gradiente_header">
 
-            <TextView
+            <ImageButton
                 android:id="@+id/btnVoltarCad"
+                style="@style/BotaoVoltar"
+                app:tint="@color/branco" />
+
+            <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="←"
-                android:textSize="28sp"
-                android:textColor="@color/branco"
-                android:paddingEnd="12dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Criar Conta"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/branco" />
+                android:textColor="@color/branco"
+                app:iconeTitulo="@drawable/ic_perfil"
+
+                app:iconeClaro="true" />
+
+
+            <Space
+
+                android:layout_width="0dp"
+
+                android:layout_height="1dp"
+
+                android:layout_weight="1" />
         </LinearLayout>
 
         <LinearLayout

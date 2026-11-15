@@ -1,5 +1,6 @@
 package br.com.arthurbaby.fragments;
 
+import br.com.arthurbaby.utils.ErrorUtils;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -47,10 +48,25 @@ public class PesquisaFragment extends Fragment {
 
     private View containerHistorico;
     private LinearLayout containerChipsHistorico;
+    private View estadoVazio;
+    private TextView tvVazioTitulo, tvVazioTexto;
     private TextView btnLimparHistorico;
 
     private String filtroAtual = "TODAS";
     private String termoAtual = "";
+
+    /**
+     * Última busca e filtro, guardados enquanto o app está aberto: ao sair da tela Buscar
+     * e voltar, o texto digitado e o filtro continuam lá (antes a caixa voltava em branco).
+     */
+    private static String termoSalvo = "";
+    private static String filtroSalvo = "TODAS";
+
+    /** Espera o usuário parar de digitar antes de chamar a API (evita 1 requisição por letra). */
+    private static final long DEBOUNCE_MS = 400;
+    private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable buscaAgendada = () -> buscarProdutos(termoAtual, null);
+    private Call<PageResponse<ProdutoResponse>> chamadaAtual;
 
     @Nullable
     @Override
@@ -62,6 +78,9 @@ public class PesquisaFragment extends Fragment {
 
         etBusca = v.findViewById(R.id.etBusca);
         tvInfo = v.findViewById(R.id.tvResultadoInfo);
+        estadoVazio = v.findViewById(R.id.estadoVazio);
+        tvVazioTitulo = v.findViewById(R.id.tvVazioTitulo);
+        tvVazioTexto = v.findViewById(R.id.tvVazioTexto);
         rvResultados = v.findViewById(R.id.rvResultados);
         progressBar = v.findViewById(R.id.progressBar);
         chipTodas = v.findViewById(R.id.chipTodas);
@@ -74,9 +93,17 @@ public class PesquisaFragment extends Fragment {
         btnLimparHistorico = v.findViewById(R.id.btnLimparHistorico);
 
         v.findViewById(R.id.btnVoltarBusca).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack());
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         rvResultados.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+        // Restaura a última busca (antes de ligar o TextWatcher, para não buscar duas vezes)
+        filtroAtual = filtroSalvo;
+        termoAtual = termoSalvo;
+        if (!termoAtual.isEmpty()) {
+            etBusca.setText(termoAtual);
+            etBusca.setSelection(termoAtual.length());
+        }
 
         // Busca via Enter/actionSearch
         etBusca.setOnEditorActionListener((view, actionId, event) -> {
@@ -85,6 +112,8 @@ public class PesquisaFragment extends Fragment {
                 if (!termo.isEmpty()) {
                     BuscaStorage.adicionar(requireContext(), termo);
                     mostrarHistorico(false);
+                    handler.removeCallbacks(buscaAgendada);
+                    buscarProdutos(termoAtual, null);
                 }
                 return true;
             }
@@ -102,34 +131,40 @@ public class PesquisaFragment extends Fragment {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 termoAtual = s.toString();
+                termoSalvo = termoAtual;
                 if (termoAtual.trim().isEmpty()) {
+                    // Campo vazio: volta a listar todos os produtos (antes a tela ficava em branco)
+                    handler.removeCallbacks(buscaAgendada);
                     mostrarHistorico(true);
-                    rvResultados.setVisibility(View.GONE);
-                    tvInfo.setText("Digite para buscar");
+                    buscarProdutos("", null);
                 } else {
                     mostrarHistorico(false);
-                    aplicarFiltro();
+                    pintarChips();
+                    handler.removeCallbacks(buscaAgendada);
+                    handler.postDelayed(buscaAgendada, DEBOUNCE_MS);
                 }
             }
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        chipTodas.setOnClickListener(x -> { filtroAtual = "TODAS"; aplicarFiltro(); });
-        chipPromocao.setOnClickListener(x -> { filtroAtual = "PROMOCAO"; aplicarFiltro(); });
-        chipBaratos.setOnClickListener(x -> { filtroAtual = "BARATOS"; aplicarFiltro(); });
+        chipTodas.setOnClickListener(x -> { filtroAtual = filtroSalvo = "TODAS"; aplicarFiltro(); });
+        chipPromocao.setOnClickListener(x -> { filtroAtual = filtroSalvo = "PROMOCAO"; aplicarFiltro(); });
+        chipBaratos.setOnClickListener(x -> { filtroAtual = filtroSalvo = "BARATOS"; aplicarFiltro(); });
         chipLimpar.setOnClickListener(x -> {
-            filtroAtual = "TODAS";
-            etBusca.setText("");
-            termoAtual = "";
-            mostrarHistorico(true);
-            rvResultados.setVisibility(View.GONE);
-            tvInfo.setText("Digite para buscar");
+            filtroAtual = filtroSalvo = "TODAS";
+            pintarChips();
+            if (termoAtual.trim().isEmpty()) {
+                buscarProdutos("", null);
+            } else {
+                etBusca.setText(""); // o TextWatcher recarrega todos os produtos
+            }
         });
 
-        // Estado inicial
-        mostrarHistorico(true);
-        rvResultados.setVisibility(View.GONE);
-        tvInfo.setText("Digite para buscar");
+        // Estado inicial: última busca/filtro restaurados (ou "Todas" com todos os produtos)
+        pintarChips();
+        pintarChipLimpar();
+        mostrarHistorico(termoAtual.trim().isEmpty());
+        buscarProdutos(termoAtual, null);
 
         return v;
     }
@@ -171,9 +206,10 @@ public class PesquisaFragment extends Fragment {
 
         GradientDrawable bg = new GradientDrawable();
         bg.setCornerRadius(dp(20));
-        bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_fundo));
+        bg.setColor(ContextCompat.getColor(requireContext(), R.color.branco));
+        bg.setStroke(dp(1), ContextCompat.getColor(requireContext(), R.color.rosa_claro));
         chip.setBackground(bg);
-        chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_texto));
+        chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.rosa_escuro));
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -192,37 +228,56 @@ public class PesquisaFragment extends Fragment {
     }
 
     private void aplicarFiltro() {
-        pintarChip(chipTodas, "TODAS".equals(filtroAtual));
-        pintarChip(chipPromocao, "PROMOCAO".equals(filtroAtual));
-        pintarChip(chipBaratos, "BARATOS".equals(filtroAtual));
+        pintarChips();
+        handler.removeCallbacks(buscaAgendada);
         buscarProdutos(termoAtual, null);
     }
 
+    private void pintarChips() {
+        pintarChip(chipTodas, "TODAS".equals(filtroAtual));
+        pintarChip(chipPromocao, "PROMOCAO".equals(filtroAtual));
+        pintarChip(chipBaratos, "BARATOS".equals(filtroAtual));
+    }
+
+    private void cancelarChamada() {
+        if (chamadaAtual != null) chamadaAtual.cancel();
+        chamadaAtual = null;
+        if (progressBar != null) progressBar.setVisibility(View.GONE);
+    }
+
+    /** Teto do filtro "Baratos". */
+    private static final java.math.BigDecimal PRECO_BARATO = new java.math.BigDecimal("50");
+
     private void buscarProdutos(String busca, Long categoriaId) {
+        if (!isAdded()) return;
+        // Uma resposta antiga não pode sobrescrever o resultado da busca mais recente
+        cancelarChamada();
+        estadoVazio.setVisibility(View.GONE);
         LoadingView.mostrar(progressBar, rvResultados);
 
+        String termo = busca != null && !busca.trim().isEmpty() ? busca.trim() : null;
+        // Filtros feitos pela própria API (antes "Promoção" era qualquer produto abaixo de R$ 50)
+        Boolean promocao = "PROMOCAO".equals(filtroAtual) ? Boolean.TRUE : null;
+        java.math.BigDecimal precoMax = "BARATOS".equals(filtroAtual) ? PRECO_BARATO : null;
+
         ApiService api = RetrofitClient.getApi(requireContext());
-        api.listarProdutos(busca, categoriaId, null, 0, 50)
-                .enqueue(new Callback<PageResponse<ProdutoResponse>>() {
+        Call<PageResponse<ProdutoResponse>> chamada =
+                api.listarProdutos(termo, categoriaId, null, precoMax, promocao, 0, 50);
+        chamadaAtual = chamada;
+        chamada.enqueue(new Callback<PageResponse<ProdutoResponse>>() {
                     @Override
                     public void onResponse(Call<PageResponse<ProdutoResponse>> call,
                                            Response<PageResponse<ProdutoResponse>> response) {
+                        if (call != chamadaAtual) return;
+                        chamadaAtual = null;
                         LoadingView.esconder(progressBar, rvResultados);
+                        if (!isAdded()) return;
 
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().content != null) {
 
-                            List<br.com.arthurbaby.models.Produto> produtos =
-                                    Conversor.paraProdutos(response.body().content);
-
                             List<br.com.arthurbaby.models.Produto> filtrados =
-                                    new java.util.ArrayList<>();
-                            for (br.com.arthurbaby.models.Produto p : produtos) {
-                                double preco = p.getPreco().doubleValue();
-                                if ("PROMOCAO".equals(filtroAtual) && preco >= 50) continue;
-                                if ("BARATOS".equals(filtroAtual) && preco > 50) continue;
-                                filtrados.add(p);
-                            }
+                                    Conversor.paraProdutos(response.body().content);
 
                             adapter = new ProdutoAdapter(filtrados, produto -> {
                                 // Salva no histórico quando o usuário clica em um produto
@@ -240,7 +295,15 @@ public class PesquisaFragment extends Fragment {
                             });
                             rvResultados.setAdapter(adapter);
 
-                            if (filtrados.isEmpty()) tvInfo.setText("Nenhum resultado encontrado");
+                            boolean semTermo = termo == null;
+                            if (filtrados.isEmpty()) {
+                                tvInfo.setText("Nenhum resultado encontrado");
+                                rvResultados.setVisibility(View.GONE);
+                                mostrarEstadoVazio("Nenhum produto encontrado",
+                                        "Tente outra palavra ou remova o filtro. Temos muitas novidades esperando por você 💕");
+                            }
+                            else if (semTermo && "TODAS".equals(filtroAtual))
+                                tvInfo.setText(filtrados.size() == 1 ? "1 produto" : filtrados.size() + " produtos");
                             else if (filtrados.size() == 1) tvInfo.setText("1 resultado");
                             else tvInfo.setText(filtrados.size() + " resultados");
                         } else {
@@ -251,24 +314,57 @@ public class PesquisaFragment extends Fragment {
 
                     @Override
                     public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
+                        if (call.isCanceled() || call != chamadaAtual) return;
+                        chamadaAtual = null;
                         LoadingView.esconder(progressBar, rvResultados);
+                        if (!isAdded()) return;
+                        rvResultados.setVisibility(View.GONE);
+                        tvInfo.setText("");
+                        mostrarEstadoVazio("Não foi possível carregar os produtos",
+                                "Verifique sua conexão e toque em \"Todas\" para tentar de novo.");
                         Toast.makeText(requireContext(),
-                                "Erro de conexão: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                                ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+    @Override
+    public void onDestroyView() {
+        handler.removeCallbacks(buscaAgendada);
+        cancelarChamada();
+        super.onDestroyView();
+    }
+
+    /** Filtro ativo em verde ArthurBaby; inativos em rosa suave. */
     private void pintarChip(TextView chip, boolean ativo) {
         GradientDrawable bg = new GradientDrawable();
-        bg.setCornerRadius(40f);
+        bg.setCornerRadius(dp(20));
         if (ativo) {
-            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado));
-            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_selecionado_texto));
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.verde_arthur));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.branco));
+            chip.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
-            bg.setColor(ContextCompat.getColor(requireContext(), R.color.chip_fundo));
-            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.chip_texto));
+            bg.setColor(ContextCompat.getColor(requireContext(), R.color.rosa_suave));
+            bg.setStroke(dp(1), ContextCompat.getColor(requireContext(), R.color.rosa_claro));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.rosa_escuro));
+            chip.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
         chip.setBackground(bg);
+    }
+
+    private void pintarChipLimpar() {
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dp(20));
+        bg.setColor(android.graphics.Color.TRANSPARENT);
+        bg.setStroke(dp(1), ContextCompat.getColor(requireContext(), R.color.cinza_borda));
+        chipLimpar.setBackground(bg);
+    }
+
+    private void mostrarEstadoVazio(String titulo, String texto) {
+        if (estadoVazio == null) return;
+        tvVazioTitulo.setText(titulo);
+        tvVazioTexto.setText(texto);
+        estadoVazio.setVisibility(View.VISIBLE);
     }
 
     private int dp(int valor) {

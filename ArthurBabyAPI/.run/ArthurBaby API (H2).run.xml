@@ -1,0 +1,17 @@
+<!--
+  Configuracao de execucao compartilhada do IntelliJ (pasta .run/ vai para o Git).
+  Alternativa SEM MySQL: roda a API com o banco H2 em memoria (dados somem ao parar).
+  O padrao do projeto e o MySQL; aqui trocamos o perfil para "h2" para nao carregar
+  o application-mysql.properties.
+-->
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ArthurBaby API (H2)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="br.com.arthurbaby.ArthurBabyApplication" />
+    <module name="arthurbaby-api" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=h2" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -40,6 +40,9 @@ public class CadastroActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro);
+        br.com.arthurbaby.utils.BarrasSistema.aplicar(this);
+
+        findViewById(R.id.btnVoltarCad).setOnClickListener(x -> finish());
 
         // Campos pessoais
         etNome = findViewById(R.id.etNome);
@@ -176,7 +179,7 @@ public class CadastroActivity extends AppCompatActivity {
             public void onFailure(Call<AuthResponse> call, Throwable t) {
                 LoadingUtils.esconder();
                 Toast.makeText(CadastroActivity.this,
-                        "Erro de conexão: " + t.getMessage(),
+                        ErrorUtils.mensagemFalha(t),
                         Toast.LENGTH_LONG).show();
             }
         });

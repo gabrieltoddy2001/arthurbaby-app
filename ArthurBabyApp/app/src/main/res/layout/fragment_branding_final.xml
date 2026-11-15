@@ -44,12 +44,10 @@
                 android:layout_gravity="center"
                 android:background="@drawable/bg_avatar_interno">
 
-                <ImageView
-                    android:layout_width="110dp"
-                    android:layout_height="110dp"
-                    android:layout_gravity="center"
-                    android:src="@mipmap/ic_launcher"
-                    android:contentDescription="Logo ArthurBaby" />
+                <br.com.arthurbaby.utils.LogoAnimadoView
+                    android:layout_width="112dp"
+                    android:layout_height="112dp"
+                    android:layout_gravity="center" />
             </FrameLayout>
         </FrameLayout>
 
@@ -91,6 +89,8 @@
 
             <FrameLayout
                 android:id="@+id/btnInstagram"
+                android:tooltipText="Abrir nosso Instagram"
+                android:contentDescription="Abrir nosso Instagram"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_circulo_categoria_suave"
@@ -107,6 +107,8 @@
 
             <FrameLayout
                 android:id="@+id/btnWhatsapp"
+                android:tooltipText="Falar no WhatsApp"
+                android:contentDescription="Falar no WhatsApp"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_circulo_verde_suave"
@@ -124,6 +126,8 @@
 
             <FrameLayout
                 android:id="@+id/btnShopee"
+                android:tooltipText="Ver nossa loja na Shopee"
+                android:contentDescription="Ver nossa loja na Shopee"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_circulo_categoria_suave"

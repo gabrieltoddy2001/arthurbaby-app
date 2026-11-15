@@ -2,7 +2,10 @@ package br.com.arthurbaby.config;
 
 import br.com.arthurbaby.dto.ErroResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
@@ -15,6 +18,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
@@ -164,10 +168,20 @@ public class OpenApiConfig {
         Map<String, Example> exemplos = new LinkedHashMap<>();
         AdminCrudExemplos.EXEMPLOS.forEach((tipo, exemplo) -> {
             try {
-                exemplos.put(tipo, new Example()
-                        .summary(exemplo.resumo())
+                JsonNode preenchido = mapper.readTree(exemplo.json());
+                // Primeiro a opção "(preencher)": mesmos campos do exemplo, mas com valores vazios, para o
+                // usuário digitar os próprios dados. Como é inserida antes, o Swagger UI já abre com ela
+                // selecionada (no primeiro tipo do combobox). É gerada a partir do exemplo, então não
+                // precisa ser mantida à mão em AdminCrudExemplos.
+                exemplos.put(tipo + "-preencher", new Example()
+                        .summary(exemplo.resumo() + " (preencher)")
                         .description(exemplo.descricao())
-                        .value(mapper.readTree(exemplo.json())));
+                        .value(esvaziar(preenchido)));
+                // Logo depois, o exemplo com dados de verdade, para consulta do formato esperado
+                exemplos.put(tipo, new Example()
+                        .summary(exemplo.resumo() + " (exemplo)")
+                        .description(exemplo.descricao())
+                        .value(preenchido));
             } catch (JsonProcessingException e) {
                 throw new IllegalStateException("Exemplo JSON invalido para o tipo " + tipo, e);
             }
@@ -179,6 +193,59 @@ public class OpenApiConfig {
             if (colecao != null) aplicarExemplos(colecao.getPost(), exemplos);
             if (registro != null) aplicarExemplos(registro.getPut(), exemplos);
         };
+    }
+
+    /**
+     * Transforma o parâmetro {@code {tipo}} de todos os endpoints do CRUD genérico ({@code /api/admin/{tipo}} e
+     * {@code /api/admin/{tipo}/{id}}: listar, buscar, criar, atualizar e excluir) em uma lista suspensa (combobox)
+     * no Swagger UI, no mesmo espírito do seletor "Examples" do corpo. Assim não é preciso digitar o nome do recurso.
+     * <p>
+     * O Swagger UI desenha um combobox sempre que o schema do parâmetro tem {@code enum}. A lista de opções vem das
+     * chaves de {@link AdminCrudExemplos#EXEMPLOS}, que são exatamente os tipos aceitos pelo {@code AdminCrudService}:
+     * ao incluir um tipo novo lá (com seu exemplo), ele aparece aqui automaticamente.
+     */
+    @Bean
+    OpenApiCustomizer comboboxTipoAdminCrud() {
+        List<String> tipos = List.copyOf(AdminCrudExemplos.EXEMPLOS.keySet());
+
+        return openApi -> openApi.getPaths().forEach((path, item) -> {
+            // Só as rotas do CRUD genérico; rotas literais como /api/admin/movimentacoes ficam de fora
+            if (!path.startsWith("/api/admin/{tipo}")) return;
+
+            item.readOperations().forEach(operacao -> {
+                if (operacao.getParameters() == null) return;
+                operacao.getParameters().stream()
+                        .filter(p -> "tipo".equals(p.getName()) && "path".equals(p.getIn()))
+                        .forEach(p -> {
+                            // enum = opções do combobox; default = opção já selecionada ao abrir o endpoint
+                            StringSchema schema = new StringSchema();
+                            schema.setEnum(new ArrayList<>(tipos));
+                            schema.setDefault("categorias");
+                            p.setSchema(schema);
+                            // Com enum, o "example" do @Parameter é redundante e o Swagger UI o ignoraria
+                            p.setExample(null);
+                        });
+            });
+        });
+    }
+
+    /**
+     * Cria uma cópia "em branco" de um exemplo JSON, mantendo os nomes dos campos e a estrutura:
+     * texto vira {@code ""}, número vira {@code null}, booleano vira {@code false} e objetos aninhados
+     * (relacionamentos como {@code "produto": { "id": 1 }}) são esvaziados recursivamente, ficando
+     * {@code "produto": { "id": null }}.
+     */
+    private static JsonNode esvaziar(JsonNode no) {
+        if (no.isObject()) {
+            ObjectNode vazio = JsonNodeFactory.instance.objectNode();
+            no.properties().forEach(campo -> vazio.set(campo.getKey(), esvaziar(campo.getValue())));
+            return vazio;
+        }
+        if (no.isArray()) return JsonNodeFactory.instance.arrayNode();
+        if (no.isTextual()) return JsonNodeFactory.instance.textNode("");
+        if (no.isBoolean()) return JsonNodeFactory.instance.booleanNode(false);
+        // Números e null ficam null: indica que o valor precisa ser informado
+        return JsonNodeFactory.instance.nullNode();
     }
 
     /** Coloca os exemplos no corpo JSON da operação (se ela existir e tiver corpo). */

@@ -24,7 +24,7 @@ public class AjudaFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_ajuda, container, false);
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack()
+                requireActivity().getOnBackPressedDispatcher().onBackPressed()
         );
 
         v.findViewById(R.id.btnFalarWhats).setOnClickListener(x -> {

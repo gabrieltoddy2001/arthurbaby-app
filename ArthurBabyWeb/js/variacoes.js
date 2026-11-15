@@ -9,6 +9,8 @@
    const CONFIG = {
      tamanhos: {
        titulo: 'Tamanhos',
+       singular: 'tamanho',
+       artigo: 'Novo',
        temOrdem: true,
        temHex: false,
        statusAtivo: 'ATIVO',
@@ -16,6 +18,8 @@
      },
      cores: {
        titulo: 'Cores',
+       singular: 'cor',
+       artigo: 'Nova',
        temOrdem: false,
        temHex: true,
        statusAtivo: 'ATIVA',
@@ -23,6 +27,8 @@
      },
      modelos: {
        titulo: 'Modelos',
+       singular: 'modelo',
+       artigo: 'Novo',
        temOrdem: false,
        temHex: false,
        statusAtivo: 'ATIVO',
@@ -74,7 +80,7 @@
        painel.innerHTML = `
          <div class="acoes-topo">
            <input type="text" id="filtro" placeholder="Filtrar por nome..." oninput="filtrar()">
-           <button class="btn btn-primary" onclick="criar()">+ Novo ${cfg.titulo.slice(0, -1).toLowerCase()}</button>
+           <button class="btn btn-primary" onclick="criar()">+ ${cfg.artigo} ${cfg.singular}</button>
          </div>
          <table class="tabela">
            <thead>
@@ -146,13 +152,13 @@
    function abrirModal(item) {
      const editando = !!item;
      const cfg = CONFIG[abaAtual];
-     const singular = cfg.titulo.slice(0, -1).toLowerCase();
+     const singular = cfg.singular;
    
      const overlay = document.createElement('div');
      overlay.className = 'modal-overlay';
      overlay.innerHTML = `
        <div class="modal">
-         <h2>${editando ? 'Editar' : 'Novo'} ${singular}</h2>
+         <h2>${editando ? 'Editar' : cfg.artigo} ${singular}</h2>
          <div id="modal-alerta" class="alert alert-erro hidden"></div>
          <form id="form-item">
            <div class="field">
@@ -278,5 +284,5 @@
    
    /* ----- Init ----- */
    document.addEventListener('DOMContentLoaded', () => {
-  if (montarLayout('Atributos', 'variacoes')) carregar();
-});
+     if (montarLayout('Atributos', 'variacoes')) carregar();
+   });

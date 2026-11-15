@@ -30,11 +30,11 @@ public class Cupom {
 
     /** Motivo pelo qual o cupom nao vale para o subtotal informado, ou {@code null} se ele puder ser aplicado. */
     public String motivoInvalido(BigDecimal subtotal, LocalDateTime agora) {
-        if (!ativo) return "Cupom inativo";
-        if (validoDe != null && agora.isBefore(validoDe)) return "Cupom ainda nao esta valido";
-        if (validoAte != null && agora.isAfter(validoAte)) return "Cupom expirado";
+        if (!ativo) return "Cupom inativo.";
+        if (validoDe != null && agora.isBefore(validoDe)) return "Cupom ainda não está válido.";
+        if (validoAte != null && agora.isAfter(validoAte)) return "Cupom expirado.";
         if (valorMinimo != null && (subtotal == null || subtotal.compareTo(valorMinimo) < 0)) {
-            return "Subtotal minimo para este cupom: R$ " + valorMinimo;
+            return "Subtotal mínimo para este cupom: R$ " + valorMinimo.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString().replace('.', ',') + ".";
         }
         return null;
     }

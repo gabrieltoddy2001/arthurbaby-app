@@ -15,14 +15,28 @@
         android:padding="16dp"
         android:background="@color/branco">
 
-        <TextView
-            android:layout_width="0dp"
+        <ImageButton
+            android:id="@+id/btnVoltarCategorias"
+            style="@style/BotaoVoltar"
+            app:tint="@color/texto_primario" />
+
+        <br.com.arthurbaby.utils.TituloComIcone
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="Categorias"
             android:textColor="@color/texto_primario"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:iconeTitulo="@drawable/ic_categorias" />
+
+
+        <Space
+
+            android:layout_width="0dp"
+
+            android:layout_height="1dp"
+
+            android:layout_weight="1" />
     </LinearLayout>
 
     <!-- BUSCA -->
@@ -40,19 +54,20 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:background="@color/superficie"
-            android:padding="12dp">
+            android:background="@drawable/bg_card_suave"
+            android:padding="14dp"
+            android:elevation="2dp">
 
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_busca"
-                app:tint="@color/cinza_medio"
+                app:tint="@color/rosa_arthur"
                 android:contentDescription="Buscar" />
 
             <TextView
                 android:id="@+id/atalhoBuscaCat"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Buscar produtos..."
                 android:textColor="@color/cinza_texto"
