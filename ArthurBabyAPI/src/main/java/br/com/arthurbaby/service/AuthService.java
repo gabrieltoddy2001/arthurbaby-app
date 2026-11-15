@@ -25,6 +25,7 @@ public class AuthService {
         this.jwt = jwt;
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         String login = request.login() == null ? "" : request.login().trim();
         String loginNormalizado = login.contains("@") ? login.toLowerCase(Locale.ROOT) : login;
@@ -37,6 +38,13 @@ public class AuthService {
         if (!usuario.isEnabled()) {
             throw new IllegalArgumentException("Conta inativa. Entre em contato com o suporte.");
         }
+        // Invalida todos os JWTs de logins anteriores, inclusive de outros dispositivos.
+        if (usuarios.incrementarVersaoToken(usuario.getId()) != 1) {
+            throw new IllegalStateException("Nao foi possivel atualizar a sessao");
+        }
+        Long versao = usuarios.obterVersaoToken(usuario.getId());
+        if (versao == null) throw new IllegalStateException("Sessao nao encontrada");
+        usuario.setTokenVersion(versao);
         return new AuthResponse(jwt.gerarToken(usuario), usuario.getId(), usuario.getNomeCompleto(), usuario.getPerfil().name());
     }
 

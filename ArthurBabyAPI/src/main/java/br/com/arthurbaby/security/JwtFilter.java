@@ -1,6 +1,7 @@
 package br.com.arthurbaby.security;
 
 import br.com.arthurbaby.entity.Usuario;
+import io.jsonwebtoken.Claims;
 import br.com.arthurbaby.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,9 +27,10 @@ public class JwtFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             try {
-                String email = jwtService.getSubject(header.substring(7));
-                usuarios.findByEmail(email)
+                Claims claims = jwtService.lerClaims(header.substring(7));
+                usuarios.findByEmail(claims.getSubject())
                         .filter(Usuario::isEnabled)
+                        .filter(usuario -> jwtService.validoParaUsuario(claims, usuario))
                         .ifPresent(usuario -> {
                             var auth = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
                             SecurityContextHolder.getContext().setAuthentication(auth);
