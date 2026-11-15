@@ -166,6 +166,35 @@ class ClienteServiceTest {
         assertThrows(NoSuchElementException.class, () -> service.buscarEndereco(4L, 99L));
     }
 
+    @Test
+    void excluirEnderecoPrincipalPromoveOutroEndereco() {
+        Endereco principal = new Endereco();
+        principal.setId(1L);
+        principal.setPrincipal(true);
+        Endereco outro = new Endereco();
+        outro.setId(2L);
+        when(enderecos.findByIdAndUsuarioId(1L, 4L)).thenReturn(Optional.of(principal));
+        when(enderecos.findByUsuarioId(4L)).thenReturn(List.of(outro));
+
+        service.excluirEndereco(4L, 1L);
+
+        verify(enderecos).delete(principal);
+        assertTrue(outro.isPrincipal());
+        verify(enderecos).save(outro);
+    }
+
+    @Test
+    void excluirEnderecoNaoPrincipalNaoMexeNosOutros() {
+        Endereco comum = new Endereco();
+        comum.setId(2L);
+        when(enderecos.findByIdAndUsuarioId(2L, 4L)).thenReturn(Optional.of(comum));
+
+        service.excluirEndereco(4L, 2L);
+
+        verify(enderecos).delete(comum);
+        verify(enderecos, never()).save(any(Endereco.class));
+    }
+
     private static EnderecoRequest enderecoRequest(Boolean principal) {
         return new EnderecoRequest("13000-000", "Rua das Flores", "10", null,
                 "Centro", "Campinas", "SP", null, principal);

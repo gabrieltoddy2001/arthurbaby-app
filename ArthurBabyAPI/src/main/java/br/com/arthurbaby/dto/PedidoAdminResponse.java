@@ -29,7 +29,8 @@ public record PedidoAdminResponse(
         String clienteCpf,
         Long vendedorId,
         String vendedorNome,
-        @Schema(description = "Endereço principal do cliente (o pedido não grava um endereço próprio)", nullable = true) EnderecoResumo enderecoEntrega,
+        @Schema(description = "Endereço de entrega gravado no pedido; pedidos antigos, sem cópia, mostram o endereço principal do cliente", nullable = true) EnderecoResumo enderecoEntrega,
+        @Schema(description = "true quando o endereço de entrega foi gravado no pedido; false em pedidos antigos (mostra o principal atual)") boolean enderecoGravadoNoPedido,
         List<Item> itens,
         BigDecimal subtotal,
         String cupom,
@@ -65,7 +66,8 @@ public record PedidoAdminResponse(
                 v != null ? "PAINEL" : "APP",
                 c.getId(), c.getNomeCompleto(), c.getEmail(), c.getTelefone(), c.getCpf(),
                 v != null ? v.getId() : null, v != null ? v.getNomeCompleto() : null,
-                enderecoPrincipal(c),
+                enderecoEntrega(p, c),
+                p.getEnderecoEntrega() != null,
                 p.getItens().stream().map(i -> new Item(
                         i.getProduto().getId(), i.getVariacao() != null ? i.getVariacao().getId() : null,
                         i.getCodigoProduto(), i.getNomeProduto(), i.getVariacaoDescricao(), i.getQuantidade(),
@@ -83,6 +85,20 @@ public record PedidoAdminResponse(
                 br.com.arthurbaby.service.FluxoPedido.proximos(p).stream().map(Enum::name).toList(),
                 java.util.Optional.ofNullable(br.com.arthurbaby.service.FluxoPedido.proximaEtapa(p)).map(Enum::name).orElse(null),
                 !br.com.arthurbaby.service.FluxoPedido.finalizado(p.getStatus()));
+    }
+
+    /** Cópia gravada no pedido (nulo se o pedido não tiver endereço de entrega). */
+    static EnderecoResumo enderecoDoPedido(Pedido p) {
+        br.com.arthurbaby.entity.EnderecoEntrega e = p.getEnderecoEntrega();
+        if (e == null) return null;
+        return new EnderecoResumo(e.getCep(), e.getLogradouro(), e.getNumero(), e.getComplemento(),
+                e.getBairro(), e.getCidade(), e.getUf(), e.getReferencia());
+    }
+
+    /** Endereço gravado no pedido; pedidos antigos (sem cópia) mostram o principal atual do cliente. */
+    private static EnderecoResumo enderecoEntrega(Pedido p, Usuario c) {
+        EnderecoResumo doPedido = enderecoDoPedido(p);
+        return doPedido != null ? doPedido : enderecoPrincipal(c);
     }
 
     private static EnderecoResumo enderecoPrincipal(Usuario c) {

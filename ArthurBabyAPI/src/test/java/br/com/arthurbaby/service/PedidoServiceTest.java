@@ -194,6 +194,57 @@ class PedidoServiceTest {
         verifyNoInteractions(estoque);
     }
 
+    @Test
+    void entregaGravaOEnderecoEscolhidoPeloCliente() {
+        prepararPedido();
+        cliente.getEnderecos().add(endereco(5L, "Rua Principal", true));
+        cliente.getEnderecos().add(endereco(6L, "Rua da Vovó", false));
+
+        PedidoResponse response = service.criar(new PedidoRequest(1L, FormaRecebimento.ENTREGA, null, null, null, null,
+                List.of(new PedidoItemRequest(9L, 90L, 1)), 6L));
+
+        assertEquals("Rua da Vovó", response.enderecoEntrega().logradouro());
+    }
+
+    @Test
+    void entregaSemEscolhaUsaOEnderecoPrincipalERetiradaNaoGravaEndereco() {
+        prepararPedido();
+        cliente.getEnderecos().add(endereco(6L, "Rua da Vovó", false));
+        cliente.getEnderecos().add(endereco(5L, "Rua Principal", true));
+
+        PedidoResponse entrega = service.criar(new PedidoRequest(1L, FormaRecebimento.ENTREGA, null, null, null, null,
+                List.of(new PedidoItemRequest(9L, 90L, 1))));
+        assertEquals("Rua Principal", entrega.enderecoEntrega().logradouro());
+
+        PedidoResponse retirada = service.criar(new PedidoRequest(1L, FormaRecebimento.RETIRADA_LOJA, null, null, null, null,
+                List.of(new PedidoItemRequest(9L, 90L, 1)), 6L));
+        assertEquals(null, retirada.enderecoEntrega());
+    }
+
+    @Test
+    void entregaRecusaEnderecoDeOutroCliente() {
+        prepararPedido();
+        cliente.getEnderecos().add(endereco(5L, "Rua Principal", true));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.criar(new PedidoRequest(1L,
+                FormaRecebimento.ENTREGA, null, null, null, null, List.of(new PedidoItemRequest(9L, 90L, 1)), 99L)));
+        assertTrue(ex.getMessage().contains("Endereço de entrega não encontrado"));
+        verifyNoInteractions(estoque);
+    }
+
+    private static br.com.arthurbaby.entity.Endereco endereco(Long id, String logradouro, boolean principal) {
+        br.com.arthurbaby.entity.Endereco e = new br.com.arthurbaby.entity.Endereco();
+        e.setId(id);
+        e.setCep("01001000");
+        e.setLogradouro(logradouro);
+        e.setNumero("10");
+        e.setBairro("Centro");
+        e.setCidade("São Paulo");
+        e.setUf("SP");
+        e.setPrincipal(principal);
+        return e;
+    }
+
     private void prepararPedido() {
         when(usuarios.findById(1L)).thenReturn(Optional.of(cliente));
         when(produtos.findById(9L)).thenReturn(Optional.of(produto));

@@ -29,6 +29,8 @@ public class Pedido {
     private LocalDateTime atualizadoEm;
     private LocalDateTime confirmadoEm;
     private LocalDateTime canceladoEm;
+    /** Endereço escolhido na entrega (nulo na retirada e nos pedidos antigos, que não gravavam endereço). */
+    @Embedded private EnderecoEntrega enderecoEntrega;
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PedidoItem> itens = new ArrayList<>();
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
