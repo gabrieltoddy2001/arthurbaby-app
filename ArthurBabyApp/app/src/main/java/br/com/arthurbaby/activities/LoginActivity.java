@@ -61,6 +61,27 @@ public class LoginActivity extends AppCompatActivity {
 
         tvEsqueciSenha.setOnClickListener(v ->
                 startActivity(new Intent(LoginActivity.this, RecuperarSenhaActivity.class)));
+
+        findViewById(R.id.btnVoltarLogin).setOnClickListener(v -> voltarParaInicio());
+
+        // Botão "voltar" do sistema faz o mesmo (não fecha o app se o login estiver sozinho)
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                voltarParaInicio();
+            }
+        });
+    }
+
+    /**
+     * Volta para a tela inicial. Se o login foi aberto sozinho (ex.: sessão expirada
+     * limpa a pilha), abre a MainActivity; senão só fecha e revela a tela de trás.
+     */
+    private void voltarParaInicio() {
+        if (isTaskRoot()) {
+            startActivity(new Intent(this, MainActivity.class));
+        }
+        finish();
     }
 
     private void validarLogin() {

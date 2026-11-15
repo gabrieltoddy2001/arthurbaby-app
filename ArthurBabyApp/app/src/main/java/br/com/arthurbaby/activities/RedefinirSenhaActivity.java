@@ -45,8 +45,9 @@ public class RedefinirSenhaActivity extends AppCompatActivity {
                 etToken.setError("Informe o código recebido");
                 return;
             }
-            if (TextUtils.isEmpty(nova) || nova.length() < 4) {
-                etNovaSenha.setError("Senha deve ter ao menos 4 caracteres");
+            String erroSenha = br.com.arthurbaby.utils.PoliticaSenha.erro(nova);
+            if (erroSenha != null) {
+                etNovaSenha.setError(erroSenha);
                 return;
             }
 
