@@ -267,8 +267,12 @@ public class OpenApiConfig {
 
     /** Espelha as rotas liberadas em SecurityConfig. Se mudar lá, mude aqui também. */
     private static boolean publico(String path, PathItem.HttpMethod metodo) {
-        if (path.equals("/api/auth/me")) return false;
+        // Rotas de /api/auth que exigem token (SecurityConfig: .authenticated() antes do permitAll de /api/auth/**).
+        // Marcadas como públicas, o Swagger não enviaria o token e a API responderia 401.
+        if (path.equals("/api/auth/me") || path.equals("/api/auth/alterar-senha") || path.equals("/api/auth/logout")) return false;
         if (path.startsWith("/api/auth/")) return true;
+        // Histórico de movimentações de estoque não é público (só ADMINISTRADOR/VENDEDOR)
+        if (path.startsWith("/api/estoque/") && path.endsWith("/movimentacoes")) return false;
         if (path.equals("/api/cupons/validar") && metodo == PathItem.HttpMethod.POST) return true;
         return metodo == PathItem.HttpMethod.GET
                 && (path.equals("/api/categorias") || path.startsWith("/api/produtos") || path.startsWith("/api/estoque/"));
