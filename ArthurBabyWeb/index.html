@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>ArthurBaby Admin</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <script>
-    // Redireciona: se já tem sessão → dashboard; senão → login
+    // Redireciona: se já tem sessão → tela inicial do perfil (vendedor não vê o Dashboard); senão → login
     if (localStorage.getItem('ab_token')) {
-      window.location.href = 'dashboard.html';
+      let perfil = null;
+      try { perfil = JSON.parse(localStorage.getItem('ab_usuario') || '{}').perfil; } catch (_) {}
+      window.location.href = perfil === 'ADMINISTRADOR' ? 'dashboard.html' : 'pedidos.html';
     } else {
       window.location.href = 'login.html';
     }

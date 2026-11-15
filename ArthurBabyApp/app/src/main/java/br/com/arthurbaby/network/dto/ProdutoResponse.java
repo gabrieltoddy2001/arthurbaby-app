@@ -18,7 +18,9 @@ public class ProdutoResponse {
     public String categoriaNome;
     public Long marcaId;
     public String marca;                      // ← back retorna "marca" (não marcaNome)
-    public int avaliacao;
+    // Média das avaliações (ex.: 4.5). O back envia BigDecimal; como int o Gson lançava
+    // NumberFormatException ("Expected an int but was 4.5") e a listagem inteira falhava.
+    public BigDecimal avaliacao;
     public List<ImagemResponse> imagens;
     public List<VariacaoResponse> variacoes;
 

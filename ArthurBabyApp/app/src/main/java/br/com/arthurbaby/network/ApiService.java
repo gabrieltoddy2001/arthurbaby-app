@@ -36,6 +36,19 @@ public interface ApiService {
             @Query("page") int page,
             @Query("size") int size
     );
+
+    /** Mesma listagem, com filtro de faixa de preço (suportado pela API). */
+    @GET("api/produtos")
+    Call<PageResponse<ProdutoResponse>> listarProdutos(
+            @Query("q") String busca,
+            @Query("categoriaId") Long categoriaId,
+            @Query("precoMin") java.math.BigDecimal precoMin,
+            @Query("precoMax") java.math.BigDecimal precoMax,
+            @Query("promocao") Boolean promocao,
+            @Query("page") int page,
+            @Query("size") int size
+    );
+
     @POST("api/produtos/{produtoId}/avaliacoes")
     Call<Void> avaliarProduto(@Path("produtoId") Long produtoId, @Body AvaliacaoRequest request);
 
@@ -63,7 +76,7 @@ public interface ApiService {
     @POST("api/pedidos")
     Call<PedidoResponse> criarPedido(@Body PedidoRequest request);
 
-    // AQUI ESTÁ A MÁGICA DO FILTRO
+    // Obs.: a API atual ignora status/dataInicio/dataFim; o MeusPedidosFragment também filtra localmente.
     @GET("api/pedidos/cliente/{clienteId}")
     Call<List<PedidoResponse>> listarPedidosCliente(
             @Path("clienteId") Long clienteId,

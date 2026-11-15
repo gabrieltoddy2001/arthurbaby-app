@@ -24,7 +24,7 @@ public class SobreFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_sobre, container, false);
 
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
-                requireActivity().getSupportFragmentManager().popBackStack()
+                requireActivity().getOnBackPressedDispatcher().onBackPressed()
         );
 
         // WhatsApp

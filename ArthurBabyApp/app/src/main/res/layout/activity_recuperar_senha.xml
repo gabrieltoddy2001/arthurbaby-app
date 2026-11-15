@@ -1,58 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/branco"
-    android:padding="24dp">
+    android:background="@color/branco_quente"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Recuperar Senha"
-        android:textColor="@color/verde_arthur"
-        android:textSize="26sp"
-        android:textStyle="bold"
-        android:layout_marginTop="24dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Informe seu e-mail e enviaremos um link para redefinir a senha."
-        android:textColor="@color/cinza_texto"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="24dp" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="E-mail cadastrado">
+        android:orientation="vertical"
+        android:padding="24dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmailRecuperar"
+        <!-- Seta de voltar + título (mesmo padrão das demais telas) -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textEmailAddress" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnEnviar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="ENVIAR LINK"
-        android:backgroundTint="@color/rosa_arthur"
-        android:textColor="@color/branco"
-        android:layout_marginTop="24dp" />
+            <ImageButton
+                android:id="@+id/btnVoltarRecuperar"
+                style="@style/BotaoVoltar"
+                app:tint="@color/texto_primario" />
 
-    <TextView
-        android:id="@+id/tvVoltar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Voltar para o login"
-        android:textColor="@color/verde_arthur"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="24dp" />
+            <br.com.arthurbaby.utils.TituloComIcone
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Recuperar Senha"
+                android:textColor="@color/verde_arthur"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                app:iconeTitulo="@drawable/ic_cadeado" />
+        </LinearLayout>
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Informe seu e-mail e enviaremos um link para redefinir a senha."
+            android:textColor="@color/cinza_medio"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-mail cadastrado"
+            app:startIconDrawable="@drawable/ic_email"
+            app:startIconTint="@color/rosa_arthur"
+            app:boxStrokeColor="@color/rosa_arthur"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etEmailRecuperar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEnviar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="ENVIAR LINK"
+            android:backgroundTint="@color/rosa_arthur"
+            android:textColor="@color/branco"
+            android:textStyle="bold"
+            app:cornerRadius="28dp"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/tvVoltar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voltar para o login"
+            android:textColor="@color/rosa_arthur"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>

@@ -34,13 +34,10 @@
         android:gravity="center"
         android:paddingHorizontal="32dp">
 
-        <ImageView
+        <br.com.arthurbaby.utils.LogoAnimadoView
             android:id="@+id/imgLogo"
-            android:layout_width="180dp"
-            android:layout_height="180dp"
-            android:src="@mipmap/ic_launcher"
-            android:scaleType="fitCenter"
-            android:contentDescription="Logo ArthurBaby" />
+            android:layout_width="196dp"
+                    android:layout_height="196dp" />
 
         <TextView
             android:layout_width="wrap_content"

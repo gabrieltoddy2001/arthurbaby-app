@@ -15,27 +15,27 @@
         android:padding="16dp"
         android:background="@drawable/bg_gradiente_header">
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_carrinho"
-            app:tint="@color/branco"
-            android:contentDescription="Carrinho" />
+        <ImageButton
+            android:id="@+id/btnVoltarCarrinho"
+            style="@style/BotaoVoltar"
+            app:tint="@color/branco" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="12dp">
+            android:orientation="vertical">
 
-            <TextView
+            <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Meu Carrinho"
                 android:textColor="@color/branco"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:iconeTitulo="@drawable/ic_carrinho"
+
+                app:iconeClaro="true" />
 
             <TextView
                 android:id="@+id/tvContadorItens"

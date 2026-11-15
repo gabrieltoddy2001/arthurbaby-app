@@ -37,7 +37,26 @@ public class ItemCarrinho implements Serializable {
     public void setVariacao(Variacao variacao) { this.variacao = variacao; }
     public void setVariacaoId(Long variacaoId) { this.variacaoId = variacaoId; }
 
+    /**
+     * Preço próprio da variação escolhida. O back (PedidoService) cobra o preço da variação
+     * quando ela tem um; sem isso o total do carrinho divergia do total do pedido.
+     */
+    private java.math.BigDecimal precoVariacao;
+
+    public void setPrecoVariacao(java.math.BigDecimal precoVariacao) { this.precoVariacao = precoVariacao; }
+
+    /** Preço unitário efetivo: o da variação, se houver; senão o do produto. */
+    public java.math.BigDecimal getPrecoUnitario() {
+        return precoVariacao != null ? precoVariacao : produto.getPreco();
+    }
+
     public double getSubtotal() {
-        return produto.getPreco().doubleValue() * quantidade;
+        return getPrecoUnitario().doubleValue() * quantidade;
+    }
+
+    /** Mesmo produto e mesma variação = mesmo item no carrinho. */
+    public boolean mesmoItem(Long produtoId, Long outraVariacaoId) {
+        return produto.getId().equals(produtoId)
+                && java.util.Objects.equals(variacaoId, outraVariacaoId);
     }
 }

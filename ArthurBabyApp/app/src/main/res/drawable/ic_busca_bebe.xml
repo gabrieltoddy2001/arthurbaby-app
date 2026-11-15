@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ilustração suave da tela Buscar: carrinho de bebê com coraçãozinho, nas cores da ArthurBaby -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Fundo: círculos em rosa e verde bem suaves -->
+    <path
+        android:fillColor="#FDF0F4"
+        android:pathData="M60,2a58,58 0 1,1 0,116a58,58 0 1,1 0,-116z" />
+    <path
+        android:fillColor="#E6F7F6"
+        android:pathData="M60,16a44,44 0 1,1 0,88a44,44 0 1,1 0,-88z" />
+
+    <!-- Alça -->
+    <path
+        android:pathData="M86,60L93,41L101,41"
+        android:strokeColor="#A08B94"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Pernas das rodas -->
+    <path
+        android:pathData="M49,79L42,90M69,79L76,90"
+        android:strokeColor="#A08B94"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+
+    <!-- Cesto -->
+    <path
+        android:fillColor="#37B6B0"
+        android:pathData="M28,58L89,58C89,72 76,82 58.5,82C41,82 28,72 28,58Z" />
+    <path
+        android:fillColor="#A8DEDB"
+        android:pathData="M34,62L83,62C81,68 74,74 58.5,74C43,74 36,68 34,62Z" />
+
+    <!-- Capota -->
+    <path
+        android:fillColor="#ED83A4"
+        android:pathData="M58,58L58,29C42,29 29,42 29,58Z" />
+    <path
+        android:pathData="M58,38C47,38 38,47 38,58M58,47C52,47 47,52 47,58"
+        android:strokeColor="#FAD1DE"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+    <!-- Rodas -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#A08B94"
+        android:strokeWidth="3"
+        android:pathData="M42,83a7,7 0 1,1 0,14a7,7 0 1,1 0,-14z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:strokeColor="#A08B94"
+        android:strokeWidth="3"
+        android:pathData="M76,83a7,7 0 1,1 0,14a7,7 0 1,1 0,-14z" />
+    <path
+        android:fillColor="#ED83A4"
+        android:pathData="M42,87.5a2.5,2.5 0 1,1 0,5a2.5,2.5 0 1,1 0,-5zM76,87.5a2.5,2.5 0 1,1 0,5a2.5,2.5 0 1,1 0,-5z" />
+
+    <!-- Coraçãozinho -->
+    <path
+        android:fillColor="#ED83A4"
+        android:pathData="M79,39C78.5,38.5 71,33.5 71,28.5A4,4 0 0,1 79,27A4,4 0 0,1 87,28.5C87,33.5 79.5,38.5 79,39Z" />
+
+    <!-- Brilhinhos -->
+    <path
+        android:fillColor="#FFC857"
+        android:pathData="M24,30C24.4,33.4 25.6,34.6 29,35C25.6,35.4 24.4,36.6 24,40C23.6,36.6 22.4,35.4 19,35C22.4,34.6 23.6,33.4 24,30Z" />
+    <path
+        android:fillColor="#FFC857"
+        android:pathData="M98,70C98.3,72.4 99.1,73.2 101.5,73.5C99.1,73.8 98.3,74.6 98,77C97.7,74.6 96.9,73.8 94.5,73.5C96.9,73.2 97.7,72.4 98,70Z" />
+</vector>

@@ -178,9 +178,9 @@
            ${!editando ? `
              <div class="field">
                <label>Senha inicial *</label>
-               <input type="text" id="u-senha" value="123456" required>
+               <input type="password" id="u-senha" minlength="6" required autocomplete="new-password">
                <small style="color:var(--texto-secundario);font-size:.8rem;">
-                 O usuário deverá alterar no primeiro acesso.
+                 Mínimo de 6 caracteres. Informe a senha ao usuário por um canal seguro.
                </small>
              </div>
            ` : ''}
@@ -213,11 +213,14 @@
        telefone: document.getElementById('u-telefone').value.trim() || null,
        perfil: document.getElementById('u-perfil').value,
        status: document.getElementById('u-status').value,
-       enderecos: usuario?.enderecos || [],
      };
    
      if (!body.nome) return mostrarErroModal('O nome é obrigatório.');
      if (!body.email) return mostrarErroModal('O e-mail é obrigatório.');
+     if (!usuario) {
+       body.senha = document.getElementById('u-senha').value;
+       if (body.senha.length < 6) return mostrarErroModal('A senha inicial deve ter pelo menos 6 caracteres.');
+     }
    
      // Valida e-mail duplicado
      const duplicado = usuarios.find(u => u.email === body.email && u.id !== usuario?.id);
@@ -228,13 +231,10 @@
    
      try {
        if (usuario) {
-         await adminApi.atualizar('usuarios', usuario.id, body);
+         // Mescla com o registro atual (a API mantém senha, endereços e aceites)
+         await adminApi.atualizar('usuarios', usuario.id, { ...usuario, ...body });
        } else {
-         const senha = document.getElementById('u-senha').value;
-         body.criadoEm = new Date().toISOString();
          await adminApi.criar('usuarios', body);
-         // A senha não fica no mock (isso é só no backend real)
-         console.log('Senha inicial definida:', senha);
        }
        fecharModal();
        await carregar();
@@ -289,9 +289,7 @@
      const u = usuarios.find(x => x.id === id);
      if (!u) return;
    
-     if (!confirm(`Resetar a senha de "${u.nome}"?\n\nUma senha temporária será enviada para ${u.email}.`)) return;
-   
-     alert(`✅ Senha temporária enviada para ${u.email}.\n\nO usuário deverá alterá-la no próximo login.`);
+     redefinirSenhaUsuario(u, carregar);
    }
    
    function fecharModal() {

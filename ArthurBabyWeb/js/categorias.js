@@ -183,7 +183,8 @@
        };
    
        try {
-         if (editando) await adminApi.atualizar(TIPO, categoria.id, body);
+         // Mescla com o registro atual para não perder ícone, imagem e ordem (usados pelo app)
+         if (editando) await adminApi.atualizar(TIPO, categoria.id, { ...categoria, ...body });
          else await adminApi.criar(TIPO, body);
          fecharModal();
          carregar();
@@ -218,9 +219,7 @@
    
      try {
        await adminApi.atualizar(TIPO, id, {
-         nome: cat.nome,
-         descricao: cat.descricao,
-         categoriaPaiId: cat.categoriaPaiId || null,
+         ...cat,
          status: cat.status === 'ATIVA' ? 'INATIVA' : 'ATIVA',
        });
        carregar();

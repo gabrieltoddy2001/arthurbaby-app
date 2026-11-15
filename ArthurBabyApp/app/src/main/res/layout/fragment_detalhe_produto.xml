@@ -22,14 +22,23 @@
                 android:layout_height="280dp"
                 android:background="@color/branco">
 
-                <ImageView
-                    android:id="@+id/imgProduto"
+                <!-- Carrossel de imagens -->
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPagerImagens"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="16dp"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="Imagem do produto" />
+                    android:layout_margin="16dp" />
 
+                <!-- Bolinhas indicadoras -->
+                <LinearLayout
+                    android:id="@+id/indicadoresImagens"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="12dp"
+                    android:orientation="horizontal" />
+
+                <!-- Botões (mantidos iguais) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -39,11 +48,12 @@
 
                     <ImageView
                         android:id="@+id/btnVoltar"
+                        android:tooltipText="Voltar"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:padding="10dp"
                         android:background="@drawable/bg_circulo_branco_suave"
-                        android:src="@drawable/ic_arrow_back"
+                        android:src="@drawable/ic_voltar"
                         app:tint="@color/texto_primario"
                         android:contentDescription="Voltar" />
 
@@ -54,24 +64,26 @@
 
                     <ImageView
                         android:id="@+id/btnCompartilhar"
+                        android:tooltipText="Compartilhar produto"
+                        android:contentDescription="Compartilhar produto"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:padding="10dp"
                         android:background="@drawable/bg_circulo_branco_suave"
                         android:src="@drawable/ic_compartilhar"
                         app:tint="@color/rosa_arthur"
-                        android:contentDescription="Compartilhar"
                         android:layout_marginEnd="8dp" />
 
                     <ImageView
                         android:id="@+id/btnFavoritoDetalhe"
+                        android:tooltipText="Adicionar aos favoritos"
+                        android:contentDescription="Adicionar aos favoritos"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:padding="10dp"
                         android:background="@drawable/bg_circulo_branco_suave"
                         android:src="@drawable/ic_favorito"
-                        app:tint="@color/coracao_inativo"
-                        android:contentDescription="Favorito" />
+                        app:tint="@color/coracao_inativo" />
                 </LinearLayout>
             </FrameLayout>
 
@@ -296,6 +308,8 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnMenos"
+                            android:tooltipText="Diminuir quantidade"
+                            android:contentDescription="Diminuir quantidade"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:text="-"
@@ -319,6 +333,8 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnMais"
+                            android:tooltipText="Aumentar quantidade"
+                            android:contentDescription="Aumentar quantidade"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:text="+"

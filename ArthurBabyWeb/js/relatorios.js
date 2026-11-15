@@ -34,9 +34,22 @@
            <button class="aba" data-aba="estoque-baixo" onclick="trocarAba('estoque-baixo')">⚠️ Estoque baixo</button>
            <button class="aba" data-aba="faturamento" onclick="trocarAba('faturamento')">💰 Faturamento</button>
          </div>
+         <div class="filtros no-print">
+           <select id="f-periodo" onchange="renderTudo()" title="Vale para Mais vendidos e Faturamento">
+             <option value="">Todo o período</option>
+             <option value="7">Últimos 7 dias</option>
+             <option value="30">Últimos 30 dias</option>
+             <option value="90">Últimos 90 dias</option>
+             <option value="mes">Mês atual</option>
+             <option value="ano">Ano atual</option>
+           </select>
+           <button class="btn btn-primary" id="btn-pdf" onclick="gerarPdf()">Gerar PDF</button>
+         </div>
          <div id="painel-relatorios"></div>
        `;
      }
+     const selPeriodo = document.getElementById('f-periodo');
+     if (selPeriodo) selPeriodo.disabled = abaAtual === 'estoque-baixo';
    
      document.querySelectorAll('#abas-relatorios .aba').forEach(btn => {
        btn.classList.toggle('ativa', btn.dataset.aba === abaAtual);
@@ -61,7 +74,7 @@
    
      // Consolida itens dos pedidos por produto
      const vendasPorProduto = {};
-     pedidos.forEach(p => {
+     pedidosFiltrados().forEach(p => {
        // Ignora pedidos cancelados
        if (p.status === 'CANCELADO') return;
        (p.itens || []).forEach(it => {
@@ -239,20 +252,41 @@
      const painel = document.getElementById('painel-relatorios');
    
      // Considera só pedidos não cancelados
-     const validos = pedidos.filter(p => p.status !== 'CANCELADO');
-     const faturamento = validos.reduce((s, p) => s + p.total, 0);
+     const lista = pedidosFiltrados();
+     const validos = lista.filter(p => p.status !== 'CANCELADO');
+     const faturamento = validos.reduce((s, p) => s + Number(p.total || 0), 0);
      const ticketMedio = validos.length > 0 ? faturamento / validos.length : 0;
-   
+
+     // Faturamento por mês (mais recente primeiro)
+     const porMes = {};
+     validos.forEach(p => {
+       const d = new Date(p.criadoEm);
+       const chave = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+       porMes[chave] = porMes[chave] || { pedidos: 0, total: 0 };
+       porMes[chave].pedidos++;
+       porMes[chave].total += Number(p.total || 0);
+     });
+     const linhasMes = Object.keys(porMes).sort().reverse().map(k => {
+       const [ano, mes] = k.split('-');
+       const nomeMes = new Date(Number(ano), Number(mes) - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+       return `<tr>
+         <td>${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)}</td>
+         <td class="text-center">${porMes[k].pedidos}</td>
+         <td class="text-right">R$ ${formatarPreco(porMes[k].total)}</td>
+         <td class="text-right">R$ ${formatarPreco(porMes[k].total / porMes[k].pedidos)}</td>
+       </tr>`;
+     }).join('');
+
      // Conta pedidos por status
      const porStatus = {};
-     pedidos.forEach(p => {
+     lista.forEach(p => {
        porStatus[p.status] = (porStatus[p.status] || 0) + 1;
      });
    
      // Faturamento por status (só não cancelados)
      const fatPorStatus = {};
      validos.forEach(p => {
-       fatPorStatus[p.status] = (fatPorStatus[p.status] || 0) + p.total;
+       fatPorStatus[p.status] = (fatPorStatus[p.status] || 0) + Number(p.total || 0);
      });
    
      const maxFat = Math.max(...Object.values(fatPorStatus), 1);
@@ -271,7 +305,7 @@
          const pct = s === 'CANCELADO' ? 0 : (fat / maxFat) * 100;
          return `
            <tr>
-             <td><span class="badge ${badgeStatus(s)}">${s}</span></td>
+             <td><span class="badge ${classeStatus(s)}">${rotuloStatus(s)}</span></td>
              <td class="text-center">${qtd}</td>
              <td class="text-right">${s === 'CANCELADO' ? '—' : 'R$ ' + formatarPreco(fat)}</td>
              <td style="width:40%;">
@@ -319,7 +353,119 @@
            <tbody>${linhasStatus}</tbody>
          </table>
        </div>
+
+       <div class="card">
+         <h3 class="secao-titulo">Faturamento por mês</h3>
+         ${linhasMes ? `
+         <table class="tabela">
+           <thead>
+             <tr>
+               <th>Mês</th>
+               <th class="text-center">Pedidos</th>
+               <th class="text-right">Faturamento</th>
+               <th class="text-right">Ticket médio</th>
+             </tr>
+           </thead>
+           <tbody>${linhasMes}</tbody>
+         </table>` : '<p class="texto-sec">Nenhum pedido válido no período.</p>'}
+       </div>
      `;
+   }
+
+   /* ============================================
+      PERÍODO
+      ============================================ */
+   function pedidosFiltrados() {
+     const v = document.getElementById('f-periodo')?.value || '';
+     if (!v) return pedidos;
+     const hoje = new Date();
+     let inicio;
+     if (v === 'mes') inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+     else if (v === 'ano') inicio = new Date(hoje.getFullYear(), 0, 1);
+     else { inicio = new Date(); inicio.setHours(0, 0, 0, 0); inicio.setDate(inicio.getDate() - Number(v)); }
+     return pedidos.filter(p => new Date(p.criadoEm) >= inicio);
+   }
+
+   function descricaoPeriodo() {
+     if (abaAtual === 'estoque-baixo') return 'Posição atual do estoque';
+     const sel = document.getElementById('f-periodo');
+     return 'Período: ' + (sel ? sel.options[sel.selectedIndex].text : 'Todo o período');
+   }
+
+   /* ============================================
+      EXPORTAR PDF
+      Usa html2pdf.js (carregado sob demanda do CDN). Sem internet, cai para a
+      impressão do navegador, onde é possível escolher "Salvar como PDF".
+      ============================================ */
+   const TITULOS_RELATORIO = {
+     'mais-vendidos': 'Produtos mais vendidos',
+     'estoque-baixo': 'Produtos com estoque baixo',
+     'faturamento': 'Faturamento',
+   };
+
+   function carregarHtml2Pdf() {
+     if (window.html2pdf) return Promise.resolve(window.html2pdf);
+     return new Promise((resolve, reject) => {
+       const s = document.createElement('script');
+       s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+       s.onload = () => (window.html2pdf ? resolve(window.html2pdf) : reject(new Error('html2pdf indisponível')));
+       s.onerror = () => reject(new Error('Falha ao carregar o gerador de PDF'));
+       document.head.appendChild(s);
+     });
+   }
+
+   function montarDocumentoPdf() {
+     const titulo = TITULOS_RELATORIO[abaAtual];
+     const usuario = getUsuario();
+     const doc = document.createElement('div');
+     doc.className = 'relatorio-pdf';
+     doc.innerHTML = `
+       <div class="relatorio-pdf-cabecalho">
+         <img src="assets/logo-arthurbaby.png" alt="Lojão Arthur Baby">
+         <div>
+           <h1>${escapeHtml(titulo)}</h1>
+           <p>${escapeHtml(descricaoPeriodo())}</p>
+           <p>Gerado em ${new Date().toLocaleString('pt-BR')} por ${escapeHtml(usuario?.nome || '—')}</p>
+         </div>
+       </div>
+       ${document.getElementById('painel-relatorios').innerHTML}
+       <div class="relatorio-pdf-rodape">Lojão Arthur Baby — Tudo para seu bebê! · Relatório gerado pelo Painel Administrativo</div>
+     `;
+     return doc;
+   }
+
+   async function gerarPdf() {
+     const btn = document.getElementById('btn-pdf');
+     btn.disabled = true;
+     btn.textContent = 'Gerando PDF...';
+     const doc = montarDocumentoPdf();
+     try {
+       const html2pdf = await carregarHtml2Pdf();
+       const nome = `relatorio-${abaAtual}-${new Date().toISOString().slice(0, 10)}.pdf`;
+       await html2pdf().set({
+         margin: [10, 10, 12, 10],
+         filename: nome,
+         image: { type: 'jpeg', quality: 0.95 },
+         html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+         pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.kpi-card'] },
+       }).from(doc).save();
+     } catch (err) {
+       console.warn(err);
+       // Alternativa offline: impressão do navegador (opção "Salvar como PDF")
+       const area = document.createElement('div');
+       area.id = 'area-impressao';
+       area.appendChild(doc);
+       document.body.appendChild(area);
+       document.body.classList.add('imprimindo-relatorio');
+       alert('Não foi possível gerar o PDF direto. Na janela de impressão, escolha "Salvar como PDF".');
+       window.print();
+       document.body.classList.remove('imprimindo-relatorio');
+       area.remove();
+     } finally {
+       btn.disabled = false;
+       btn.textContent = 'Gerar PDF';
+     }
    }
    
    /* ============================================
