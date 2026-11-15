@@ -33,6 +33,8 @@
              <option value="BLOQUEAR">Bloquear</option>
              <option value="DESBLOQUEAR">Desbloquear</option>
              <option value="CANCELAR">Cancelar</option>
+             <option value="ALTERAR_STATUS">Alterar status</option>
+             <option value="MOVIMENTAR_ESTOQUE">Movimentar estoque</option>
            </select>
            <select id="f-entidade" onchange="aplicarFiltros()">
              <option value="">Todas as entidades</option>
@@ -164,6 +166,8 @@
        'BLOQUEAR': 'Bloquear',
        'DESBLOQUEAR': 'Desbloquear',
        'CANCELAR': 'Cancelar',
+       'ALTERAR_STATUS': 'Alterar status',
+       'MOVIMENTAR_ESTOQUE': 'Movimentar estoque',
      };
      return mapa[acao] || acao;
    }

@@ -64,6 +64,7 @@ public class HomeFragment extends Fragment {
 // === CABEÇALHO ===
         TextView btnEntrar = v.findViewById(R.id.btnEntrarHome);
         View btnFav = v.findViewById(R.id.btnFavoritos);
+        View btnSair = v.findViewById(R.id.btnSairHome);
         TextView tvSaudacao = v.findViewById(R.id.tvSaudacao);
 
         if (br.com.arthurbaby.utils.AuthGuard.estaLogado(requireContext())) {
@@ -77,12 +78,26 @@ public class HomeFragment extends Fragment {
             }
             btnEntrar.setVisibility(View.GONE);
             btnFav.setVisibility(View.VISIBLE);
+            btnSair.setVisibility(View.VISIBLE);
         } else {
             // Visitante: saudação genérica + botão Entrar
             tvSaudacao.setText("Olá! 💕");
             btnEntrar.setVisibility(View.VISIBLE);
             btnFav.setVisibility(View.GONE);
+            btnSair.setVisibility(View.GONE);
         }
+
+        // Sair: mesma lógica do Perfil; recria a Home já como visitante
+        btnSair.setOnClickListener(x -> {
+            br.com.arthurbaby.network.TokenStorage.limpar(requireContext());
+            br.com.arthurbaby.repositories.FavoritoRepository.getInstance().limpar();
+            android.widget.Toast.makeText(requireContext(), "Até logo!",
+                    android.widget.Toast.LENGTH_SHORT).show();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.frameContainer, new HomeFragment())
+                    .commit();
+        });
 
         btnEntrar.setOnClickListener(x ->
                 br.com.arthurbaby.utils.AuthGuard.mostrarDialogLogin(requireActivity(),

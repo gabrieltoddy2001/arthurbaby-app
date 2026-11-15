@@ -112,20 +112,13 @@ const ICONES = {
 
   /* Redefine a senha de um usuário (cliente ou interno). A API grava o hash BCrypt. */
   async function redefinirSenhaUsuario(u, aoConcluir) {
-    const nova = prompt(`Nova senha para "${u.nome || u.nomeCompleto}" (mínimo 6 caracteres):`);
+    const nova = prompt(`Nova senha para "${u.nome || u.nomeCompleto}"\n${POLITICA_SENHA}`);
     if (nova === null) return;
-    if (nova.length < 6) { alert('A senha deve ter pelo menos 6 caracteres.'); return; }
+    const erroSenha = erroPoliticaSenha(nova);
+    if (erroSenha) { alert(erroSenha); return; }
     try {
+      // A API registra a auditoria (RESETAR_SENHA) com o usuário do token; o navegador não grava logs.
       await adminApi.atualizar('usuarios', u.id, { ...u, senha: nova });
-      try {
-        await adminApi.criar('auditoria', {
-          usuario: getUsuario()?.nome || 'Administrador',
-          acao: 'REDEFINIR_SENHA',
-          entidade: 'Usuario',
-          entidadeId: u.id,
-          descricao: `Redefiniu a senha de ${u.nome || u.nomeCompleto} (${u.email})`,
-        });
-      } catch (_) { /* auditoria não bloqueia a operação */ }
       alert('Senha redefinida. Informe a nova senha ao usuário por um canal seguro.');
       if (aoConcluir) aoConcluir();
     } catch (err) {

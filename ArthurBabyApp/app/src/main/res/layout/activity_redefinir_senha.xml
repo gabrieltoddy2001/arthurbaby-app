@@ -69,6 +69,7 @@
             android:hint="Nova senha"
             android:layout_marginTop="12dp"
             app:passwordToggleEnabled="true"
+            app:helperText="8 a 72 caracteres, com pelo menos uma letra e um número"
             app:startIconDrawable="@drawable/ic_cadeado"
             app:startIconTint="@color/rosa_arthur"
             app:boxStrokeColor="@color/rosa_arthur"

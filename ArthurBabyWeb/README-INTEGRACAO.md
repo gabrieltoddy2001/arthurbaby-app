@@ -50,7 +50,7 @@ ArthurBabyWeb/
 2. Clicar com botão direito em `login.html` → **Open with Live Server**.
 3. Login com:
    - **E-mail:** `admin@arthurbaby.com.br`
-   - **Senha:** `123456`
+   - **Senha:** a definida em `SEED_SENHA_INICIAL` no `ArthurBabyAPI/application-local.properties` (no modo mock, `123456`)
 
 **Não precisa do backend rodando.** O mock funciona sozinho.
 
