@@ -206,7 +206,9 @@ function renderDetalhe() {
             <p><strong>${p.formaRecebimento === 'ENTREGA' ? 'Entrega no endereço' : 'Retirada na loja'}</strong></p>
             ${p.formaRecebimento === 'ENTREGA' ? `
               <p style="margin-top:.5rem;font-size:.9rem;">${enderecoHtml}</p>
-              <p class="texto-mini" style="margin-top:.4rem;">Endereço principal do cadastro do cliente.</p>` : ''}
+              <p class="texto-mini" style="margin-top:.4rem;">${p.enderecoGravadoNoPedido
+                ? 'Endereço escolhido no pedido.'
+                : 'Pedido antigo, sem endereço gravado: mostrando o endereço principal atual do cliente.'}</p>` : ''}
             ${p.observacao ? `<p style="margin-top:.75rem;"><strong>Observação:</strong> ${escapeHtml(p.observacao)}</p>` : ''}
           </div>
         </div>
