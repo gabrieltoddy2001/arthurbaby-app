@@ -42,7 +42,8 @@ public class AlterarSenhaActivity extends AppCompatActivity {
             String confirmar = etConfirmar.getText() != null ? etConfirmar.getText().toString().trim() : "";
 
             if (TextUtils.isEmpty(atual)) { etSenhaAtual.setError("Informe a senha atual"); return; }
-            if (TextUtils.isEmpty(nova) || nova.length() < 4) { etNovaSenha.setError("Nova senha muito curta"); return; }
+            String erroSenha = br.com.arthurbaby.utils.PoliticaSenha.erro(nova);
+            if (erroSenha != null) { etNovaSenha.setError(erroSenha); return; }
             if (!nova.equals(confirmar)) { etConfirmar.setError("As senhas não coincidem"); return; }
 
             Long clienteId = TokenStorage.getUsuarioId(this);

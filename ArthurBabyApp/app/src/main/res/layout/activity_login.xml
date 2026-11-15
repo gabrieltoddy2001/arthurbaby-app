@@ -55,6 +55,20 @@
                     android:alpha="0.9"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
+
+            <!-- Voltar para a tela inicial -->
+            <ImageView
+                android:id="@+id/btnVoltarLogin"
+                android:tooltipText="Voltar"
+                android:contentDescription="Voltar para a tela inicial"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:padding="10dp"
+                android:background="@drawable/bg_circulo_branco_suave"
+                android:src="@drawable/ic_voltar"
+                app:tint="@color/rosa_arthur" />
         </RelativeLayout>
 
         <!-- CARD DE FORMULÁRIO -->

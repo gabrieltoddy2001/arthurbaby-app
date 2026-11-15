@@ -26,9 +26,11 @@ public class JwtFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             try {
-                String email = jwtService.getSubject(header.substring(7));
-                usuarios.findByEmail(email)
+                var claims = jwtService.lerClaims(header.substring(7));
+                usuarios.findByEmail(claims.getSubject())
                         .filter(Usuario::isEnabled)
+                        // Recusa token emitido antes da última troca de senha ou "sair" (401 no cliente)
+                        .filter(usuario -> jwtService.emitidoDepoisDasCredenciais(claims, usuario))
                         .ifPresent(usuario -> {
                             var auth = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
                             SecurityContextHolder.getContext().setAuthentication(auth);

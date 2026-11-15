@@ -134,7 +134,11 @@ public class Conversor {
     public static List<Produto> paraProdutos(List<ProdutoResponse> lista) {
         List<Produto> out = new ArrayList<>();
         if (lista == null) return out;
-        for (ProdutoResponse p : lista) out.add(paraProduto(p));
+        for (ProdutoResponse p : lista) {
+            // Defesa extra: produto INATIVO nunca é exibido nas listas do app (a API já não o envia)
+            if (p == null || "INATIVO".equals(p.status)) continue;
+            out.add(paraProduto(p));
+        }
         return out;
     }
 

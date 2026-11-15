@@ -204,6 +204,13 @@ public class DetalheProdutoFragment extends Fragment {
             public void onResponse(Call<ProdutoResponse> call, Response<ProdutoResponse> response) {
                 if (!isAdded() || getContext() == null) return;
 
+                // 404: produto desativado pela loja (ou removido) — não fica acessível; volta para a tela anterior
+                if (response.code() == 404) {
+                    Toast.makeText(requireContext(), "Este produto não está mais disponível.", Toast.LENGTH_LONG).show();
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                    return;
+                }
+
                 if (response.isSuccessful() && response.body() != null) {
                     Produto atualizado = Conversor.paraProduto(response.body());
                     if (atualizado == null) return;

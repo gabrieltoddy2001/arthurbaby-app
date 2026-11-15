@@ -65,7 +65,9 @@ public class CatalogoService {
     @Transactional(readOnly = true)
     public Page<ProdutoResumoResponse> listarProdutos(String q, Long categoriaId, BigDecimal precoMin, BigDecimal precoMax,
                                                       Boolean promocao, Pageable pageable) {
-        Specification<Produto> spec = Specification.where(null);
+        // Produto INATIVO (desativado pela loja) não aparece na vitrine nem na busca (o detalhe também responde 404).
+        Specification<Produto> spec = Specification.where((root, query, cb) ->
+                cb.notEqual(root.get("status"), br.com.arthurbaby.entity.Enums.ProdutoStatus.INATIVO));
         if (q != null && !q.isBlank()) {
             String term = "%" + q.toLowerCase() + "%";
             spec = spec.and((root, query, cb) -> cb.or(
@@ -84,7 +86,10 @@ public class CatalogoService {
     /** Detalhe do produto; o campo avaliacao e a media das notas da tabela avaliacao, calculada na hora (0.0 sem notas). */
     @Transactional(readOnly = true)
     public ProdutoDetalheResponse detalhe(Long id) {
-        Produto produto = produtos.findById(id).orElseThrow(() -> new NoSuchElementException("Produto nao encontrado"));
+        // Produto INATIVO não fica acessível no app: responde 404 como se não existisse
+        Produto produto = produtos.findById(id)
+                .filter(p -> p.getStatus() != br.com.arthurbaby.entity.Enums.ProdutoStatus.INATIVO)
+                .orElseThrow(() -> new NoSuchElementException("Produto nao encontrado"));
         Categoria categoria = produto.getCategoria();
         Marca marca = produto.getMarca();
         return new ProdutoDetalheResponse(

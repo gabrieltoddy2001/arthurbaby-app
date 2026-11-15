@@ -2,7 +2,6 @@ package br.com.arthurbaby.controller;
 
 import br.com.arthurbaby.dto.FavoritoRequest;
 import br.com.arthurbaby.dto.FavoritoResponse;
-import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.service.FavoritoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +24,9 @@ public class FavoritoController {
     private static final String OUTRO_CLIENTE = "Acesso negado: favoritos pertencem a outro cliente";
 
     private final FavoritoService service;
-    public FavoritoController(FavoritoService service) {
+    private final br.com.arthurbaby.service.AcessoUsuarioService acesso;
+    public FavoritoController(FavoritoService service, br.com.arthurbaby.service.AcessoUsuarioService acesso) {
+        this.acesso = acesso;
         this.service = service;
     }
 
@@ -78,11 +78,8 @@ public class FavoritoController {
         service.remover(clienteId, produtoId);
     }
 
-    /** Mesma regra de {@code ClienteController}: equipe da loja acessa tudo, cliente só os próprios favoritos. */
+    /** Mesma regra de {@code ClienteController} (ver {@code AcessoUsuarioService}). */
     private void verificarAcesso(Long clienteId, Usuario logado) {
-        boolean equipeLoja = logado.getPerfil() == Perfil.ADMINISTRADOR || logado.getPerfil() == Perfil.VENDEDOR;
-        if (!equipeLoja && !logado.getId().equals(clienteId)) {
-            throw new AccessDeniedException("Acesso negado a favoritos de outro cliente");
-        }
+        acesso.verificar(clienteId, logado, "Acesso negado a favoritos de outro cliente");
     }
 }

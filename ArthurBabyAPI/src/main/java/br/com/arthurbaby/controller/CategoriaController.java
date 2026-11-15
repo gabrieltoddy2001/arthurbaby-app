@@ -18,9 +18,11 @@ import java.util.Map;
 public class CategoriaController {
 
     private final CategoriaRepository repository;
+    private final br.com.arthurbaby.service.AuditoriaService auditoria;
 
-    public CategoriaController(CategoriaRepository repository) {
+    public CategoriaController(CategoriaRepository repository, br.com.arthurbaby.service.AuditoriaService auditoria) {
         this.repository = repository;
+        this.auditoria = auditoria;
     }
 
     @GetMapping
@@ -32,7 +34,10 @@ public class CategoriaController {
     @PostMapping
     @Operation(summary = "Cadastrar categoria")
     public ResponseEntity<Categoria> criar(@RequestBody Categoria categoria) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(categoria));
+        categoria.setId(null); // POST sempre cria: nunca sobrescreve um registro existente
+        Categoria salvo = repository.save(categoria);
+        auditoria.registrar("CRIAR", "Categoria", salvo.getId(), "Criou Categoria #" + salvo.getId() + " (" + salvo.getNome() + ")");
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PutMapping("/{id}")
@@ -43,7 +48,9 @@ public class CategoriaController {
             categoria.setDescricao(categoriaAtualizada.getDescricao());
             categoria.setCategoriaPai(categoriaAtualizada.getCategoriaPai());
             if (categoriaAtualizada.getStatus() != null) categoria.setStatus(categoriaAtualizada.getStatus());
-            return ResponseEntity.ok(repository.save(categoria));
+            Categoria salvo = repository.save(categoria);
+            auditoria.registrar("ATUALIZAR", "Categoria", id, "Atualizou Categoria #" + id + " (" + salvo.getNome() + ")");
+            return ResponseEntity.ok(salvo);
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -53,6 +60,7 @@ public class CategoriaController {
         if (!repository.existsById(id)) return ResponseEntity.notFound().build();
         try {
             repository.deleteById(id);
+            auditoria.registrar("DELETAR", "Categoria", id, "Excluiu Categoria #" + id);
             return ResponseEntity.noContent().build();
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("erro", "Não é possível excluir: esta categoria está sendo usada por um produto ou subcategoria."));

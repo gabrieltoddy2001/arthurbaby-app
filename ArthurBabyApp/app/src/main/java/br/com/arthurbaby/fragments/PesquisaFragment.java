@@ -126,6 +126,17 @@ public class PesquisaFragment extends Fragment {
             mostrarHistorico(false);
         });
 
+        // Botão de histórico na barra de busca: mostra/esconde as buscas recentes mesmo com texto digitado
+        v.findViewById(R.id.btnHistoricoBusca).setOnClickListener(x -> {
+            if (containerHistorico.getVisibility() == View.VISIBLE) {
+                mostrarHistorico(false);
+            } else if (BuscaStorage.getHistorico(requireContext()).isEmpty()) {
+                Toast.makeText(requireContext(), "Você ainda não tem buscas recentes.", Toast.LENGTH_SHORT).show();
+            } else {
+                mostrarHistorico(true);
+            }
+        });
+
         // Escuta digitação
         etBusca.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -163,10 +174,24 @@ public class PesquisaFragment extends Fragment {
         // Estado inicial: última busca/filtro restaurados (ou "Todas" com todos os produtos)
         pintarChips();
         pintarChipLimpar();
-        mostrarHistorico(termoAtual.trim().isEmpty());
+        // "Buscas recentes" aparece sempre ao abrir a tela (como nas versões anteriores), mesmo quando
+        // a última busca é restaurada no campo; some ao digitar uma busca nova e volta com o campo vazio
+        mostrarHistorico(true);
         buscarProdutos(termoAtual, null);
 
         return v;
+    }
+
+    /**
+     * Ao sair da tela, a busca digitada entra nas buscas recentes (antes só entrava ao apertar
+     * "buscar" no teclado ou abrir um produto, e quem só digitava nunca via o histórico).
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (getContext() != null && termoAtual != null && !termoAtual.trim().isEmpty()) {
+            BuscaStorage.adicionar(getContext(), termoAtual);
+        }
     }
 
     /**
