@@ -194,7 +194,7 @@
    
          <div class="modal-acoes" style="margin-top:1.5rem;justify-content:space-between;">
            <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-             <button type="button" class="btn btn-accent" onclick="resetarSenha(${c.id})">Redefinir senha</button>
+             ${ehAdmin() ? `<button type="button" class="btn btn-accent" onclick="resetarSenha(${c.id})">Redefinir senha</button>` : ''}
              ${c.status === 'ATIVO' ? `<button type="button" class="btn btn-primary" onclick="novoPedidoPara(${c.id})">+ Novo pedido</button>` : ''}
            </div>
            <button type="button" class="btn btn-ghost" onclick="fecharModal()">Fechar</button>
@@ -234,6 +234,11 @@
       RESETAR SENHA
       ============================================ */
    async function resetarSenha(id) {
+     // Só o administrador redefine senha de cliente (a API também bloqueia o vendedor com 403).
+     if (!ehAdmin()) {
+       alert('Apenas o administrador pode redefinir a senha de um cliente.');
+       return;
+     }
      const c = clientes.find(x => x.id === id);
      if (!c) return;
 

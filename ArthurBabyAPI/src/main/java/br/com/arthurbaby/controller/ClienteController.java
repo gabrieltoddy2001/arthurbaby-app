@@ -6,6 +6,7 @@ import br.com.arthurbaby.dto.ClienteResponse;
 import br.com.arthurbaby.dto.EnderecoRequest;
 import br.com.arthurbaby.dto.EnderecoResponse;
 import br.com.arthurbaby.dto.MensagemResponse;
+import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Usuario;
 import br.com.arthurbaby.service.AcessoUsuarioService;
 import br.com.arthurbaby.service.ClienteService;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,7 +67,7 @@ public class ClienteController {
 
     @PutMapping("/{id}/senha")
     @Operation(summary = "Alterar senha do cliente", description = "Troca a senha do cliente identificado pelo id, conferindo antes a senha atual. "
-            + "Mesmo efeito de PUT /api/auth/alterar-senha, mas com o id na URL.")
+            + "Mesmo efeito de PUT /api/auth/alterar-senha, mas com o id na URL. O vendedor só pode trocar a própria senha.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "{ \"mensagem\": \"" + MENSAGEM_SENHA_ALTERADA + "\" }"),
             @ApiResponse(responseCode = "400", description = "Senha atual incorreta ou nova senha fora da política (8 a 72 caracteres, com letra e número)"),
@@ -75,6 +77,10 @@ public class ClienteController {
     public MensagemResponse alterarSenha(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @RequestBody AlterarSenhaRequest request,
                                          @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
+        // O VENDEDOR pode ver dados de clientes, mas só troca a PRÓPRIA senha (nunca a de outra pessoa).
+        if (logado.getPerfil() == Perfil.VENDEDOR && !logado.getId().equals(id)) {
+            throw new AccessDeniedException("Acesso negado: o vendedor só pode alterar a própria senha");
+        }
         service.alterarSenha(id, request);
         return new MensagemResponse(MENSAGEM_SENHA_ALTERADA);
     }
