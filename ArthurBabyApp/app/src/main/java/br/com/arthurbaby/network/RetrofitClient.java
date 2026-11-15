@@ -57,7 +57,9 @@ public class RetrofitClient {
         okhttp3.Interceptor authCheck = chain -> {
             okhttp3.Request request = chain.request();
             okhttp3.Response response = chain.proceed(request);
-            if (response.code() == 401 && request.header("Authorization") != null) {
+            // O próprio "Sair" pode receber 401 (token já vencido): a pessoa já está saindo, não é "sessão expirada"
+            if (response.code() == 401 && request.header("Authorization") != null
+                    && !request.url().encodedPath().equals("/api/auth/logout")) {
                 SessionExpiredHandler.tratar(appContext);
             }
             return response;

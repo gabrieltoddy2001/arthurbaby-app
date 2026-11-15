@@ -29,6 +29,7 @@ import br.com.arthurbaby.network.RetrofitClient;
 import br.com.arthurbaby.network.TokenStorage;
 import br.com.arthurbaby.network.dto.CupomValidacaoRequest;
 import br.com.arthurbaby.network.dto.CupomValidacaoResponse;
+import br.com.arthurbaby.network.dto.EnderecoResponse;
 import br.com.arthurbaby.network.dto.PedidoItemRequest;
 import br.com.arthurbaby.network.dto.PedidoRequest;
 import br.com.arthurbaby.network.dto.PedidoResponse;
@@ -54,6 +55,13 @@ public class CarrinhoFragment extends Fragment {
     /** Subtotal sobre o qual o cupom foi validado; se o carrinho mudar, o cupom precisa ser revalidado. */
     private double subtotalDoCupom = 0;
     private LinearLayout rowDesconto;
+
+    // Endereço de entrega: lista do cliente e o escolhido (padrão: o principal)
+    private View layoutEndereco, btnTrocarEndereco;
+    private TextView tvEnderecoEntrega;
+    private List<EnderecoResponse> enderecos = null; // null = ainda não carregou (ou falhou)
+    private Long enderecoSelecionadoId = null;
+    private boolean carregandoEnderecos = false;
 
     @Nullable
     @Override
@@ -87,12 +95,20 @@ public class CarrinhoFragment extends Fragment {
         rowDesconto = v.findViewById(R.id.rowDesconto);
         TextView tvDesconto = v.findViewById(R.id.tvDesconto);
 
+        layoutEndereco = v.findViewById(R.id.layoutEnderecoEntrega);
+        btnTrocarEndereco = v.findViewById(R.id.btnTrocarEndereco);
+        tvEnderecoEntrega = v.findViewById(R.id.tvEnderecoEntrega);
+        btnTrocarEndereco.setOnClickListener(x -> escolherEndereco());
+        tvEnderecoEntrega.setOnClickListener(x -> escolherEndereco());
+
         if ("ENTREGA".equals(repo.getFormaRecebimento())) rbEntrega.setChecked(true);
         else rbRetirada.setChecked(true);
 
         rgRecebimento.setOnCheckedChangeListener((group, checkedId) -> {
             repo.setFormaRecebimento(checkedId == R.id.rbEntrega ? "ENTREGA" : "RETIRADA_LOJA");
             atualizarTotal();
+            atualizarCardEndereco();
+            if (ehEntrega() && enderecos == null) carregarEnderecos();
         });
 
         // CUPOM — via API (dinâmico)
@@ -186,6 +202,26 @@ public class CarrinhoFragment extends Fragment {
             String observacao = etObservacao.getText().toString().trim();
             String forma = repo.getFormaRecebimento();
 
+            Long enderecoId = null;
+            if ("ENTREGA".equals(forma)) {
+                if (enderecos == null) {
+                    Toast.makeText(requireContext(), carregandoEnderecos
+                            ? "Aguarde: carregando seus endereços."
+                            : "Não foi possível carregar seus endereços. Toque no endereço para tentar de novo.",
+                            Toast.LENGTH_LONG).show();
+                    if (!carregandoEnderecos) carregarEnderecos();
+                    return;
+                }
+                EnderecoResponse escolhido = enderecoSelecionado();
+                if (escolhido == null) {
+                    Toast.makeText(requireContext(),
+                            "Cadastre um endereço para receber o pedido.", Toast.LENGTH_LONG).show();
+                    abrirEnderecos();
+                    return;
+                }
+                enderecoId = escolhido.id;
+            }
+
             List<PedidoItemRequest> itensReq = new ArrayList<>();
             for (ItemCarrinho item : repo.getItens()) {
                 itensReq.add(new PedidoItemRequest(
@@ -202,7 +238,8 @@ public class CarrinhoFragment extends Fragment {
                     BigDecimal.valueOf(descontoAplicado),
                     BigDecimal.valueOf(freteGratisPorCupom ? 0 : repo.getFrete()),
                     observacao,
-                    itensReq
+                    itensReq,
+                    enderecoId
             );
 
             LoadingUtils.mostrar(requireContext());
@@ -230,7 +267,8 @@ public class CarrinhoFragment extends Fragment {
                                 pedido.subtotal != null ? pedido.subtotal.doubleValue() : 0,
                                 pedido.frete != null ? pedido.frete.doubleValue() : 0,
                                 pedido.desconto != null ? pedido.desconto.doubleValue() : descontoAplicado,
-                                pedido.cupom != null ? pedido.cupom : cupomAplicado
+                                pedido.cupom != null ? pedido.cupom : cupomAplicado,
+                                formatarEndereco(pedido.enderecoEntrega)
                         );
                         requireActivity().getSupportFragmentManager()
                                 .beginTransaction()
@@ -254,7 +292,167 @@ public class CarrinhoFragment extends Fragment {
         });
 
         atualizarTotal();
+        atualizarCardEndereco();
         return v;
+    }
+
+    // ================= ENDEREÇO DE ENTREGA =================
+
+    private boolean ehEntrega() {
+        return "ENTREGA".equals(repo.getFormaRecebimento());
+    }
+
+    /** Busca os endereços do cliente; mantém o escolhido se ainda existir, senão usa o principal. */
+    private void carregarEnderecos() {
+        if (!isAdded() || !AuthGuard.estaLogado(requireContext())) return;
+        Long clienteId = TokenStorage.getUsuarioId(requireContext());
+        if (clienteId == null) return;
+
+        carregandoEnderecos = true;
+        atualizarCardEndereco();
+        RetrofitClient.getApi(requireContext()).listarEnderecos(clienteId)
+                .enqueue(new Callback<List<EnderecoResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<EnderecoResponse>> call, Response<List<EnderecoResponse>> response) {
+                        carregandoEnderecos = false;
+                        if (!isAdded()) return;
+                        if (response.isSuccessful() && response.body() != null) {
+                            enderecos = response.body();
+                            if (enderecoSelecionado() == null) enderecoSelecionadoId = idDoPadrao(enderecos);
+                        } else {
+                            enderecos = null;
+                        }
+                        atualizarCardEndereco();
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<EnderecoResponse>> call, Throwable t) {
+                        carregandoEnderecos = false;
+                        if (!isAdded()) return;
+                        enderecos = null;
+                        atualizarCardEndereco();
+                    }
+                });
+    }
+
+    private static Long idDoPadrao(List<EnderecoResponse> lista) {
+        if (lista.isEmpty()) return null;
+        for (EnderecoResponse e : lista) if (e.principal) return e.id;
+        return lista.get(0).id;
+    }
+
+    @Nullable
+    private EnderecoResponse enderecoSelecionado() {
+        if (enderecos == null || enderecoSelecionadoId == null) return null;
+        for (EnderecoResponse e : enderecos) if (enderecoSelecionadoId.equals(e.id)) return e;
+        return null;
+    }
+
+    private void atualizarCardEndereco() {
+        if (layoutEndereco == null) return;
+        if (!ehEntrega()) {
+            layoutEndereco.setVisibility(View.GONE);
+            return;
+        }
+        layoutEndereco.setVisibility(View.VISIBLE);
+
+        boolean logado = isAdded() && AuthGuard.estaLogado(requireContext());
+        String texto;
+        boolean mostrarTrocar = false;
+        if (!logado) {
+            texto = "Entre na sua conta para escolher o endereço.";
+        } else if (carregandoEnderecos && enderecos == null) {
+            texto = "Carregando seus endereços…";
+        } else if (enderecos == null) {
+            texto = "Não foi possível carregar seus endereços. Toque para tentar de novo.";
+        } else if (enderecos.isEmpty()) {
+            texto = "Nenhum endereço cadastrado. Toque para cadastrar.";
+        } else {
+            EnderecoResponse e = enderecoSelecionado();
+            texto = formatarEndereco(e) + (e != null && e.principal ? "\n(endereço principal)" : "");
+            mostrarTrocar = true;
+        }
+        tvEnderecoEntrega.setText(texto);
+        btnTrocarEndereco.setVisibility(mostrarTrocar ? View.VISIBLE : View.GONE);
+    }
+
+    /** Toque no card: login, nova tentativa, cadastro ou lista para escolher, conforme o caso. */
+    private void escolherEndereco() {
+        if (!AuthGuard.estaLogado(requireContext())) {
+            AuthGuard.mostrarDialogLogin(requireActivity(), "Entre para escolher o endereço de entrega.");
+            return;
+        }
+        if (enderecos == null) {
+            if (!carregandoEnderecos) carregarEnderecos();
+            return;
+        }
+        if (enderecos.isEmpty()) {
+            abrirEnderecos();
+            return;
+        }
+
+        String[] opcoes = new String[enderecos.size()];
+        int marcado = 0;
+        for (int i = 0; i < enderecos.size(); i++) {
+            EnderecoResponse e = enderecos.get(i);
+            opcoes[i] = formatarEndereco(e) + (e.principal ? "\n(principal)" : "");
+            if (e.id != null && e.id.equals(enderecoSelecionadoId)) marcado = i;
+        }
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Entregar em")
+                .setSingleChoiceItems(opcoes, marcado, (d, which) -> {
+                    enderecoSelecionadoId = enderecos.get(which).id;
+                    atualizarCardEndereco();
+                    d.dismiss();
+                })
+                .setNeutralButton("Novo endereço", (d, w) -> abrirEnderecos())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    /** Abre "Meus endereços"; ao voltar, o onResume recarrega a lista. */
+    private void abrirEnderecos() {
+        requireActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frameContainer, new EnderecosFragment())
+                .addToBackStack(null)
+                .commit();
+    }
+
+    /** "Rua X, 10 - Apto 2 / Bairro - Cidade/UF / CEP 00000-000". */
+    static String formatarEndereco(@Nullable EnderecoResponse e) {
+        if (e == null) return "";
+        return montarEndereco(e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep);
+    }
+
+    static String formatarEndereco(@Nullable br.com.arthurbaby.network.dto.EnderecoEntregaResponse e) {
+        if (e == null) return null;
+        return montarEndereco(e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep);
+    }
+
+    private static String montarEndereco(String logradouro, String numero, String complemento,
+                                         String bairro, String cidade, String uf, String cep) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(vazio(logradouro) ? "Endereço" : logradouro);
+        if (!vazio(numero)) sb.append(", ").append(numero);
+        if (!vazio(complemento)) sb.append(" - ").append(complemento);
+        StringBuilder linha2 = new StringBuilder();
+        if (!vazio(bairro)) linha2.append(bairro);
+        if (!vazio(cidade)) {
+            if (linha2.length() > 0) linha2.append(" - ");
+            linha2.append(cidade);
+            if (!vazio(uf)) linha2.append("/").append(uf);
+        }
+        if (linha2.length() > 0) sb.append("\n").append(linha2);
+        if (!vazio(cep)) {
+            String d = cep.replaceAll("\\D", "");
+            sb.append("\nCEP ").append(d.length() == 8 ? d.substring(0, 5) + "-" + d.substring(5) : cep);
+        }
+        return sb.toString();
+    }
+
+    private static boolean vazio(String s) {
+        return s == null || s.trim().isEmpty();
     }
 
     private void atualizarTotal() {
@@ -288,6 +486,9 @@ public class CarrinhoFragment extends Fragment {
         super.onResume();
         if (adapter != null) atualizarTotal();
         removerProdutosIndisponiveis();
+        // Recarrega sempre: a pessoa pode ter cadastrado/apagado endereço ou entrado na conta
+        if (repo != null && ehEntrega()) carregarEnderecos();
+        else atualizarCardEndereco();
     }
 
     /**

@@ -18,6 +18,10 @@ public interface ApiService {
     @GET("api/auth/me")
     Call<UsuarioResponse> buscarMeuPerfil();
 
+    /** Invalida no servidor os tokens do usuário. Token explícito: a sessão local já foi apagada (ver Sessao.sair). */
+    @POST("api/auth/logout")
+    Call<Void> logout(@Header("Authorization") String bearerToken);
+
     @POST("api/auth/recuperar-senha")
     Call<Void> recuperarSenha(@Body RecuperarSenhaRequest request);
 
@@ -110,6 +114,11 @@ public interface ApiService {
 
     @POST("api/clientes/{clienteId}/enderecos")
     Call<EnderecoResponse> criarEndereco(@Path("clienteId") Long clienteId, @Body EnderecoRequest request);
+
+    /** Atualiza o endereço; com principal = true ele vira o principal e os outros são desmarcados. */
+    @PUT("api/clientes/{clienteId}/enderecos/{enderecoId}")
+    Call<EnderecoResponse> atualizarEndereco(@Path("clienteId") Long clienteId, @Path("enderecoId") Long enderecoId,
+                                             @Body EnderecoRequest request);
 
     @DELETE("api/clientes/{clienteId}/enderecos/{enderecoId}")
     Call<Void> removerEndereco(@Path("clienteId") Long clienteId, @Path("enderecoId") Long enderecoId);

@@ -89,8 +89,7 @@ public class HomeFragment extends Fragment {
 
         // Sair: mesma lógica do Perfil; recria a Home já como visitante
         btnSair.setOnClickListener(x -> {
-            br.com.arthurbaby.network.TokenStorage.limpar(requireContext());
-            br.com.arthurbaby.repositories.FavoritoRepository.getInstance().limpar();
+            br.com.arthurbaby.utils.Sessao.sair(requireContext());
             android.widget.Toast.makeText(requireContext(), "Até logo!",
                     android.widget.Toast.LENGTH_SHORT).show();
             requireActivity().getSupportFragmentManager()
