@@ -4,6 +4,7 @@ import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Enums.UsuarioStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +32,10 @@ public class Usuario implements UserDetails {
     /** Hash BCrypt: aceito na entrada (CRUD admin), nunca devolvido em JSON. */
     @Column(nullable = false) @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String senha;
+    /** Incrementado atomicamente a cada login: somente o JWT mais recente e valido. */
+    @JsonIgnore
+    @Column(name = "token_version", nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private Long tokenVersion = 0L;
     private String telefone;
     @Column(unique = true, length = 14)
     private String cpf;

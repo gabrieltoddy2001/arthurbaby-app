@@ -149,6 +149,8 @@ public class AdminCrudService {
             // O painel nao edita enderecos nem aceites: preserva os dados do cadastro em vez de apaga-los
             usuario.setEnderecos(new java.util.ArrayList<>(atual.getEnderecos()));
             usuario.setCriadoEm(atual.getCriadoEm());
+            // Nunca reinicia a versao da sessao ao atualizar um usuario pelo CRUD.
+            usuario.setTokenVersion(atual.getTokenVersion());
             usuario.setAceiteTermoUso(atual.isAceiteTermoUso());
             usuario.setDataAceiteTermoUso(atual.getDataAceiteTermoUso());
             usuario.setAceiteLgpd(atual.isAceiteLgpd());
