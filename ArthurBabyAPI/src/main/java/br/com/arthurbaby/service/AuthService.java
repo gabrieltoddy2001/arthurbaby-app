@@ -33,6 +33,7 @@ public class AuthService {
     /** Mesma mensagem para usuário inexistente e senha errada: não revela quais e-mails/CPFs têm conta. */
     static final String LOGIN_INVALIDO = "E-mail/CPF ou senha inválidos.";
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         return login(request, null);
     }
@@ -43,6 +44,7 @@ public class AuthService {
     }
 
     /** {@code ip}: endereço de quem tentou, usado no limite de tentativas (pode ser nulo). */
+    @Transactional
     public AuthResponse login(LoginRequest request, String ip) {
         String login = request.login() == null ? "" : request.login().trim();
         limiteTentativas.verificar(login, ip);
@@ -61,6 +63,13 @@ public class AuthService {
         if (!usuario.isEnabled()) {
             throw new IllegalArgumentException("Conta inativa. Entre em contato com o suporte.");
         }
+        // Invalida os tokens de logins anteriores sem alterar as protecoes existentes.
+        if (usuarios.incrementarVersaoToken(usuario.getId()) != 1) {
+            throw new IllegalStateException("Nao foi possivel atualizar a sessao");
+        }
+        Long novaVersao = usuarios.obterVersaoToken(usuario.getId());
+        if (novaVersao == null) throw new IllegalStateException("Versao da sessao nao encontrada");
+        usuario.setTokenVersion(novaVersao);
         return new AuthResponse(jwt.gerarToken(usuario), usuario.getId(), usuario.getNomeCompleto(), usuario.getPerfil().name());
     }
 
