@@ -51,6 +51,9 @@ public class Usuario implements UserDetails {
      */
     @JsonIgnore @Column(columnDefinition = "DATETIME(6)")
     private LocalDateTime credenciaisAlteradasEm;
+    /** Versao da sessao; incrementada em cada novo login. */
+    @JsonIgnore @Column(nullable = false, columnDefinition = "bigint default 0")
+    private Long tokenVersion = 0L;
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Endereco> enderecos = new ArrayList<>();
 
