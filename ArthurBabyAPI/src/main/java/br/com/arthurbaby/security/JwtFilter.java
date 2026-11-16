@@ -31,6 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         .filter(Usuario::isEnabled)
                         // Recusa token emitido antes da última troca de senha ou "sair" (401 no cliente)
                         .filter(usuario -> jwtService.emitidoDepoisDasCredenciais(claims, usuario))
+                        .filter(usuario -> jwtService.versaoSessaoValida(claims, usuario))
                         .ifPresent(usuario -> {
                             var auth = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
                             SecurityContextHolder.getContext().setAuthentication(auth);
