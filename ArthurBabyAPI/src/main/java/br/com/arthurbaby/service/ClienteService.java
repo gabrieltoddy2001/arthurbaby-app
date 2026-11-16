@@ -135,6 +135,16 @@ public class ClienteService {
     public void excluirEndereco(Long clienteId, Long enderecoId) {
         Endereco endereco = buscarEnderecoDoCliente(clienteId, enderecoId);
         enderecos.delete(endereco);
+        // Apagou o principal: o primeiro que sobrar vira o principal (é o que vem marcado na entrega)
+        if (endereco.isPrincipal()) {
+            enderecos.findByUsuarioId(clienteId).stream()
+                    .filter(e -> !e.getId().equals(enderecoId))
+                    .findFirst()
+                    .ifPresent(e -> {
+                        e.setPrincipal(true);
+                        enderecos.save(e);
+                    });
+        }
     }
 
     private void preencher(Endereco endereco, EnderecoRequest request) {

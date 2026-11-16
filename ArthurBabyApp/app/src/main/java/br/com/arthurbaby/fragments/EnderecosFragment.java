@@ -92,7 +92,8 @@ public class EnderecosFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     adapter = new EnderecoAdapter(
                             Conversor.paraEnderecos(response.body()),
-                            EnderecosFragment.this::removerEndereco);
+                            EnderecosFragment.this::removerEndereco,
+                            EnderecosFragment.this::definirPrincipal);
                     rv.setAdapter(adapter);
                 } else {
                     Toast.makeText(requireContext(),
@@ -108,6 +109,37 @@ public class EnderecosFragment extends Fragment {
                         ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /** Torna o endereço o principal (o que vem marcado na entrega do pedido). */
+    private void definirPrincipal(Endereco e) {
+        Long clienteId = TokenStorage.getUsuarioId(requireContext());
+        if (clienteId == null || e.getId() == null) return;
+
+        EnderecoRequest req = new EnderecoRequest(e.getCep(), e.getLogradouro(), e.getNumero(),
+                e.getComplemento(), e.getBairro(), e.getCidade(), e.getUf(), e.getReferencia(), true);
+        RetrofitClient.getApi(requireContext()).atualizarEndereco(clienteId, e.getId(), req)
+                .enqueue(new Callback<EnderecoResponse>() {
+                    @Override
+                    public void onResponse(Call<EnderecoResponse> call, Response<EnderecoResponse> response) {
+                        if (!isAdded()) return;
+                        if (response.isSuccessful()) {
+                            Toast.makeText(requireContext(),
+                                    "Endereço principal atualizado", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    ErrorUtils.extrairMensagem(response), Toast.LENGTH_SHORT).show();
+                        }
+                        carregarEnderecos();
+                    }
+
+                    @Override
+                    public void onFailure(Call<EnderecoResponse> call, Throwable t) {
+                        if (!isAdded()) return;
+                        Toast.makeText(requireContext(),
+                                ErrorUtils.mensagemFalha(t), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void removerEndereco(Endereco e) {

@@ -122,7 +122,9 @@ function normalizarPedido(p) {
   if (!p || typeof p !== 'object' || p.clienteNome !== undefined) return p;
   const c = p.cliente || {};
   const v = p.vendedor || null;
-  const end = (c.enderecos || []).find(e => e.principal) || (c.enderecos || [])[0] || null;
+  // Endereço gravado no pedido; pedidos antigos (sem cópia) caem no principal do cliente
+  const gravado = p.enderecoEntrega || null;
+  const end = gravado || (c.enderecos || []).find(e => e.principal) || (c.enderecos || [])[0] || null;
   return {
     ...p,
     origem: v ? 'PAINEL' : 'APP',
@@ -134,6 +136,7 @@ function normalizarPedido(p) {
     vendedorId: v?.id ?? null,
     vendedorNome: v?.nomeCompleto ?? null,
     enderecoEntrega: end,
+    enderecoGravadoNoPedido: !!gravado,
     itens: (p.itens || []).map(i => ({
       ...i,
       produtoId: i.produto?.id ?? i.produtoId ?? null,

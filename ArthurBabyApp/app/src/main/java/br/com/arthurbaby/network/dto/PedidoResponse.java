@@ -21,6 +21,8 @@ public class PedidoResponse {
     public String confirmadoEm;              // ← era Date
     public String canceladoEm;               // ← era Date
     public List<PedidoStatusHistoricoResponse> historico;
+    /** Endereço de entrega gravado no pedido (nulo na retirada e em pedidos antigos). */
+    public EnderecoEntregaResponse enderecoEntrega;
 
     public static class ClienteResponse {
         public Long id;

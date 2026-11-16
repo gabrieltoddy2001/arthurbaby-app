@@ -2,6 +2,7 @@ package br.com.arthurbaby.service;
 
 import br.com.arthurbaby.dto.*;
 import br.com.arthurbaby.entity.*;
+import br.com.arthurbaby.entity.Enums.FormaRecebimento;
 import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Enums.PedidoStatus;
 import br.com.arthurbaby.entity.Enums.ProdutoStatus;
@@ -95,6 +96,10 @@ public class PedidoService {
         pedido.setVendedor(vendedor);
         if (request.formaRecebimento() != null) pedido.setFormaRecebimento(request.formaRecebimento());
         pedido.setObservacao(request.observacao());
+        if (pedido.getFormaRecebimento() == FormaRecebimento.ENTREGA) {
+            Endereco endereco = enderecoDeEntrega(cliente, request.enderecoId());
+            if (endereco != null) pedido.setEnderecoEntrega(EnderecoEntrega.de(endereco));
+        }
         BigDecimal subtotal = BigDecimal.ZERO;
         for (PedidoItemRequest itemRequest : request.itens()) {
             if (itemRequest.produtoId() == null) throw new IllegalArgumentException("Informe o produto de cada item do pedido.");
@@ -139,6 +144,21 @@ public class PedidoService {
         registrarHistorico(pedido, null, PedidoStatus.PEDIDO_GERADO, vendedor != null ? vendedor : cliente,
                 vendedor != null ? "Pedido lançado no painel por " + vendedor.getNomeCompleto() : "Pedido gerado");
         return pedidos.save(pedido);
+    }
+
+    /**
+     * Endereço da entrega: o escolhido pelo cliente (precisa ser dele) ou, sem escolha, o principal / o primeiro.
+     * Sem escolha e sem endereço cadastrado devolve nulo (comportamento anterior, para não quebrar versões antigas do app).
+     */
+    private Endereco enderecoDeEntrega(Usuario cliente, Long enderecoId) {
+        List<Endereco> enderecos = cliente.getEnderecos();
+        if (enderecoId != null) {
+            return enderecos.stream().filter(e -> enderecoId.equals(e.getId())).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Endereço de entrega não encontrado. Atualize seus endereços e escolha novamente."));
+        }
+        return enderecos.stream().filter(Endereco::isPrincipal).findFirst()
+                .orElse(enderecos.isEmpty() ? null : enderecos.get(0));
     }
 
     /**

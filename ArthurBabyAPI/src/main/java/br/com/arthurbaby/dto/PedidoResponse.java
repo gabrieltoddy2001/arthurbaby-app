@@ -26,7 +26,9 @@ public record PedidoResponse(
         @Schema(description = "Motivo, quando cancelado", nullable = true) String motivoCancelamento,
         @Schema(description = "Quando foi confirmado", nullable = true) LocalDateTime confirmadoEm,
         @Schema(description = "Quando foi cancelado", nullable = true) LocalDateTime canceladoEm,
-        @Schema(description = "Histórico de mudanças de status") List<HistoricoResponse> historico) {
+        @Schema(description = "Histórico de mudanças de status") List<HistoricoResponse> historico,
+        @Schema(description = "Endereço de entrega gravado no pedido (nulo na retirada e em pedidos antigos)", nullable = true)
+        PedidoAdminResponse.EnderecoResumo enderecoEntrega) {
 
     /** Identificação mínima do cliente (sem dados pessoais sensíveis). */
     @Schema(description = "Cliente resumido")
@@ -69,6 +71,7 @@ public record PedidoResponse(
                 p.getConfirmadoEm(), p.getCanceladoEm(),
                 p.getHistorico().stream().map(h -> new HistoricoResponse(
                         h.getStatusAnterior(), h.getStatusNovo(), h.getObservacao(),
-                        h.getUsuario() != null ? h.getUsuario().getId() : null, h.getCriadoEm())).toList());
+                        h.getUsuario() != null ? h.getUsuario().getId() : null, h.getCriadoEm())).toList(),
+                PedidoAdminResponse.enderecoDoPedido(p));
     }
 }

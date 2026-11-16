@@ -156,8 +156,7 @@ public class PerfilFragment extends Fragment {
         );
 
         v.findViewById(R.id.opSair).setOnClickListener(x -> {
-            TokenStorage.limpar(requireContext());
-            FavoritoRepository.getInstance().limpar();
+            br.com.arthurbaby.utils.Sessao.sair(requireContext());
 
             Toast.makeText(requireContext(), "Até logo!", Toast.LENGTH_SHORT).show();
 
