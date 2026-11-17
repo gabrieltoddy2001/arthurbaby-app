@@ -48,7 +48,6 @@ public class JwtService {
                 .subject(usuario.getEmail())
                 .claim("id", usuario.getId())
                 .claim("perfil", usuario.getPerfil().name())
-                .claim("sv", usuario.getTokenVersion())
                 .issuedAt(Date.from(agora))
                 // "iat" do JWT só guarda segundos; com milissegundos, um "sair"/troca de senha no mesmo segundo também invalida
                 .claim("iatMs", agora.toEpochMilli())
@@ -77,13 +76,6 @@ public class JwtService {
         if (emitidoMs == null) return false;
         long marcoMs = usuario.getCredenciaisAlteradasEm().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
         return emitidoMs > marcoMs;
-    }
-
-    /** Recusa JWT de qualquer login anterior da mesma conta. */
-    public boolean versaoSessaoValida(io.jsonwebtoken.Claims claims, Usuario usuario) {
-        if (claims == null || usuario == null || usuario.getTokenVersion() == null) return false;
-        Object sv = claims.get("sv");
-        return sv instanceof Number && ((Number) sv).longValue() == usuario.getTokenVersion();
     }
 
     public String getSubject(String token) {
