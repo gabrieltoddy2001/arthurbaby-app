@@ -33,7 +33,7 @@ public class ClienteAdminController {
 
     @PatchMapping(value = "/{id}/senha", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Redefinir senha exclusivamente de uma conta CLIENTE")
+    @Operation(summary = "Redefinir senha exclusivamente de uma conta CLIENTE", description = "Somente ADMINISTRADOR; o vendedor recebe 403.")
     public void redefinirSenha(@PathVariable Long id, @RequestBody RedefinirSenhaRequest request) {
         if (request == null) throw new IllegalArgumentException("Informe a nova senha");
         service.redefinirSenha(id, request.senha());

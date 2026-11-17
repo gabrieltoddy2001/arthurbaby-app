@@ -41,6 +41,9 @@ public class SecurityConfig {
                         // Áreas exclusivas do ADMINISTRADOR. O menu do painel só esconde as telas; a proteção real é esta.
                         .requestMatchers("/api/admin/usuarios/**", "/api/admin/configuracoes-loja/**", "/api/admin/auditoria/**",
                                 "/api/admin/enderecos/**", "/api/admin/favoritos/**").hasRole("ADMINISTRADOR")
+                        // Redefinir a senha de um cliente é exclusivo do ADMINISTRADOR: o VENDEDOR só troca a própria senha
+                        // (PUT /api/auth/alterar-senha). Precisa vir antes da regra genérica de /api/admin/**.
+                        .requestMatchers(HttpMethod.PATCH, "/api/admin/clientes/*/senha").hasRole("ADMINISTRADOR")
                         // Exclusão física só pelo ADMINISTRADOR (no dia a dia, prefira desativar pelo status)
                         .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
