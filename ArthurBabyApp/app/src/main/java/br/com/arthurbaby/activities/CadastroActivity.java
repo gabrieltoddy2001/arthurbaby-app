@@ -120,8 +120,9 @@ public class CadastroActivity extends AppCompatActivity {
         if (!MaskUtils.validarCpf(cpf)) { etCpf.setError("CPF inválido"); return; }
         if (TextUtils.isEmpty(email)) { etEmail.setError("Informe seu e-mail"); return; }
         if (TextUtils.isEmpty(telefone)) { etTelefone.setError("Informe seu telefone"); return; }
-        if (TextUtils.isEmpty(senha) || senha.length() < 4) {
-            etSenha.setError("Senha deve ter ao menos 4 caracteres"); return;
+        String erroSenha = br.com.arthurbaby.utils.PoliticaSenha.erro(senha);
+        if (erroSenha != null) {
+            etSenha.setError(erroSenha); return;
         }
         if (TextUtils.isEmpty(cep)) { etCep.setError("Informe seu CEP"); return; }
         if (TextUtils.isEmpty(logradouro)) { etLogradouro.setError("Informe o logradouro"); return; }

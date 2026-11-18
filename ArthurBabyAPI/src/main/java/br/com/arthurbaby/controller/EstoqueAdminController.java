@@ -26,8 +26,20 @@ public class EstoqueAdminController {
     private static final String SEM_PERMISSAO = "Acesso negado: apenas perfis ADMINISTRADOR ou VENDEDOR";
 
     private final EstoqueService estoque;
-    public EstoqueAdminController(EstoqueService estoque) {
+    private final br.com.arthurbaby.service.AuditoriaService auditoria;
+    public EstoqueAdminController(EstoqueService estoque, br.com.arthurbaby.service.AuditoriaService auditoria) {
         this.estoque = estoque;
+        this.auditoria = auditoria;
+    }
+
+    /** Executa a operação e registra a auditoria no servidor (o autor vem do token). */
+    private MovimentacaoEstoqueResponse movimentar(Long variacaoId, MovimentoEstoqueTipo tipo, EstoqueOperacaoRequest request, Usuario logado) {
+        if (request == null) throw new IllegalArgumentException("Informe a quantidade.");
+        MovimentacaoEstoqueResponse mov = estoque.movimentarVariacao(variacaoId, tipo, request.quantidade(), logado, request.observacao());
+        auditoria.registrar("MOVIMENTAR_ESTOQUE", "MovimentacaoEstoque", mov.id(),
+                tipo + " de " + mov.quantidade() + " un. no SKU " + mov.sku() + " (saldo " + mov.estoqueAnterior() + " -> " + mov.estoquePosterior() + ")"
+                        + (request.observacao() == null || request.observacao().isBlank() ? "" : ": " + request.observacao()));
+        return mov;
     }
 
     @PostMapping("/entrada")
@@ -40,7 +52,7 @@ public class EstoqueAdminController {
     })
     public MovimentacaoEstoqueResponse entrada(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                                @AuthenticationPrincipal Usuario logado) {
-        return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.ENTRADA, request.quantidade(), logado, request.observacao());
+        return movimentar(variacaoId, MovimentoEstoqueTipo.ENTRADA, request, logado);
     }
 
     @PostMapping("/saida")
@@ -53,7 +65,7 @@ public class EstoqueAdminController {
     })
     public MovimentacaoEstoqueResponse saida(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                              @AuthenticationPrincipal Usuario logado) {
-        return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.SAIDA, request.quantidade(), logado, request.observacao());
+        return movimentar(variacaoId, MovimentoEstoqueTipo.SAIDA, request, logado);
     }
 
     @PostMapping("/ajuste")
@@ -66,7 +78,7 @@ public class EstoqueAdminController {
     })
     public MovimentacaoEstoqueResponse ajuste(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                               @AuthenticationPrincipal Usuario logado) {
-        return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.AJUSTE, request.quantidade(), logado, request.observacao());
+        return movimentar(variacaoId, MovimentoEstoqueTipo.AJUSTE, request, logado);
     }
 
     @PostMapping("/estorno")
@@ -80,6 +92,6 @@ public class EstoqueAdminController {
     })
     public MovimentacaoEstoqueResponse estorno(@Parameter(description = "Id da variação do produto", example = "1") @PathVariable Long variacaoId, @RequestBody EstoqueOperacaoRequest request,
                                                @AuthenticationPrincipal Usuario logado) {
-        return estoque.movimentarVariacao(variacaoId, MovimentoEstoqueTipo.ESTORNO, request.quantidade(), logado, request.observacao());
+        return movimentar(variacaoId, MovimentoEstoqueTipo.ESTORNO, request, logado);
     }
 }

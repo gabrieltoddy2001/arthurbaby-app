@@ -2,6 +2,7 @@ package br.com.arthurbaby.service;
 
 import br.com.arthurbaby.dto.*;
 import br.com.arthurbaby.entity.*;
+import br.com.arthurbaby.entity.Enums.FormaRecebimento;
 import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Enums.PedidoStatus;
 import br.com.arthurbaby.entity.Enums.ProdutoStatus;
@@ -95,6 +96,10 @@ public class PedidoService {
         pedido.setVendedor(vendedor);
         if (request.formaRecebimento() != null) pedido.setFormaRecebimento(request.formaRecebimento());
         pedido.setObservacao(request.observacao());
+        if (pedido.getFormaRecebimento() == FormaRecebimento.ENTREGA) {
+            Endereco endereco = enderecoDeEntrega(cliente, request.enderecoId());
+            if (endereco != null) pedido.setEnderecoEntrega(EnderecoEntrega.de(endereco));
+        }
         BigDecimal subtotal = BigDecimal.ZERO;
         for (PedidoItemRequest itemRequest : request.itens()) {
             if (itemRequest.produtoId() == null) throw new IllegalArgumentException("Informe o produto de cada item do pedido.");
@@ -139,6 +144,21 @@ public class PedidoService {
         registrarHistorico(pedido, null, PedidoStatus.PEDIDO_GERADO, vendedor != null ? vendedor : cliente,
                 vendedor != null ? "Pedido lançado no painel por " + vendedor.getNomeCompleto() : "Pedido gerado");
         return pedidos.save(pedido);
+    }
+
+    /**
+     * Endereço da entrega: o escolhido pelo cliente (precisa ser dele) ou, sem escolha, o principal / o primeiro.
+     * Sem escolha e sem endereço cadastrado devolve nulo (comportamento anterior, para não quebrar versões antigas do app).
+     */
+    private Endereco enderecoDeEntrega(Usuario cliente, Long enderecoId) {
+        List<Endereco> enderecos = cliente.getEnderecos();
+        if (enderecoId != null) {
+            return enderecos.stream().filter(e -> enderecoId.equals(e.getId())).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Endereço de entrega não encontrado. Atualize seus endereços e escolha novamente."));
+        }
+        return enderecos.stream().filter(Endereco::isPrincipal).findFirst()
+                .orElse(enderecos.isEmpty() ? null : enderecos.get(0));
     }
 
     /**
@@ -211,7 +231,8 @@ public class PedidoService {
     @Transactional
     public PedidoResponse alterarStatus(Long id, StatusPedidoRequest request, Usuario logado) {
         Pedido pedido = pedidos.findById(id).orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
-        Usuario usuario = request.usuarioId() == null ? logado : usuarios.findById(request.usuarioId()).orElse(logado);
+        // O responsável registrado no histórico é sempre quem está logado (usuarioId do corpo é ignorado)
+        Usuario usuario = logado;
         aplicarStatus(pedido, request, usuario);
         return PedidoResponse.de(pedidos.save(pedido));
     }
@@ -219,12 +240,12 @@ public class PedidoService {
     private void aplicarStatus(Pedido pedido, StatusPedidoRequest request, Usuario usuario) {
         if (request.status() == null) throw new IllegalArgumentException("Informe o novo status do pedido.");
         if (request.status() == PedidoStatus.CANCELADO) {
+            FluxoPedido.validarCancelamento(pedido, true); // alteração de status é sempre feita pela equipe
             cancelarSemSalvar(pedido, request.motivoCancelamento(), usuario, request.observacao());
             return;
         }
-        if (pedido.getStatus() == PedidoStatus.CANCELADO) throw new IllegalArgumentException("Pedido cancelado não pode mudar de status.");
-        if (pedido.getStatus() == PedidoStatus.ENTREGUE) throw new IllegalArgumentException("Pedido entregue não pode mudar de status.");
-        if (pedido.getStatus() == request.status()) throw new IllegalArgumentException("O pedido já está com o status " + request.status() + ".");
+        // Máquina de estados: avança na ordem (pulando só as etapas opcionais) ou volta uma etapa
+        FluxoPedido.validarTransicao(pedido, request.status());
         PedidoStatus anterior = pedido.getStatus();
         pedido.setStatus(request.status());
         if (request.status() == PedidoStatus.CONFIRMADO && pedido.getConfirmadoEm() == null) pedido.setConfirmadoEm(LocalDateTime.now());
@@ -239,6 +260,8 @@ public class PedidoService {
         Pedido pedido = pedidos.findByNumeroPedido(numeroPedido)
                 .orElseThrow(() -> new NoSuchElementException("Pedido não encontrado."));
         verificarAcesso(pedido, logado);
+        // Cliente só cancela até CONFIRMADO; a equipe, em qualquer etapa antes de ENTREGUE
+        FluxoPedido.validarCancelamento(pedido, equipeLoja(logado));
         return cancelar(pedido, motivo, logado, null);
     }
 

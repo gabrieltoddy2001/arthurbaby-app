@@ -48,7 +48,7 @@
          editando.categoriaId = editando.categoria?.id ?? editando.categoriaId ?? null;
          editando.marcaId = editando.marca?.id ?? editando.marcaId ?? null;
 
-         imagens = [...(editando.imagens || [])];
+         imagens = prepararImagensIniciais(editando.imagens);
 
          variacoes = (editando.variacoes || []).map(v => ({
            ...v,
@@ -267,26 +267,28 @@
            </div>
          </div>
 
-         <div class="card">
+         <div class="card" id="card-imagens">
            <div class="secao-header">
              <h3 class="secao-titulo">Imagens</h3>
-
-             <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
-               <button type="button" class="btn btn-ghost btn-sm" onclick="adicionarImagem()">+ Adicionar URL</button>
-               <button type="button" class="btn btn-accent btn-sm" id="btn-upload-imagem"
-                       onclick="document.getElementById('arquivos-imagem').click()">Enviar fotos</button>
-               <input id="arquivos-imagem" type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      multiple hidden onchange="enviarImagens(this)">
-             </div>
            </div>
 
            <p class="texto-sec" style="margin:.5rem 0">
-             Selecione fotos JPG, PNG, WEBP ou GIF (até 5 MB cada).
-             A primeira foto será a principal. Você também pode continuar usando URLs.
+             Informe um link ou o caminho do arquivo, ou deixe em branco e clique em "Escolher fotos".
+             Também pode arrastar fotos para cá ou colar com Ctrl+V. JPG, PNG, WEBP ou GIF; fotos grandes são reduzidas automaticamente.
            </p>
 
-           <div id="status-upload-imagem" role="status" aria-live="polite"></div>
+           <div class="img-link-linha">
+             <input type="text" id="img-link" autocomplete="off" spellcheck="false"
+                    placeholder="Link (https://...) ou caminho do arquivo (C:\\Fotos\\produto.jpg)"
+                    oninput="atualizarBotaoImagem()"
+                    onkeydown="if (event.key === 'Enter') { event.preventDefault(); acaoBotaoImagem(); }">
+             <button type="button" class="btn btn-accent btn-sm" id="btn-imagem-acao" onclick="acaoBotaoImagem()">Escolher fotos</button>
+             <input id="arquivos-imagem" type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    multiple hidden onchange="enviarImagens(this)">
+           </div>
+
+           <div id="status-upload-imagem" class="img-status" role="status" aria-live="polite"></div>
            <div id="lista-imagens"></div>
          </div>
 
@@ -355,6 +357,7 @@
      `;
 
      renderImagens();
+     configurarZonaImagens();
      renderVariacoes();
      atualizarMargem();
      contarDescricao();
@@ -554,64 +557,392 @@
 
    /* ============================================
       IMAGENS
+      Cada item de `imagens` é { id?, url, descricao, principal } + campos de tela (começam com _):
+      _uid (chave estável), _preview (blob local enquanto envia), _status ('enviando' | 'erro'),
+      _progresso (0-100), _erro (mensagem), _arquivo (para tentar de novo).
+      A ordem do array é a ordem de exibição salva (ordemExibicao = posição + 1).
       ============================================ */
 
-   async function enviarImagens(input) {
-     const arquivos = Array.from(input.files || []);
-     input.value = '';
+   const IMG_TIPOS = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+   const IMG_MAX_BYTES = 5 * 1024 * 1024;
+   const IMG_MAX_LADO = 1600;          // fotos maiores são reduzidas antes do envio
+   const IMG_ENVIOS_SIMULTANEOS = 3;
+   let imgSeq = 0;
+   let imgArrastando = null;
+   let lightboxIndice = -1;
 
+   function novoUid() { return 'img-' + (++imgSeq); }
+
+   function prepararImagensIniciais(lista) {
+     const ordenadas = [...(lista || [])]
+       .sort((a, b) => (a.ordemExibicao ?? 0) - (b.ordemExibicao ?? 0))
+       .map(img => ({ ...img, _uid: novoUid() }));
+     if (ordenadas.length && !ordenadas.some(i => i.principal)) ordenadas[0].principal = true;
+     return ordenadas;
+   }
+
+   function imagensEnviando() {
+     return imagens.some(i => i._status === 'enviando');
+   }
+
+   function formatarBytes(b) {
+     if (b < 1024) return b + ' B';
+     if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
+     return (b / (1024 * 1024)).toFixed(1).replace('.', ',') + ' MB';
+   }
+
+   function statusImagem(msg, tipo = '') {
+     const el = document.getElementById('status-upload-imagem');
+     if (!el) return;
+     el.className = 'img-status' + (tipo ? ' img-status-' + tipo : '');
+     el.textContent = msg || '';
+   }
+
+   /** Reduz fotos grandes (lado maior > 1600px ou arquivo > 1,5 MB) para enviar e carregar mais rápido. GIF fica como está. */
+   async function otimizarImagem(arquivo) {
+     if (arquivo.type === 'image/gif') return arquivo;
+     let bitmap;
+     try {
+       bitmap = await createImageBitmap(arquivo);
+     } catch (_) {
+       return arquivo; // o navegador não decodificou: o servidor valida o formato
+     }
+     const maior = Math.max(bitmap.width, bitmap.height);
+     if (maior <= IMG_MAX_LADO && arquivo.size <= 1.5 * 1024 * 1024) { bitmap.close?.(); return arquivo; }
+
+     const escala = Math.min(1, IMG_MAX_LADO / maior);
+     const canvas = document.createElement('canvas');
+     canvas.width = Math.round(bitmap.width * escala);
+     canvas.height = Math.round(bitmap.height * escala);
+     canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+     bitmap.close?.();
+
+     // PNG vira WEBP (mantém transparência e fica bem menor); JPG e WEBP mantêm o formato.
+     const tipoSaida = arquivo.type === 'image/jpeg' ? 'image/jpeg' : 'image/webp';
+     const blob = await new Promise(r => canvas.toBlob(r, tipoSaida, 0.85));
+     if (!blob || blob.size >= arquivo.size) return arquivo;
+     const ext = tipoSaida === 'image/jpeg' ? '.jpg' : '.webp';
+     return new File([blob], arquivo.name.replace(/\.[^.]+$/, '') + ext, { type: tipoSaida });
+   }
+
+   /** Envia um arquivo com progresso real (XMLHttpRequest expõe o upload.onprogress, o fetch não). */
+   function enviarArquivo(arquivo, aoProgredir) {
+     return new Promise((resolve, reject) => {
+       const xhr = new XMLHttpRequest();
+       xhr.open('POST', `${API_BASE}/admin/imagens/upload`);
+       const token = getToken();
+       if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+       xhr.upload.onprogress = e => { if (e.lengthComputable) aoProgredir(Math.round(e.loaded / e.total * 100)); };
+       xhr.onerror = () => reject(new Error('Sem conexão com o servidor'));
+       xhr.onload = () => {
+         let json = null;
+         try { json = JSON.parse(xhr.responseText); } catch (_) {}
+         if (xhr.status === 401) { limparSessao(); window.location.href = 'login.html'; return reject(new Error('Sessão expirada')); }
+         if (xhr.status >= 200 && xhr.status < 300 && json?.url) return resolve(json.url);
+         reject(new Error(json?.erro || json?.message || `Falha no envio (${xhr.status})`));
+       };
+       const dados = new FormData();
+       dados.append('arquivo', arquivo);
+       xhr.send(dados);
+     });
+   }
+
+   async function processarEnvio(img) {
+     img._status = 'enviando';
+     img._progresso = 0;
+     img._erro = null;
+     atualizarCartaoImagem(img);
+     try {
+       let url;
+       if (img._caminho) {
+         url = await importarPorCaminho(img._caminho);
+       } else {
+         const arquivo = await otimizarImagem(img._arquivo);
+         img._tamanhoEnviado = arquivo.size;
+         url = await enviarArquivo(arquivo, p => { img._progresso = p; atualizarProgresso(img); });
+       }
+       img.url = url;
+       img._status = null;
+       img._arquivo = null;
+       if (img._caminho) img._origem = img._caminho; // mostra o caminho do arquivo ao lado de "Imagem principal"
+       img._caminho = null;
+       // Mantém a prévia local até a imagem do servidor terminar de carregar (sem "piscar")
+       const preload = new Image();
+       preload.onload = preload.onerror = () => {
+         if (img._preview) { URL.revokeObjectURL(img._preview); img._preview = null; }
+         atualizarCartaoImagem(img);
+       };
+       preload.src = urlImagem(url);
+       marcarSujo(true);
+     } catch (erro) {
+       img._status = 'erro';
+       img._erro = erro.message;
+     }
+     atualizarCartaoImagem(img);
+   }
+
+   /** Adiciona arquivos (do seletor, arrastar-e-soltar ou colar). Arquivos inválidos não impedem os demais. */
+   async function adicionarArquivos(lista) {
+     const arquivos = Array.from(lista || []);
      if (!arquivos.length) return;
 
-     const btn = document.getElementById('btn-upload-imagem');
-     const status = document.getElementById('status-upload-imagem');
-     const tipos = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-
-     btn.disabled = true;
-
-     try {
-       for (let i = 0; i < arquivos.length; i++) {
-         const arquivo = arquivos[i];
-
-         if (!tipos.includes(arquivo.type) || arquivo.size > 5 * 1024 * 1024 || !arquivo.size) {
-           throw new Error(`Arquivo inválido: ${arquivo.name}. Use JPG, PNG, WEBP ou GIF de até 5 MB.`);
-         }
-
-         status.textContent = `Enviando ${i + 1} de ${arquivos.length}: ${arquivo.name}`;
-
-         const dados = new FormData();
-         dados.append('arquivo', arquivo);
-
-         const resposta = await fetch(`${API_BASE}/admin/imagens/upload`, {
-           method: 'POST',
-           headers: {
-             Authorization: `Bearer ${getToken() || ''}`,
-           },
-           body: dados,
-         });
-
-         if (!resposta.ok) {
-           const erro = await resposta.json().catch(() => ({}));
-           throw new Error(erro.erro || `Falha no upload (${resposta.status})`);
-         }
-
-         const resultado = await resposta.json();
-
-         imagens.push({
-           url: resultado.url,
-           descricao: arquivo.name,
-           principal: imagens.length === 0,
-         });
-
-         renderImagens();
-         marcarSujo(true);
-       }
-
-       status.textContent = `${arquivos.length} imagem(ns) enviada(s). Clique em Salvar para associar ao produto.`;
-     } catch (erro) {
-       status.textContent = `Erro: ${erro.message}. As imagens já enviadas permanecem na lista.`;
-     } finally {
-       btn.disabled = false;
+     const recusados = [];
+     const novos = [];
+     for (const arquivo of arquivos) {
+       if (!IMG_TIPOS.includes(arquivo.type)) { recusados.push(`${arquivo.name} (formato não aceito)`); continue; }
+       if (!arquivo.size) { recusados.push(`${arquivo.name} (arquivo vazio)`); continue; }
+       // Acima de 5 MB só passa se não for GIF (as fotos grandes são reduzidas antes do envio)
+       if (arquivo.size > IMG_MAX_BYTES && arquivo.type === 'image/gif') { recusados.push(`${arquivo.name} (GIF acima de 5 MB)`); continue; }
+       if (arquivo.size > 25 * 1024 * 1024) { recusados.push(`${arquivo.name} (acima de 25 MB)`); continue; }
+       const img = {
+         _uid: novoUid(),
+         url: '',
+         descricao: arquivo.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim(),
+         principal: imagens.length === 0 && novos.length === 0,
+         _preview: URL.createObjectURL(arquivo),
+         _arquivo: arquivo,
+         _status: 'enviando',
+         _progresso: 0,
+       };
+       novos.push(img);
      }
+     imagens.push(...novos);
+     garantirPrincipal();
+     renderImagens();
+
+     if (recusados.length) statusImagem(`Não adicionadas: ${recusados.join('; ')}. Use JPG, PNG, WEBP ou GIF.`, 'erro');
+     else if (novos.length) statusImagem(`Enviando ${novos.length} imagem(ns)...`);
+
+     // Fila com no máximo 3 envios ao mesmo tempo
+     const fila = [...novos];
+     const trabalhadores = Array.from({ length: Math.min(IMG_ENVIOS_SIMULTANEOS, fila.length) }, async () => {
+       while (fila.length) await processarEnvio(fila.shift());
+     });
+     await Promise.all(trabalhadores);
+
+     if (!novos.length) return;
+     const falhas = novos.filter(i => i._status === 'erro').length;
+     if (falhas) statusImagem(`${novos.length - falhas} enviada(s), ${falhas} com erro. Use "Tentar de novo" na linha da imagem.`, 'erro');
+     else if (!recusados.length) statusImagem(`${novos.length} imagem(ns) enviada(s). Clique em Salvar para gravar no produto.`, 'ok');
+   }
+
+   function enviarImagens(input) {
+     const arquivos = input.files;
+     adicionarArquivos(arquivos).finally(() => { input.value = ''; });
+   }
+
+   function tentarEnviarDeNovo(uid) {
+     const img = imagens.find(i => i._uid === uid);
+     if (img?._arquivo || img?._caminho) processarEnvio(img);
+   }
+
+
+
+   /** A API lê o arquivo no computador onde ela roda (o navegador não pode abrir um caminho digitado). */
+   async function importarPorCaminho(caminho) {
+     const resp = await apiFetch('/admin/imagens/importar-caminho', {
+       method: 'POST',
+       body: JSON.stringify({ caminho }),
+     });
+     let json = null;
+     try { json = await resp.json(); } catch (_) {}
+     if (!resp.ok || !json?.url) {
+       throw new Error(json?.erro || json?.message || `Falha ao importar (${resp.status})`);
+     }
+     return json.url;
+   }
+
+   /** Separa o que foi digitado/colado: aceita vários itens entre aspas (como o "Copiar como caminho" do Windows) ou separados por ";". */
+   function separarEntradas(texto) {
+     const t = (texto || '').trim();
+     if (!t) return [];
+     const entreAspas = t.match(/"[^"]+"/g);
+     if (entreAspas) return entreAspas.map(x => x.slice(1, -1).trim()).filter(Boolean);
+     return t.split(/[;\n]+/).map(x => x.trim()).filter(Boolean);
+   }
+
+   function ehLink(v) { return /^https?:\/\/\S+$/i.test(v); }
+   function ehCaminho(v) { return /^(file:|[a-z]:[\\/]|\\\\|\/)/i.test(v); }
+
+   /** Confere no navegador se o link abre como imagem antes de adicioná-lo (evita salvar link quebrado). */
+   function linkCarregaImagem(url) {
+     return new Promise(resolve => {
+       const teste = new Image();
+       const limite = setTimeout(() => { teste.src = ''; resolve(false); }, 15000);
+       teste.onload = () => { clearTimeout(limite); resolve(teste.naturalWidth > 0); };
+       teste.onerror = () => { clearTimeout(limite); resolve(false); };
+       teste.src = url;
+     });
+   }
+
+   async function adicionarPorLinkOuCaminho() {
+     const campo = document.getElementById('img-link');
+     const entradas = separarEntradas(campo?.value);
+     if (!entradas.length) { campo?.focus(); return; }
+
+     const recusados = [];
+     const caminhos = [];
+     const links = [];
+     for (const e of entradas) {
+       if (imagens.some(i => i.url === e)) recusados.push(`${e} (já está na lista)`);
+       else if (ehLink(e)) links.push(e);
+       else if (ehCaminho(e)) caminhos.push(e);
+       else recusados.push(`${e} (use um link https://... ou o caminho completo, ex.: C:\\Fotos\\produto.jpg)`);
+     }
+     campo.value = '';
+     atualizarBotaoImagem();
+
+     // Caminhos: entram na lista na hora e são importados pela API (com "Tentar de novo" em caso de erro)
+     const novos = caminhos.map(c => ({
+       _uid: novoUid(),
+       url: '',
+       descricao: c.replace(/^"|"$/g, '').split(/[\\/]/).pop().replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim(),
+       principal: false,
+       _caminho: c,
+       _status: 'enviando',
+       _progresso: 0,
+     }));
+     imagens.push(...novos);
+
+     // Links: verifica se abrem como imagem
+     if (links.length) statusImagem(`Verificando ${links.length} link(s)...`);
+     const verificados = await Promise.all(links.map(async url => ({ url, ok: await linkCarregaImagem(url) })));
+     for (const { url, ok } of verificados) {
+       if (!ok) { recusados.push(`${url} (não abriu como imagem)`); continue; }
+       imagens.push({ _uid: novoUid(), url, descricao: '', principal: false });
+     }
+     garantirPrincipal();
+     renderImagens();
+     if (novos.length || verificados.some(v => v.ok)) marcarSujo(true);
+
+     await Promise.all(novos.map(processarEnvio));
+
+     const falhas = novos.filter(i => i._status === 'erro').length;
+     const adicionadas = verificados.filter(v => v.ok).length + novos.length - falhas;
+     const partes = [];
+     if (adicionadas) partes.push(`${adicionadas} imagem(ns) adicionada(s). Clique em Salvar para gravar no produto.`);
+     if (falhas) partes.push(`${falhas} caminho(s) com erro (veja na lista).`);
+     if (recusados.length) partes.push(`Não adicionadas: ${recusados.join('; ')}.`);
+     statusImagem(partes.join(' '), falhas || recusados.length ? 'erro' : 'ok');
+   }
+
+   function garantirPrincipal() {
+     if (imagens.length && !imagens.some(i => i.principal)) imagens[0].principal = true;
+   }
+
+   function removerImagem(uid) {
+     const i = imagens.findIndex(x => x._uid === uid);
+     if (i < 0) return;
+     const [img] = imagens.splice(i, 1);
+     if (img._preview) URL.revokeObjectURL(img._preview);
+     garantirPrincipal();
+     renderImagens();
+     marcarSujo(true);
+   }
+
+   function marcarImagemPrincipal(uid) {
+     imagens.forEach(img => { img.principal = img._uid === uid; });
+     renderImagens();
+     marcarSujo(true);
+   }
+
+   function moverImagem(uid, delta) {
+     const i = imagens.findIndex(x => x._uid === uid);
+     const j = i + delta;
+     if (i < 0 || j < 0 || j >= imagens.length) return;
+     [imagens[i], imagens[j]] = [imagens[j], imagens[i]];
+     renderImagens();
+     marcarSujo(true);
+     document.querySelector(`[data-uid="${uid}"] .img-${delta < 0 ? 'subir' : 'descer'}`)?.focus();
+   }
+
+   function alterarDescricaoImagem(uid, valor) {
+     const img = imagens.find(x => x._uid === uid);
+     if (img) img.descricao = valor;
+   }
+
+   /* ----- Renderização ----- */
+
+   function srcDaImagem(img) {
+     return img._preview || urlImagem(img.url);
+   }
+
+   function htmlCartaoImagem(img, i) {
+     const total = imagens.length;
+     const enviando = img._status === 'enviando';
+     const erro = img._status === 'erro';
+     const src = srcDaImagem(img);
+     return `
+       <div class="linha-imagem ${enviando ? 'enviando' : ''} ${erro ? 'com-erro' : ''}"
+            data-uid="${img._uid}" draggable="${enviando ? 'false' : 'true'}"
+            ondragstart="iniciarArrasteImagem(event, '${img._uid}')" ondragend="terminarArrasteImagem()"
+            ondragover="sobreCartaoImagem(event, '${img._uid}')" ondrop="soltarNoCartaoImagem(event, '${img._uid}')">
+         <div class="preview ${src ? 'carregando' : ''}" ${src && !erro ? `onclick="abrirLightbox('${img._uid}')" title="Clique para ampliar" style="cursor:zoom-in"` : ''}>
+           ${src
+             ? `<img src="${escapeAttr(src)}" alt="" loading="lazy" decoding="async"
+                     onload="this.parentElement.classList.remove('carregando')"
+                     onerror="falhaAoCarregarImagem(this, '${img._uid}')">`
+             : '<span style="font-size:.7rem;color:var(--texto-secundario);text-align:center;">sem<br>imagem</span>'}
+         </div>
+
+         <div class="campos-imagem">
+           <input type="text" placeholder="Descrição (opcional)" maxlength="255"
+                  value="${escapeAttr(img.descricao || '')}"
+                  oninput="alterarDescricaoImagem('${img._uid}', this.value)">
+
+           ${enviando ? `
+             <div class="img-envio">
+               <div class="img-progresso ${img._caminho ? 'indeterminado' : ''}"><div class="img-progresso-barra" style="width:${img._progresso || 0}%"></div></div>
+               <span class="img-progresso-texto">${img._caminho ? 'Importando do computador...' : img._progresso >= 100 ? 'Processando...' : `Enviando ${img._progresso || 0}%`}</span>
+             </div>` : erro ? `
+             <div class="img-envio img-envio-erro">
+               <span>Falha no envio: ${escapeHtml(img._erro || '')}</span>
+               ${img._arquivo || img._caminho ? `<button type="button" class="btn-mini" onclick="tentarEnviarDeNovo('${img._uid}')">Tentar de novo</button>` : ''}
+             </div>` : `
+             <div class="img-principal-linha">
+               <label style="display:flex; align-items:center; gap:.4rem; font-size:.85rem; flex-shrink:0;">
+                 <input type="radio" name="img-principal" ${img.principal ? 'checked' : ''}
+                        onchange="marcarImagemPrincipal('${img._uid}')">
+                 Imagem principal
+               </label>
+               ${htmlOrigemImagem(img)}
+             </div>`}
+         </div>
+
+         <div class="img-acoes-linha">
+           <button type="button" class="img-ordem-btn img-subir" onclick="moverImagem('${img._uid}', -1)" ${i === 0 ? 'disabled' : ''}
+                   title="Subir (ordem de exibição)" aria-label="Subir imagem ${i + 1}">▲</button>
+           <button type="button" class="img-ordem-btn img-descer" onclick="moverImagem('${img._uid}', 1)" ${i === total - 1 ? 'disabled' : ''}
+                   title="Descer (ordem de exibição)" aria-label="Descer imagem ${i + 1}">▼</button>
+           <button type="button" class="btn-mini inativar" onclick="removerImagem('${img._uid}')">Remover</button>
+         </div>
+       </div>`;
+   }
+
+   /**
+    * Caminho ou endereço da imagem, ao lado de "Imagem principal". Imagens importadas por caminho nesta sessão
+    * mostram o caminho do arquivo; as demais, o endereço gravado no produto (link abre a imagem em nova aba).
+    */
+   /** "C:\Users\User\...\Fotos\body.jpg" -> "C:\Users\…\Fotos\body.jpg": mantém o início e o nome do arquivo visíveis. */
+   function abreviarCaminho(caminho) {
+     const limpo = caminho.replace(/^"|"$/g, '');
+     if (limpo.length <= 60) return limpo;
+     const sep = limpo.includes('\\') ? '\\' : '/';
+     const partes = limpo.split(/[\\/]/);
+     if (partes.length <= 4) return limpo;
+     return [partes[0], partes[1], '…', partes[partes.length - 2], partes[partes.length - 1]].join(sep);
+   }
+
+   function htmlOrigemImagem(img) {
+     const endereco = (img.url || '').trim();
+     if (!endereco && !img._origem) return '';
+     const texto = img._origem ? abreviarCaminho(img._origem) : endereco;
+     const titulo = img._origem ? `Arquivo: ${img._origem}\nEndereço gravado: ${endereco}` : endereco;
+     const tipo = img._origem ? 'img-origem-arquivo' : 'img-origem-link';
+     return endereco
+       ? `<a class="img-origem ${tipo}" href="${escapeAttr(urlImagem(endereco))}" target="_blank" rel="noopener noreferrer"
+             title="${escapeAttr(titulo)}">${escapeHtml(texto)}</a>`
+       : `<span class="img-origem ${tipo}" title="${escapeAttr(titulo)}">${escapeHtml(texto)}</span>`;
    }
 
    function renderImagens() {
@@ -621,75 +952,209 @@
      if (imagens.length === 0) {
        div.innerHTML = `
          <p style="color:var(--texto-secundario);font-size:.9rem;padding:.5rem 0;">
-           Nenhuma imagem adicionada. Clique em "+ Adicionar URL" ou em "Enviar fotos".
+           Nenhuma imagem adicionada. Clique em "Escolher fotos" ou informe um link/caminho acima.
          </p>
        `;
        return;
      }
 
-     div.innerHTML = imagens.map((img, i) => `
-       <div class="linha-imagem">
-         <div class="preview">
-           ${img.url
-             ? `<img src="${escapeAttr(img.url)}" alt=""
-                     style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.innerHTML='<span style=\\'font-size:.65rem;color:#EF4444;text-align:center;padding:.3rem;\\'>não<br>carregou</span>'">`
-             : '<span style="font-size:.7rem;color:var(--texto-secundario);text-align:center;">sem<br>imagem</span>'}
-         </div>
-
-         <div class="campos-imagem">
-           <input type="text" id="img-url-${i}" placeholder="URL da imagem"
-                  value="${escapeAttr(img.url || '')}"
-                  oninput="imagens[${i}].url = this.value;"
-                  onblur="renderImagens();">
-
-           <input type="text" id="img-desc-${i}" placeholder="Descrição (opcional)"
-                  value="${escapeAttr(img.descricao || '')}"
-                  oninput="imagens[${i}].descricao = this.value;">
-
-           <label style="display:flex; align-items:center; gap:.4rem; font-size:.85rem;">
-             <input type="radio" name="img-principal" ${img.principal ? 'checked' : ''}
-                    onchange="marcarImagemPrincipal(${i})">
-             Imagem principal
-           </label>
-         </div>
-
-         <button type="button" class="btn-mini inativar" onclick="removerImagem(${i})">Remover</button>
-       </div>
-     `).join('');
+     div.innerHTML = imagens.map(htmlCartaoImagem).join('');
    }
 
-   function adicionarImagem() {
-     imagens.push({
-       url: '',
-       descricao: '',
-       ordemExibicao: imagens.length,
-       principal: imagens.length === 0,
-     });
-
-     renderImagens();
+   /** Atualiza só o cartão da imagem (evita redesenhar a grade inteira e perder o foco da descrição). */
+   function atualizarCartaoImagem(img) {
+     const atual = document.querySelector(`[data-uid="${img._uid}"]`);
+     const i = imagens.indexOf(img);
+     if (!atual || i < 0) return;
+     const tmp = document.createElement('div');
+     tmp.innerHTML = htmlCartaoImagem(img, i);
+     atual.replaceWith(tmp.firstElementChild);
    }
 
-   function removerImagem(i) {
-     const eraPrincipal = imagens[i].principal;
+   function atualizarProgresso(img) {
+     const cartao = document.querySelector(`[data-uid="${img._uid}"]`);
+     if (!cartao) return;
+     const barra = cartao.querySelector('.img-progresso-barra');
+     const texto = cartao.querySelector('.img-progresso-texto');
+     if (barra) barra.style.width = img._progresso + '%';
+     if (texto) texto.textContent = img._progresso >= 100 ? 'Processando...' : `Enviando ${img._progresso}%`;
+   }
 
-     imagens.splice(i, 1);
-
-     if (eraPrincipal && imagens.length > 0) {
-       imagens[0].principal = true;
+   function falhaAoCarregarImagem(el, uid) {
+     const thumb = el.parentElement;
+     thumb.classList.remove('carregando');
+     thumb.removeAttribute('onclick');
+     thumb.style.cursor = '';
+     el.remove();
+     if (!thumb.querySelector('.img-falha')) {
+       thumb.insertAdjacentHTML('beforeend', `
+         <button type="button" class="img-falha" title="Não carregou. Clique para tentar de novo"
+                 onclick="event.stopPropagation(); recarregarImagem('${uid}')">não<br>carregou<br>↻</button>`);
      }
+   }
 
+   function recarregarImagem(uid) {
+     const img = imagens.find(x => x._uid === uid);
+     const thumb = document.querySelector(`[data-uid="${uid}"] .preview`);
+     if (!img || !thumb) return;
+     thumb.querySelector('.img-falha')?.remove();
+     thumb.classList.add('carregando');
+     const src = srcDaImagem(img);
+     const novo = document.createElement('img');
+     novo.alt = '';
+     novo.onload = () => {
+       thumb.classList.remove('carregando');
+       thumb.setAttribute('onclick', `abrirLightbox('${uid}')`);
+       thumb.style.cursor = 'zoom-in';
+     };
+     novo.onerror = () => falhaAoCarregarImagem(novo, uid);
+     novo.src = src + (src.startsWith('blob:') ? '' : (src.includes('?') ? '&' : '?') + 'r=' + Date.now());
+     thumb.prepend(novo);
+   }
+
+   /* ----- Arrastar para reordenar ----- */
+
+   function iniciarArrasteImagem(e, uid) {
+     imgArrastando = uid;
+     e.dataTransfer.effectAllowed = 'move';
+     e.dataTransfer.setData('text/plain', uid);
+     requestAnimationFrame(() => document.querySelector(`[data-uid="${uid}"]`)?.classList.add('arrastando'));
+   }
+
+   function terminarArrasteImagem() {
+     imgArrastando = null;
+     document.querySelectorAll('.linha-imagem.arrastando, .linha-imagem.alvo').forEach(el => el.classList.remove('arrastando', 'alvo'));
+   }
+
+   function sobreCartaoImagem(e, uid) {
+     if (!imgArrastando || imgArrastando === uid) return;
+     e.preventDefault();
+     document.querySelectorAll('.linha-imagem.alvo').forEach(el => el.classList.remove('alvo'));
+     document.querySelector(`[data-uid="${uid}"]`)?.classList.add('alvo');
+   }
+
+   function soltarNoCartaoImagem(e, uid) {
+     if (!imgArrastando) return; // arquivos soltos sobre a grade: tratados pela zona de envio
+     e.preventDefault();
+     e.stopPropagation();
+     const de = imagens.findIndex(x => x._uid === imgArrastando);
+     const para = imagens.findIndex(x => x._uid === uid);
+     terminarArrasteImagem();
+     if (de < 0 || para < 0 || de === para) return;
+     const [img] = imagens.splice(de, 1);
+     imagens.splice(para, 0, img);
      renderImagens();
      marcarSujo(true);
    }
 
-   function marcarImagemPrincipal(i) {
-     imagens.forEach((img, idx) => {
-       img.principal = idx === i;
-     });
+   /* ----- Zona de envio: clicar, arrastar arquivos ou colar (Ctrl+V) ----- */
 
-     renderImagens();
-     marcarSujo(true);
+   /** Botão único: com link/caminho digitado, adiciona; com o campo vazio, abre o explorador para escolher as fotos. */
+   function acaoBotaoImagem() {
+     const valor = (document.getElementById('img-link')?.value || '').trim();
+     if (valor) adicionarPorLinkOuCaminho();
+     else document.getElementById('arquivos-imagem').click();
+   }
+
+   function atualizarBotaoImagem() {
+     const btn = document.getElementById('btn-imagem-acao');
+     if (!btn) return;
+     const temTexto = !!(document.getElementById('img-link')?.value || '').trim();
+     btn.textContent = temTexto ? 'Adicionar' : 'Escolher fotos';
+     btn.title = temTexto ? 'Adicionar a imagem do link/caminho informado' : 'Abrir o explorador para escolher fotos';
+   }
+
+   /** Arrastar arquivos para o card de Imagens ou colar (Ctrl+V) faz o mesmo que "Escolher fotos". */
+   function configurarZonaImagens() {
+     const card = document.getElementById('card-imagens');
+     if (!card) return;
+     let profundidade = 0;
+     const temArquivos = e => Array.from(e.dataTransfer?.types || []).includes('Files');
+
+     card.addEventListener('dragenter', e => { if (!temArquivos(e)) return; e.preventDefault(); profundidade++; card.classList.add('img-soltar'); });
+     card.addEventListener('dragover', e => { if (!temArquivos(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+     card.addEventListener('dragleave', e => { if (!temArquivos(e)) return; if (--profundidade <= 0) { profundidade = 0; card.classList.remove('img-soltar'); } });
+     card.addEventListener('drop', e => {
+       if (!temArquivos(e)) return;
+       e.preventDefault();
+       profundidade = 0;
+       card.classList.remove('img-soltar');
+       adicionarArquivos(e.dataTransfer.files);
+     });
+     document.addEventListener('paste', e => {
+       const alvo = e.target;
+       if (alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA')) return;
+       const arquivos = Array.from(e.clipboardData?.files || []).filter(f => f.type.startsWith('image/'));
+       if (arquivos.length) { e.preventDefault(); adicionarArquivos(arquivos); }
+     });
+   }
+
+   /* ----- Visualização ampliada ----- */
+
+   function imagensVisiveis() {
+     return imagens.filter(i => srcDaImagem(i) && i._status !== 'erro');
+   }
+
+   function abrirLightbox(uid) {
+     const lista = imagensVisiveis();
+     lightboxIndice = lista.findIndex(i => i._uid === uid);
+     if (lightboxIndice < 0) return;
+     let lb = document.getElementById('img-lightbox');
+     if (!lb) {
+       lb = document.createElement('div');
+       lb.id = 'img-lightbox';
+       lb.className = 'img-lightbox';
+       lb.setAttribute('role', 'dialog');
+       lb.setAttribute('aria-modal', 'true');
+       lb.innerHTML = `
+         <button type="button" class="lb-fechar" onclick="fecharLightbox()" aria-label="Fechar">✕</button>
+         <button type="button" class="lb-nav lb-ant" onclick="navegarLightbox(-1)" aria-label="Imagem anterior">‹</button>
+         <figure>
+           <div class="lb-palco carregando"><img id="lb-img" alt=""></div>
+           <figcaption id="lb-legenda"></figcaption>
+         </figure>
+         <button type="button" class="lb-nav lb-prox" onclick="navegarLightbox(1)" aria-label="Próxima imagem">›</button>`;
+       lb.addEventListener('click', e => { if (e.target === lb) fecharLightbox(); });
+       document.body.appendChild(lb);
+       document.addEventListener('keydown', e => {
+         if (!document.getElementById('img-lightbox')?.classList.contains('aberto')) return;
+         if (e.key === 'Escape') fecharLightbox();
+         if (e.key === 'ArrowLeft') navegarLightbox(-1);
+         if (e.key === 'ArrowRight') navegarLightbox(1);
+       });
+     }
+     lb.classList.add('aberto');
+     mostrarNoLightbox();
+     lb.querySelector('.lb-fechar').focus();
+   }
+
+   function mostrarNoLightbox() {
+     const lista = imagensVisiveis();
+     const img = lista[lightboxIndice];
+     if (!img) return fecharLightbox();
+     const palco = document.querySelector('#img-lightbox .lb-palco');
+     const el = document.getElementById('lb-img');
+     palco.classList.add('carregando');
+     el.onload = () => palco.classList.remove('carregando');
+     el.onerror = () => palco.classList.remove('carregando');
+     el.src = srcDaImagem(img);
+     el.alt = img.descricao || 'Imagem do produto';
+     const pos = imagens.indexOf(img) + 1;
+     document.getElementById('lb-legenda').textContent =
+       `${pos} de ${imagens.length}${img.principal ? ' · Principal' : ''}${img.descricao ? ' · ' + img.descricao : ''}`;
+     const varias = lista.length > 1;
+     document.querySelectorAll('#img-lightbox .lb-nav').forEach(b => { b.hidden = !varias; });
+   }
+
+   function navegarLightbox(delta) {
+     const total = imagensVisiveis().length;
+     if (!total) return;
+     lightboxIndice = (lightboxIndice + delta + total) % total;
+     mostrarNoLightbox();
+   }
+
+   function fecharLightbox() {
+     document.getElementById('img-lightbox')?.classList.remove('aberto');
    }
 
    /* ============================================
@@ -893,6 +1358,10 @@
        variacoes: variacoes,
      };
 
+     if (imagensEnviando()) return mostrarErro('Aguarde o envio das imagens terminar antes de salvar.');
+     if (imagens.some(i => i._status === 'erro')) {
+       return mostrarErro('Há imagens que não foram enviadas: use "Tentar de novo" ou remova-as antes de salvar.');
+     }
      if (!body.nome) return mostrarErro('O nome é obrigatório.');
      if (!body.codigo) return mostrarErro('O código é obrigatório.');
      if (!body.sku) return mostrarErro('O SKU é obrigatório.');

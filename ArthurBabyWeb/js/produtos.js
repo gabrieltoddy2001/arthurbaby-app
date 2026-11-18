@@ -120,7 +120,7 @@
    
            const imgPrincipal = (p.imagens || []).find(i => i.principal) || (p.imagens || [])[0];
            const imgHtml = imgPrincipal?.url
-             ? `<img src="${escapeAttr(imgPrincipal.url)}" alt=""
+             ? `<img src="${escapeAttr(urlImagem(imgPrincipal.url))}" loading="lazy" alt=""
                      style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--borda);"
                      onerror="this.parentElement.innerHTML='<div style=\\'width:50px;height:50px;background:#FEE2E2;border-radius:6px;border:1px solid #FCA5A5;display:grid;place-items:center;font-size:.6rem;color:#991B1B;text-align:center;\\'>não<br>carregou</div>'">`
              : `<div style="width:50px;height:50px;background:var(--superficie);border-radius:6px;

@@ -9,4 +9,4 @@ public record StatusPedidoRequest(
         @Schema(description = "Novo status", example = "CONFIRMADO") PedidoStatus status,
         @Schema(description = "Observação gravada no histórico", example = "Pagamento confirmado via PIX") String observacao,
         @Schema(description = "Obrigatório quando status = CANCELADO", example = "Cliente desistiu da compra") String motivoCancelamento,
-        @Schema(description = "Id do usuário responsável pela alteração (registrado no histórico)", example = "2") Long usuarioId) {}
+        @Schema(description = "Ignorado: o responsável registrado no histórico é sempre o usuário do token", example = "2", deprecated = true) Long usuarioId) {}

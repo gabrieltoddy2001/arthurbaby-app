@@ -19,24 +19,57 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final JwtService jwt;
 
-    public AuthService(UsuarioRepository usuarios, PasswordEncoder encoder, JwtService jwt) {
+    private final LimiteTentativasLogin limiteTentativas;
+    /** Hash de uma senha aleatória, gerado na primeira tentativa com conta inexistente (iguala o tempo de resposta). */
+    private volatile String hashFicticio;
+
+    public AuthService(UsuarioRepository usuarios, PasswordEncoder encoder, JwtService jwt, LimiteTentativasLogin limiteTentativas) {
+        this.limiteTentativas = limiteTentativas;
         this.usuarios = usuarios;
         this.encoder = encoder;
         this.jwt = jwt;
     }
 
+    /** Mesma mensagem para usuário inexistente e senha errada: não revela quais e-mails/CPFs têm conta. */
+    static final String LOGIN_INVALIDO = "E-mail/CPF ou senha inválidos.";
+
+    @Transactional
     public AuthResponse login(LoginRequest request) {
+        return login(request, null);
+    }
+
+    private String hashFicticio() {
+        if (hashFicticio == null) hashFicticio = encoder.encode(java.util.UUID.randomUUID().toString());
+        return hashFicticio;
+    }
+
+    /** {@code ip}: endereço de quem tentou, usado no limite de tentativas (pode ser nulo). */
+    @Transactional
+    public AuthResponse login(LoginRequest request, String ip) {
         String login = request.login() == null ? "" : request.login().trim();
+        limiteTentativas.verificar(login, ip);
         String loginNormalizado = login.contains("@") ? login.toLowerCase(Locale.ROOT) : login;
-        Usuario usuario = usuarios.findByEmail(loginNormalizado)
+        Usuario usuario = loginNormalizado.isEmpty() ? null : usuarios.findByEmail(loginNormalizado)
                 .or(() -> usuarios.findByCpf(loginNormalizado.replaceAll("\\D", "")))
-                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
-        if (!encoder.matches(request.senha(), usuario.getSenha())) {
-            throw new IllegalArgumentException("Senha invalida");
+                .orElse(null);
+        String senha = request.senha() == null ? "" : request.senha();
+        boolean senhaConfere = encoder.matches(senha, usuario != null ? usuario.getSenha() : hashFicticio());
+        if (usuario == null || !senhaConfere) {
+            limiteTentativas.registrarFalha(login, ip);
+            throw new IllegalArgumentException(LOGIN_INVALIDO);
         }
+        limiteTentativas.registrarSucesso(login);
+        // Só depois da senha certa: informar que a conta está inativa não revela nada a quem não sabe a senha
         if (!usuario.isEnabled()) {
             throw new IllegalArgumentException("Conta inativa. Entre em contato com o suporte.");
         }
+        // Invalida os tokens de logins anteriores sem alterar as protecoes existentes.
+        if (usuarios.incrementarVersaoToken(usuario.getId()) != 1) {
+            throw new IllegalStateException("Nao foi possivel atualizar a sessao");
+        }
+        Long novaVersao = usuarios.obterVersaoToken(usuario.getId());
+        if (novaVersao == null) throw new IllegalStateException("Versao da sessao nao encontrada");
+        usuario.setTokenVersion(novaVersao);
         return new AuthResponse(jwt.gerarToken(usuario), usuario.getId(), usuario.getNomeCompleto(), usuario.getPerfil().name());
     }
 
@@ -50,6 +83,8 @@ public class AuthService {
             if (!validarCpf(cpf)) throw new IllegalArgumentException("CPF invalido");
             if (usuarios.existsByCpf(cpf)) throw new IllegalArgumentException("CPF ja cadastrado");
         }
+
+        PoliticaSenha.validar(request.senha(), email, cpf);
 
         Usuario usuario = new Usuario();
         usuario.setNomeCompleto(request.nomeCompleto());
@@ -90,9 +125,20 @@ public class AuthService {
         if (!encoder.matches(request.senhaAtual(), usuario.getSenha())) {
             throw new IllegalArgumentException("Senha atual incorreta");
         }
+        PoliticaSenha.validar(request.novaSenha(), usuario.getEmail(), usuario.getCpf());
 
         usuario.setSenha(encoder.encode(request.novaSenha()));
+        usuario.invalidarSessoes(); // tokens emitidos antes da troca deixam de valer
         usuarios.save(usuario);
+    }
+
+    /** "Sair": invalida todos os tokens já emitidos para o usuário (em qualquer aparelho). */
+    @Transactional
+    public void logout(Long usuarioId) {
+        usuarios.findById(usuarioId).ifPresent(usuario -> {
+            usuario.invalidarSessoes();
+            usuarios.save(usuario);
+        });
     }
 
     static String normalizarEmail(String email) {

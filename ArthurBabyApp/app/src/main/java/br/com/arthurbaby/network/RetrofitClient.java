@@ -19,7 +19,7 @@ public class RetrofitClient {
      * - Celular físico: "api.url" do local.properties (IP do PC na mesma rede Wi-Fi).
      *   Antes o IP ficava fixo no código e, quando o IP do PC mudava, o login dava timeout.
      */
-    static final String URL_EMULADOR = "http://10.0.2.2:8080/";
+    static final String URL_EMULADOR = br.com.arthurbaby.BuildConfig.API_URL; // padrão http://10.0.2.2:8080/
     private static final String BASE_URL = ehEmulador() ? URL_EMULADOR : br.com.arthurbaby.BuildConfig.API_URL;
 
     private static boolean ehEmulador() {
@@ -57,7 +57,9 @@ public class RetrofitClient {
         okhttp3.Interceptor authCheck = chain -> {
             okhttp3.Request request = chain.request();
             okhttp3.Response response = chain.proceed(request);
-            if (response.code() == 401 && request.header("Authorization") != null) {
+            // O próprio "Sair" pode receber 401 (token já vencido): a pessoa já está saindo, não é "sessão expirada"
+            if (response.code() == 401 && request.header("Authorization") != null
+                    && !request.url().encodedPath().equals("/api/auth/logout")) {
                 SessionExpiredHandler.tratar(appContext);
             }
             return response;

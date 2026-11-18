@@ -76,7 +76,8 @@
 
             <EditText
                 android:id="@+id/etBusca"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:minHeight="44dp"
                 android:hint="Roupinhas, enxoval, acessórios..."
@@ -88,6 +89,20 @@
                 android:inputType="text"
                 android:imeOptions="actionSearch"
                 android:singleLine="true" />
+
+            <!-- Histórico: abre/fecha as buscas recentes a qualquer momento -->
+            <ImageView
+                android:id="@+id/btnHistoricoBusca"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="9dp"
+                android:src="@drawable/ic_historico"
+                app:tint="@color/rosa_arthur"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:tooltipText="Buscas recentes"
+                android:contentDescription="Buscas recentes" />
         </LinearLayout>
     </LinearLayout>
 
@@ -148,7 +163,7 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- BUSCAS RECENTES (visível só quando o campo está vazio) -->
+    <!-- BUSCAS RECENTES (aparece ao abrir a tela e com o campo vazio; o botão de histórico da barra abre/fecha) -->
     <LinearLayout
         android:id="@+id/containerHistorico"
         android:layout_width="match_parent"

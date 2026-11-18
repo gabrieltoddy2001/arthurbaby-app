@@ -28,13 +28,24 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // /me e /alterar-senha ficam antes da liberacao de /api/auth/** porque exigem token
-                        .requestMatchers("/api/auth/me", "/api/auth/alterar-senha").authenticated()
+                        .requestMatchers("/api/auth/me", "/api/auth/alterar-senha", "/api/auth/logout").authenticated()
                         .requestMatchers("/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/h2-console/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cupons/validar").permitAll()
                         // "Meus Cupons": lista publica de cupons vigentes, consultada antes do checkout
                         .requestMatchers(HttpMethod.GET, "/api/cupons/ativos").permitAll()
+                        // Histórico de movimentações (saldos, fornecedor, responsável) não é público: só a equipe da loja.
+                        // Precisa vir antes da liberação de /api/estoque/** (o app não usa estas rotas).
+                        .requestMatchers(HttpMethod.GET, "/api/estoque/*/movimentacoes").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                         .requestMatchers(HttpMethod.GET, "/api/categorias", "/api/produtos", "/api/produtos/**", "/api/estoque/**").permitAll()
+                        // Áreas exclusivas do ADMINISTRADOR. O menu do painel só esconde as telas; a proteção real é esta.
+                        .requestMatchers("/api/admin/usuarios/**", "/api/admin/configuracoes-loja/**", "/api/admin/auditoria/**",
+                                "/api/admin/enderecos/**", "/api/admin/favoritos/**").hasRole("ADMINISTRADOR")
+                        // Redefinir a senha de um cliente é exclusivo do ADMINISTRADOR: o VENDEDOR só troca a própria senha
+                        // (PUT /api/auth/alterar-senha). Precisa vir antes da regra genérica de /api/admin/**.
+                        .requestMatchers(HttpMethod.PATCH, "/api/admin/clientes/*/senha").hasRole("ADMINISTRADOR")
+                        // Exclusão física só pelo ADMINISTRADOR (no dia a dia, prefira desativar pelo status)
+                        .requestMatchers(HttpMethod.DELETE, "/api/admin/**").hasRole("ADMINISTRADOR")
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMINISTRADOR", "VENDEDOR")
                         .anyRequest().authenticated())
                 // Erros de segurança no mesmo formato JSON do ApiExceptionHandler: { "erro": ..., "codigo": ... }

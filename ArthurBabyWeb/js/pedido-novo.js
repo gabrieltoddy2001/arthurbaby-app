@@ -13,16 +13,18 @@ let produtos = [];
 let clienteSel = null;
 let itens = [];          // { produtoId, variacaoId, nome, variacaoDescricao, sku, preco, quantidade, estoque }
 let cupomAplicado = null; // resposta de /cupons/validar
+let enderecoSelId = null; // endereço de entrega escolhido (padrão: o principal do cliente)
 
 async function init() {
   const conteudo = document.getElementById('conteudo');
   conteudo.innerHTML = '<div class="loading">Carregando clientes e produtos...</div>';
   try {
-    const [usuarios, prods] = await Promise.all([
-      adminApi.listar('usuarios'),
+    // /admin/clientes devolve só contas CLIENTE (o vendedor não tem acesso à lista de usuários internos)
+    const [listaClientes, prods] = await Promise.all([
+      apiJson('/admin/clientes', {}, 'Erro ao listar clientes'),
       adminApi.listar('produtos'),
     ]);
-    clientes = usuarios
+    clientes = (listaClientes || [])
       .filter(u => u.perfil === 'CLIENTE' && u.status === 'ATIVO')
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     produtos = prods
@@ -182,11 +184,14 @@ function selecionarCliente(id) {
     return;
   }
   clienteSel = c;
+  const ends = c.enderecos || [];
+  enderecoSelId = (ends.find(x => x.principal) || ends[0])?.id ?? null;
   renderCliente();
 }
 
 function trocarCliente() {
   clienteSel = null;
+  enderecoSelId = null;
   renderCliente();
   document.getElementById('busca-cliente')?.focus();
 }
@@ -361,10 +366,21 @@ function renderResumo() {
   const aviso = document.getElementById('aviso-endereco');
   if (aviso) {
     if (forma === 'ENTREGA' && clienteSel) {
-      const e = (clienteSel.enderecos || []).find(x => x.principal) || (clienteSel.enderecos || [])[0];
-      aviso.innerHTML = e
-        ? `Entrega em: ${escapeHtml(e.logradouro)}, ${escapeHtml(e.numero)} — ${escapeHtml(e.bairro)}, ${escapeHtml(e.cidade)}/${escapeHtml(e.uf)}`
-        : '<span style="color:var(--erro);">Cliente sem endereço cadastrado. Use retirada ou peça o cadastro do endereço no app.</span>';
+      const ends = clienteSel.enderecos || [];
+      const rotulo = e => `${e.logradouro || ''}, ${e.numero || 's/n'}${e.complemento ? ' — ' + e.complemento : ''} — `
+        + `${e.bairro || ''}, ${e.cidade || ''}/${e.uf || ''}${e.principal ? ' (principal)' : ''}`;
+      if (!ends.length) {
+        aviso.innerHTML = '<span style="color:var(--erro);">Cliente sem endereço cadastrado. Use retirada ou peça o cadastro do endereço no app.</span>';
+      } else if (ends.length === 1) {
+        aviso.innerHTML = `Entrega em: ${escapeHtml(rotulo(ends[0]))}`;
+      } else {
+        // Mais de um endereço: o vendedor escolhe onde entregar (o mesmo que o cliente faz no app)
+        aviso.innerHTML = `
+          <label for="f-endereco" style="display:block;margin:.25rem 0;">Entregar em</label>
+          <select id="f-endereco" onchange="enderecoSelId = Number(this.value)" style="width:100%;">
+            ${ends.map(e => `<option value="${e.id}" ${e.id === enderecoSelId ? 'selected' : ''}>${escapeHtml(rotulo(e))}</option>`).join('')}
+          </select>`;
+      }
     } else {
       aviso.textContent = '';
     }
@@ -407,6 +423,7 @@ async function finalizar() {
       cupom: cupom || null,
       observacao: document.getElementById('f-obs').value.trim() || null,
       itens: itens.map(i => ({ produtoId: i.produtoId, variacaoId: i.variacaoId, quantidade: i.quantidade })),
+      enderecoId: forma === 'ENTREGA' ? enderecoSelId : null,
     });
     window.location.href = `pedido-detalhe.html?id=${criado.id}`;
   } catch (err) {

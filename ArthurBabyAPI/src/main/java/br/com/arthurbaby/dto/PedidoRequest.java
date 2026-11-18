@@ -18,4 +18,13 @@ public record PedidoRequest(
         @Schema(description = "Ignorado: o desconto é calculado a partir do cupom", example = "0", deprecated = true) BigDecimal desconto,
         @Schema(description = "Ignorado: o frete é calculado no servidor", example = "0", deprecated = true) BigDecimal frete,
         @Schema(description = "Observação do cliente para a loja", example = "Entregar após as 14h") String observacao,
-        @Schema(description = "Itens selecionados no carrinho do app para esta compra (ao menos um); enviados diretamente na criação do pedido") List<PedidoItemRequest> itens) {}
+        @Schema(description = "Itens selecionados no carrinho do app para esta compra (ao menos um); enviados diretamente na criação do pedido") List<PedidoItemRequest> itens,
+        @Schema(description = "Endereço de entrega escolhido (um dos endereços do cliente). Opcional: na ENTREGA sem ele, "
+                + "usa o endereço principal; ignorado na RETIRADA_LOJA", example = "7", nullable = true) Long enderecoId) {
+
+    /** Sem endereço escolhido (versões do app anteriores à escolha de endereço e o painel). */
+    public PedidoRequest(Long clienteId, FormaRecebimento formaRecebimento, String cupom, BigDecimal desconto,
+                         BigDecimal frete, String observacao, List<PedidoItemRequest> itens) {
+        this(clienteId, formaRecebimento, cupom, desconto, frete, observacao, itens, null);
+    }
+}

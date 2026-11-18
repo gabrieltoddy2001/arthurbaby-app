@@ -43,7 +43,11 @@ function renderDetalhe() {
   const finalizado = p.status === 'CANCELADO' || p.status === 'ENTREGUE';
   const etapas = etapasDoPedido(p);
   const idxAtual = etapas.indexOf(p.status);
-  const proxima = !finalizado && idxAtual >= 0 && idxAtual < etapas.length - 1 ? etapas[idxAtual + 1] : null;
+  // Regras de transição vêm da API (FluxoPedido): só aparecem as mudanças permitidas agora
+  const permitidos = Array.isArray(p.proximosStatus) ? p.proximosStatus : null;
+  const proximaLocal = !finalizado && idxAtual >= 0 && idxAtual < etapas.length - 1 ? etapas[idxAtual + 1] : null;
+  const proxima = p.proximaEtapa !== undefined ? p.proximaEtapa : proximaLocal;
+  const podeCancelar = p.podeCancelar !== undefined ? p.podeCancelar : !finalizado;
 
   const fluxoHtml = p.status === 'CANCELADO'
     ? `<div class="alert alert-erro" style="margin:0;display:block;">
@@ -101,9 +105,11 @@ function renderDetalhe() {
         `Olá ${p.clienteNome?.split(' ')[0] || ''}! Sobre o seu pedido ${p.numeroPedido} na Lojão Arthur Baby: status atual "${rotuloStatus(p.status)}".`)}`
     : null;
 
-  const opcoesStatus = Object.keys(STATUS_PEDIDO)
-    .filter(s => s !== 'CANCELADO' && s !== p.status)
-    .map(s => `<option value="${s}" ${s === proxima ? 'selected' : ''}>${rotuloStatus(s)}</option>`)
+  const opcoesStatus = (permitidos || Object.keys(STATUS_PEDIDO).filter(s => s !== 'CANCELADO' && s !== p.status))
+    .map(s => {
+      const voltar = etapas.indexOf(s) >= 0 && etapas.indexOf(s) < idxAtual;
+      return `<option value="${s}" ${s === proxima ? 'selected' : ''}>${rotuloStatus(s)}${voltar ? ' (voltar etapa)' : ''}</option>`;
+    })
     .join('');
 
   conteudo.innerHTML = `
@@ -119,7 +125,7 @@ function renderDetalhe() {
         <div class="no-print">
           <button class="btn btn-ghost" onclick="voltar()">Voltar</button>
           <button class="btn btn-ghost" onclick="window.print()">Imprimir</button>
-          ${!finalizado ? `<button class="btn btn-danger" onclick="cancelar()">Cancelar pedido</button>` : ''}
+          ${podeCancelar ? `<button class="btn btn-danger" onclick="cancelar()">Cancelar pedido</button>` : ''}
         </div>
       </div>
 
@@ -131,7 +137,7 @@ function renderDetalhe() {
           <span class="badge ${classeStatus(p.status)}" style="font-size:.85rem;padding:.35rem .8rem;">${rotuloStatus(p.status)}</span>
         </div>
         ${fluxoHtml}
-        ${!finalizado ? `
+        ${!finalizado && opcoesStatus ? `
           <div class="grid-2 no-print" style="align-items:end;">
             <div class="field" style="margin-bottom:0;">
               <label for="f-novo-status">Alterar para</label>
@@ -200,7 +206,9 @@ function renderDetalhe() {
             <p><strong>${p.formaRecebimento === 'ENTREGA' ? 'Entrega no endereço' : 'Retirada na loja'}</strong></p>
             ${p.formaRecebimento === 'ENTREGA' ? `
               <p style="margin-top:.5rem;font-size:.9rem;">${enderecoHtml}</p>
-              <p class="texto-mini" style="margin-top:.4rem;">Endereço principal do cadastro do cliente.</p>` : ''}
+              <p class="texto-mini" style="margin-top:.4rem;">${p.enderecoGravadoNoPedido
+                ? 'Endereço escolhido no pedido.'
+                : 'Pedido antigo, sem endereço gravado: mostrando o endereço principal atual do cliente.'}</p>` : ''}
             ${p.observacao ? `<p style="margin-top:.75rem;"><strong>Observação:</strong> ${escapeHtml(p.observacao)}</p>` : ''}
           </div>
         </div>
@@ -230,7 +238,7 @@ function mudarStatus() {
   const obs = document.getElementById('f-obs-status').value.trim();
   const etapas = etapasDoPedido(pedido);
   if (etapas.indexOf(novo) >= 0 && etapas.indexOf(novo) < etapas.indexOf(pedido.status)) {
-    if (!confirm(`O status "${rotuloStatus(novo)}" é anterior ao atual. Deseja voltar o pedido mesmo assim?`)) return;
+    if (!confirm(`Voltar o pedido para "${rotuloStatus(novo)}"? A correção fica registrada no histórico.`)) return;
   }
   if (novo === 'ENTREGUE' && !confirm('Marcar como ENTREGUE finaliza o pedido (não poderá mais ser alterado). Confirmar?')) return;
   enviarStatus(novo, obs, null, `Status alterado para "${rotuloStatus(novo)}".`);

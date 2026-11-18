@@ -22,7 +22,8 @@ public class DataInitializer {
     CommandLineRunner seed(UsuarioRepository usuarios, CategoriaRepository categorias, MarcaRepository marcas,
                            TamanhoRepository tamanhos, CorRepository cores, ModeloRepository modelos,
                            ProdutoRepository produtos, ProdutoImagemRepository imagens, ProdutoVariacaoRepository variacoes,
-                           ConfiguracaoLojaRepository configs, CupomRepository cupons, PasswordEncoder encoder) {
+                           ConfiguracaoLojaRepository configs, CupomRepository cupons, PasswordEncoder encoder,
+                           SenhaInicialSeed senhaInicial) {
         return args -> {
             if (configs.count() == 0) {
                 ConfiguracaoLoja c = new ConfiguracaoLoja();
@@ -36,11 +37,13 @@ public class DataInitializer {
                 configs.save(c);
             }
             if (usuarios.count() == 0) {
-                Usuario admin = usuario("Administrador ArthurBaby", "admin@arthurbaby.com.br", "123456", Perfil.ADMINISTRADOR, encoder);
-                Usuario vendedor = usuario("Carlos Almeida", "vendedor@arthurbaby.com.br", "123456", Perfil.VENDEDOR, encoder);
-                Usuario ana = usuario("Ana Souza", "ana.souza@email.com", "123456", Perfil.CLIENTE, encoder);
-                Usuario mariana = usuario("Mariana Santos", "mariana.santos@email.com", "123456", Perfil.CLIENTE, encoder);
-                Usuario mariaTeste = usuario("Maria Teste Silva Atualizada", "maria.teste@exemplo.com", "123456", Perfil.CLIENTE, encoder);
+                // Senha das contas iniciais: SEED_SENHA_INICIAL (fora do codigo); sem ela, aleatoria e mostrada no log
+                String senhaSeed = senhaInicial.senha();
+                Usuario admin = usuario("Administrador ArthurBaby", "admin@arthurbaby.com.br", senhaSeed, Perfil.ADMINISTRADOR, encoder);
+                Usuario vendedor = usuario("Carlos Almeida", "vendedor@arthurbaby.com.br", senhaSeed, Perfil.VENDEDOR, encoder);
+                Usuario ana = usuario("Ana Souza", "ana.souza@email.com", senhaSeed, Perfil.CLIENTE, encoder);
+                Usuario mariana = usuario("Mariana Santos", "mariana.santos@email.com", senhaSeed, Perfil.CLIENTE, encoder);
+                Usuario mariaTeste = usuario("Maria Teste Silva Atualizada", "maria.teste@exemplo.com", senhaSeed, Perfil.CLIENTE, encoder);
                 usuarios.saveAll(List.of(admin, vendedor, ana, mariana, mariaTeste));
             }
             if (categorias.count() == 0) {

@@ -10,12 +10,13 @@
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
    
      try {
-       const [usuarios, peds] = await Promise.all([
-         adminApi.listar('usuarios'),
+       const [lista, peds] = await Promise.all([
+         // Endpoint dedicado: o próprio servidor só retorna contas CLIENTE.
+         apiJson('/admin/clientes', {}, 'Erro ao listar clientes'),
          adminApi.listar('pedidos'),
        ]);
-       // Filtra só clientes
-       clientes = usuarios.filter(u => u.perfil === 'CLIENTE');
+       // Defesa adicional no navegador; usuários internos nunca são exibidos.
+       clientes = (Array.isArray(lista) ? lista : []).filter(u => u.perfil === 'CLIENTE');
        pedidos = peds;
        renderTudo();
      } catch (err) {
@@ -193,7 +194,7 @@
    
          <div class="modal-acoes" style="margin-top:1.5rem;justify-content:space-between;">
            <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-             <button type="button" class="btn btn-accent" onclick="resetarSenha(${c.id})">Redefinir senha</button>
+             ${ehAdmin() ? `<button type="button" class="btn btn-accent" onclick="resetarSenha(${c.id})">Redefinir senha</button>` : ''}
              ${c.status === 'ATIVO' ? `<button type="button" class="btn btn-primary" onclick="novoPedidoPara(${c.id})">+ Novo pedido</button>` : ''}
            </div>
            <button type="button" class="btn btn-ghost" onclick="fecharModal()">Fechar</button>
@@ -218,7 +219,11 @@
      if (!confirm(msg)) return;
    
      try {
-       await adminApi.atualizar('usuarios', id, { ...c, status: novoStatus });
+       // Não usa o CRUD genérico de usuários: evita mexer em contas administrativas.
+       await apiJson(`/admin/clientes/${id}/status`, {
+         method: 'PATCH',
+         body: JSON.stringify({ status: novoStatus }),
+       }, 'Erro ao alterar status do cliente');
        await carregar();
      } catch (err) {
        alert('Erro: ' + err.message);
@@ -228,12 +233,35 @@
    /* ============================================
       RESETAR SENHA
       ============================================ */
-   function resetarSenha(id) {
+   async function resetarSenha(id) {
+     // Só o administrador redefine senha de cliente (a API também bloqueia o vendedor com 403).
+     if (!ehAdmin()) {
+       alert('Apenas o administrador pode redefinir a senha de um cliente.');
+       return;
+     }
      const c = clientes.find(x => x.id === id);
      if (!c) return;
-   
+
      fecharModal();
-     redefinirSenhaUsuario(c, carregar);
+     const nova = prompt(`Nova senha para "${c.nome}"\n${POLITICA_SENHA}`);
+     if (nova === null) return;
+     const erroSenha = erroPoliticaSenha(nova);
+     if (erroSenha) {
+       alert(erroSenha);
+       return;
+     }
+     try {
+       // Alteração restrita a CLIENTE no backend, sem regravar os dados cadastrais.
+       await apiJson(`/admin/clientes/${id}/senha`, {
+         method: 'PATCH',
+         body: JSON.stringify({ senha: nova }),
+       }, 'Erro ao redefinir a senha do cliente');
+       // A auditoria é registrada pelo servidor (autor tirado do token), não pelo navegador.
+       alert('Senha redefinida. Informe a nova senha ao usuário por um canal seguro.');
+       await carregar();
+     } catch (err) {
+       alert('Erro ao redefinir senha: ' + err.message);
+     }
    }
 
    function novoPedidoPara(id) {

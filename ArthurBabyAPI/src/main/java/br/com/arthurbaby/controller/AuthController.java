@@ -42,9 +42,13 @@ public class AuthController {
     @Operation(summary = "Fazer login", description = "Autentica o usuário com email (ou CPF) e senha e retorna o token JWT e os dados do usuário.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login realizado; retorna o token JWT e os dados do usuário"),
-            @ApiResponse(responseCode = "400", description = "Usuário não encontrado, senha inválida ou conta inativa")
+            @ApiResponse(responseCode = "400", description = "E-mail/CPF ou senha inválidos (mesma mensagem nos dois casos) ou conta inativa"),
+            @ApiResponse(responseCode = "429", description = "Muitas tentativas erradas: conta ou IP bloqueados por 15 minutos")
     })
-    public AuthResponse login(@RequestBody LoginRequest request) { return auth.login(request); }
+    public AuthResponse login(@RequestBody LoginRequest request, jakarta.servlet.http.HttpServletRequest http) {
+        // IP de quem tentou: o limite de tentativas vale por conta e também por IP
+        return auth.login(request, http.getRemoteAddr());
+    }
 
     @PostMapping("/cadastro")
     @ResponseStatus(HttpStatus.CREATED)
@@ -64,6 +68,18 @@ public class AuthController {
         return ClienteResponse.from(logado);
     }
 
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Sair", description = "Invalida todos os tokens já emitidos para o usuário logado (em qualquer aparelho). "
+            + "Depois disso, as requisições com esses tokens recebem 401 e é preciso fazer login novamente.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Sessões encerradas"),
+            @ApiResponse(responseCode = "401", description = "Token ausente, inválido ou já encerrado")
+    })
+    public void logout(@AuthenticationPrincipal Usuario logado) {
+        auth.logout(logado.getId());
+    }
+
     @PostMapping("/recuperar-senha")
     @Operation(summary = "Recuperar senha", description = "Gera um token descartável de redefinição de senha, válido por 1 hora, e o envia ao e-mail "
             + "(em desenvolvimento o token é impresso no log). A resposta é a mesma exista ou não o e-mail e nunca contém o token.")
@@ -81,7 +97,7 @@ public class AuthController {
     @Operation(summary = "Redefinir senha", description = "Define uma nova senha a partir do token de recuperação recebido. O token só pode ser usado uma vez.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Senha redefinida com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Token inválido, já usado ou expirado, ou nova senha com menos de 4 caracteres")
+            @ApiResponse(responseCode = "400", description = "Token inválido, já usado ou expirado, ou nova senha fora da política (8 a 72 caracteres, com letra e número)")
     })
     public void redefinirSenha(@RequestBody RedefinirSenhaRequest request) {
         passwordReset.redefinirSenha(request.token(), request.novaSenha());

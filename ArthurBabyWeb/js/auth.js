@@ -30,7 +30,19 @@
     return usuario?.perfil === 'ADMINISTRADOR';
   }
 
-  function logout() {
+  /* Sair: a API invalida o token (e qualquer cópia dele) antes de a sessão ser apagada deste navegador.
+     Se a API não responder, a sessão local é apagada mesmo assim (o token expira sozinho em até 2 horas). */
+  async function logout() {
+    const token = getToken();
+    if (token && typeof API_BASE !== 'undefined') {
+      try {
+        await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          keepalive: true,
+        });
+      } catch (_) { /* sem conexão: segue para o login */ }
+    }
     limparSessao();
     window.location.href = 'login.html';
   }

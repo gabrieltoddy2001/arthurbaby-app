@@ -24,13 +24,16 @@ public class ConfirmaPedidoFragment extends Fragment {
     private static final String ARG_FRETE = "frete";
     private static final String ARG_DESCONTO = "desconto";
     private static final String ARG_CUPOM = "cupom";
+    private static final String ARG_ENDERECO = "endereco";
 
     public static ConfirmaPedidoFragment newInstance(String numeroPedido, String formaRecebimento,
                                                      String observacao, double total,
                                                      double subtotal, double frete,
-                                                     double desconto, String cupom) {
+                                                     double desconto, String cupom,
+                                                     String enderecoEntrega) {
         ConfirmaPedidoFragment f = new ConfirmaPedidoFragment();
         Bundle b = new Bundle();
+        b.putString(ARG_ENDERECO, enderecoEntrega);
         b.putString(ARG_NUMERO, numeroPedido);
         b.putString(ARG_FORMA, formaRecebimento);
         b.putString(ARG_OBS, observacao);
@@ -66,7 +69,10 @@ public class ConfirmaPedidoFragment extends Fragment {
 
         TextView tvObrigado = v.findViewById(R.id.tvObrigado);
         String recebTxt = "ENTREGA".equals(forma) ? "Entrega" : "Retirada na loja";
+        String endereco = args != null ? args.getString(ARG_ENDERECO, null) : null;
         tvObrigado.setText("Forma de recebimento: " + recebTxt
+                + ("ENTREGA".equals(forma) && endereco != null && !endereco.isEmpty()
+                ? "\nEntregar em: " + endereco : "")
                 + (obs.isEmpty() ? "" : "\nObservação: " + obs)
                 + "\n\nVocê receberá atualizações sobre o pedido");
 

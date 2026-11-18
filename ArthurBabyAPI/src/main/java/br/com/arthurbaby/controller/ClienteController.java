@@ -8,6 +8,7 @@ import br.com.arthurbaby.dto.EnderecoResponse;
 import br.com.arthurbaby.dto.MensagemResponse;
 import br.com.arthurbaby.entity.Enums.Perfil;
 import br.com.arthurbaby.entity.Usuario;
+import br.com.arthurbaby.service.AcessoUsuarioService;
 import br.com.arthurbaby.service.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,14 +26,18 @@ import java.util.List;
 /** Perfil e endereços do cliente. Cada método chama {@link #verificarAcesso} antes de delegar ao serviço. */
 @RestController
 @RequestMapping(value = "/api/clientes", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Clientes", description = "Perfil e endereços do cliente. Exige token; o cliente só acessa os próprios dados, administrador e vendedor acessam qualquer cliente.")
+@Tag(name = "Clientes", description = "Perfil e endereços do cliente. Exige token; o cliente só acessa os próprios dados, o vendedor só acessa clientes e o administrador acessa qualquer conta.")
 public class ClienteController {
     private static final String OUTRO_CLIENTE = "Acesso negado: dados pertencem a outro cliente";
     /** Mensagem de sucesso da troca de senha (tambem usada pelo AuthController). */
     public static final String MENSAGEM_SENHA_ALTERADA = "Senha alterada com sucesso.";
 
     private final ClienteService service;
-    public ClienteController(ClienteService service) { this.service = service; }
+    private final AcessoUsuarioService acesso;
+    public ClienteController(ClienteService service, AcessoUsuarioService acesso) {
+        this.service = service;
+        this.acesso = acesso;
+    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar perfil do cliente", description = "Retorna os dados do cliente identificado pelo id informado. Cliente só acessa o próprio perfil; administrador e vendedor acessam qualquer um.")
@@ -62,16 +67,20 @@ public class ClienteController {
 
     @PutMapping("/{id}/senha")
     @Operation(summary = "Alterar senha do cliente", description = "Troca a senha do cliente identificado pelo id, conferindo antes a senha atual. "
-            + "Mesmo efeito de PUT /api/auth/alterar-senha, mas com o id na URL.")
+            + "Mesmo efeito de PUT /api/auth/alterar-senha, mas com o id na URL. O vendedor só pode trocar a própria senha.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "{ \"mensagem\": \"" + MENSAGEM_SENHA_ALTERADA + "\" }"),
-            @ApiResponse(responseCode = "400", description = "Senha atual incorreta ou nova senha com menos de 4 caracteres"),
+            @ApiResponse(responseCode = "400", description = "Senha atual incorreta ou nova senha fora da política (8 a 72 caracteres, com letra e número)"),
             @ApiResponse(responseCode = "403", description = OUTRO_CLIENTE),
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
     public MensagemResponse alterarSenha(@Parameter(description = "Id do cliente", example = "3") @PathVariable Long id, @RequestBody AlterarSenhaRequest request,
                                          @AuthenticationPrincipal Usuario logado) {
         verificarAcesso(id, logado);
+        // O VENDEDOR pode ver dados de clientes, mas só troca a PRÓPRIA senha (nunca a de outra pessoa).
+        if (logado.getPerfil() == Perfil.VENDEDOR && !logado.getId().equals(id)) {
+            throw new AccessDeniedException("Acesso negado: o vendedor só pode alterar a própria senha");
+        }
         service.alterarSenha(id, request);
         return new MensagemResponse(MENSAGEM_SENHA_ALTERADA);
     }
@@ -159,13 +168,10 @@ public class ClienteController {
     }
 
     /**
-     * Regra de acesso: administrador e vendedor acessam qualquer cliente;
-     * o cliente só acessa os próprios dados (id do token igual ao id da URL). Caso contrário, 403.
+     * Regra de acesso (ver {@link AcessoUsuarioService}): o cliente só acessa os próprios dados;
+     * o vendedor só acessa contas CLIENTE; o administrador acessa qualquer conta. Caso contrário, 403.
      */
     private void verificarAcesso(Long id, Usuario logado) {
-        boolean equipeLoja = logado.getPerfil() == Perfil.ADMINISTRADOR || logado.getPerfil() == Perfil.VENDEDOR;
-        if (!equipeLoja && !logado.getId().equals(id)) {
-            throw new AccessDeniedException("Acesso negado a dados de outro cliente");
-        }
+        acesso.verificar(id, logado, "Acesso negado a dados de outro cliente");
     }
 }
