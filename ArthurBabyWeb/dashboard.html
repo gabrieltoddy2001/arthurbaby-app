@@ -6,6 +6,8 @@
   <title>Dashboard — ArthurBaby Admin</title>
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Biblioteca para o Gráfico -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="app"></div>
@@ -19,62 +21,144 @@
       await carregarDashboard();
     });
 
+    // Ícones SVG
+    const SVG = {
+      box: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+      alert: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+      fileText: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+      zap: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+      folder: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+      tag: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+      receipt: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>',
+      chartBar: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+      trendingUp: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+      settings: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
+    };
+
     async function carregarDashboard() {
       const conteudo = document.getElementById('conteudo');
       conteudo.innerHTML = '<div class="loading">Carregando indicadores...</div>';
 
       try {
-        const [produtos, pedidos, usuarios] = await Promise.all([
+        // Busca tudo em paralelo, incluindo as configurações
+        const [produtos, pedidos, usuarios, configs] = await Promise.all([
           adminApi.listar('produtos'),
           adminApi.listar('pedidos'),
           adminApi.listar('usuarios'),
+          adminApi.listar('configuracoes-loja')
         ]);
 
-        renderDashboard(produtos, pedidos, usuarios);
+        const config = configs.length > 0 ? configs[0] : {};
+        renderDashboard(produtos, pedidos, usuarios, config);
       } catch (err) {
         conteudo.innerHTML = `<div class="alert alert-erro">Erro: ${err.message}</div>`;
       }
     }
 
-    function renderDashboard(produtos, pedidos, usuarios) {
+    function renderDashboard(produtos, pedidos, usuarios, config) {
       const conteudo = document.getElementById('conteudo');
 
-      /* ===== KPIs ===== */
+      /* ===== CÁLCULOS GERAIS ===== */
       const produtosAtivos = produtos.filter(p => p.status === 'ATIVO').length;
       const pedidosValidos = pedidos.filter(p => p.status !== 'CANCELADO');
-      const faturamento = pedidosValidos.reduce((s, p) => s + p.total, 0);
+      const faturamentoTotal = pedidosValidos.reduce((s, p) => s + Number(p.total || 0), 0);
       const clientesAtivos = usuarios.filter(u => u.perfil === 'CLIENTE' && u.status === 'ATIVO').length;
       const pedidosPendentes = pedidos.filter(p =>
         ['RASCUNHO', 'PEDIDO_GERADO', 'EM_ANALISE', 'AGUARDANDO_CONFIRMACAO'].includes(p.status)
       ).length;
 
-      /* ===== Estoque baixo ===== */
+      // Ticket Médio Geral
+      const ticketMedio = pedidosValidos.length > 0 ? (faturamentoTotal / pedidosValidos.length) : 0;
+
+      /* ===== META E COMPARATIVO ===== */
+      const hoje = new Date();
+      const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      const inicioMesPassado = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+      const fimMesPassado = new Date(hoje.getFullYear(), hoje.getMonth(), 0, 23, 59, 59);
+
+      const pedidosMesAtual = pedidosValidos.filter(p => new Date(p.criadoEm) >= inicioMesAtual);
+      const faturamentoMesAtual = pedidosMesAtual.reduce((s, p) => s + Number(p.total || 0), 0);
+      
+      const pedidosMesPassado = pedidosValidos.filter(p => {
+        const d = new Date(p.criadoEm);
+        return d >= inicioMesPassado && d <= fimMesPassado;
+      });
+      const faturamentoMesPassado = pedidosMesPassado.reduce((s, p) => s + Number(p.total || 0), 0);
+
+      let comparativo = 0;
+      if (faturamentoMesPassado > 0) {
+        comparativo = ((faturamentoMesAtual - faturamentoMesPassado) / faturamentoMesPassado) * 100;
+      }
+
+      const metaMensal = Number(config.metaFaturamentoMensal || 0);
+      const pctMeta = metaMensal > 0 ? (faturamentoMesAtual / metaMensal) * 100 : 0;
+
+      /* ===== ESTOQUE E PEDIDOS RECENTES ===== */
       const produtosCriticos = produtos
         .map(p => ({ p, atual: estoqueProduto(p), minimo: p.estoqueMinimo || 0 }))
         .filter(({ atual, minimo }) => atual <= minimo)
         .sort((a, b) => a.atual - b.atual)
         .slice(0, 5);
 
-      /* ===== Últimos pedidos ===== */
       const ultimosPedidos = [...pedidos]
         .sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm))
         .slice(0, 5);
 
-      /* ===== Pedidos por status ===== */
       const porStatus = {};
       pedidos.forEach(p => {
         porStatus[p.status] = (porStatus[p.status] || 0) + 1;
       });
-      const maxStatus = Math.max(...Object.values(porStatus), 1);
+      
       const statusOrdem = [
-        'PEDIDO_GERADO', 'EM_ANALISE', 'AGUARDANDO_CONFIRMACAO', 'CONFIRMADO',
-        'SEPARANDO_PRODUTOS', 'PRONTO_PARA_RETIRADA', 'EM_TRANSPORTE',
-        'ENTREGUE', 'CANCELADO',
+        'RASCUNHO', 'PEDIDO_GERADO', 'EM_ANALISE', 'AGUARDANDO_CONFIRMACAO',
+        'CONFIRMADO', 'SEPARANDO_PRODUTOS', 'PRONTO_PARA_RETIRADA',
+        'EM_TRANSPORTE', 'ENTREGUE', 'CANCELADO',
       ];
 
       conteudo.innerHTML = `
         <!-- ===== KPIs ===== -->
         <div class="cards-kpi">
+          
+          <!-- FATURAMENTO -->
+          <div class="kpi-card" style="border-left:4px solid var(--rosa); display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div class="kpi-label">Faturamento (Mês Atual)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem; margin-bottom:.25rem;">
+                <div class="kpi-valor" style="color:var(--rosa-escuro);font-size:1.35rem;">
+                  R$ ${formatarPreco(faturamentoMesAtual)}
+                </div>
+                ${faturamentoMesPassado > 0 ? `
+                  <span style="font-size:0.8rem; font-weight:700; color:${comparativo >= 0 ? 'var(--verde-escuro)' : 'var(--erro)'}; display:flex; align-items:center;" title="Comparado ao mês passado (R$ ${formatarPreco(faturamentoMesPassado)})">
+                    ${comparativo >= 0 ? '▲' : '▼'} ${Math.abs(comparativo).toFixed(1)}%
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+            
+            ${metaMensal > 0 ? `
+              <div style="margin-top:.75rem;">
+                <div style="display:flex; justify-content:space-between; font-size:.75rem; color:var(--texto-secundario); margin-bottom:.25rem;">
+                  <span>Meta: R$ ${formatarPreco(metaMensal)}</span>
+                  <span>${pctMeta.toFixed(1)}%</span>
+                </div>
+                <div style="height:6px; background:var(--borda-suave); border-radius:3px; overflow:hidden;">
+                  <div style="height:100%; width:${Math.min(pctMeta, 100)}%; background:${pctMeta >= 100 ? 'var(--verde)' : 'linear-gradient(90deg, #F59E0B, #10B981)'}; transition: width 0.5s;"></div>
+                </div>
+              </div>
+            ` : `<div style="font-size:.75rem; color:var(--texto-secundario); margin-top:.5rem;">Defina uma meta em Configurações.</div>`}
+          </div>
+
+          <!-- TICKET MÉDIO -->
+          <div class="kpi-card" style="border-left:4px solid var(--info);">
+            <div class="kpi-label">Ticket Médio</div>
+            <div class="kpi-valor" style="color:var(--info);">R$ ${formatarPreco(ticketMedio)}</div>
+            <div style="font-size:.8rem;color:var(--texto-secundario);margin-top:.25rem;">
+              por pedido válido
+            </div>
+          </div>
+
+          <!-- PRODUTOS ATIVOS -->
           <div class="kpi-card" style="border-left:4px solid var(--verde);">
             <div class="kpi-label">Produtos ativos</div>
             <div class="kpi-valor" style="color:var(--verde-escuro);">${produtosAtivos}</div>
@@ -82,6 +166,8 @@
               de ${produtos.length} cadastrados
             </div>
           </div>
+
+          <!-- PEDIDOS -->
           <div class="kpi-card" style="border-left:4px solid #F59E0B;">
             <div class="kpi-label">Pedidos</div>
             <div class="kpi-valor" style="color:#F59E0B;">${pedidos.length}</div>
@@ -89,54 +175,60 @@
               ${pedidosPendentes} pendente${pedidosPendentes === 1 ? '' : 's'}
             </div>
           </div>
-          <div class="kpi-card" style="border-left:4px solid var(--rosa);">
-            <div class="kpi-label">Faturamento</div>
-            <div class="kpi-valor" style="color:var(--rosa-escuro);font-size:1.35rem;">
-              R$ ${formatarPreco(faturamento)}
-            </div>
-            <div style="font-size:.8rem;color:var(--texto-secundario);margin-top:.25rem;">
-              ${pedidosValidos.length} pedido${pedidosValidos.length === 1 ? '' : 's'} válido${pedidosValidos.length === 1 ? '' : 's'}
-            </div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Clientes ativos</div>
-            <div class="kpi-valor">${clientesAtivos}</div>
-            <div style="font-size:.8rem;color:var(--texto-secundario);margin-top:.25rem;">
-              cadastrados no sistema
-            </div>
-          </div>
         </div>
 
-        <!-- ===== 2 colunas: Pedidos por status + Estoque baixo ===== -->
-        <div class="grid-dashboard" style="display:grid;grid-template-columns:1fr 1fr;">
+        <!-- ===== 2 colunas: Gráfico de Evolução + Resumo de Pedidos ===== -->
+        <div class="grid-dashboard" style="display:grid;grid-template-columns: 2fr 1fr; gap: 1rem;">
+          
+          <!-- COLUNA ESQUERDA: Gráfico de Faturamento (Chart.js) -->
+          <div class="card" style="display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+              <h3 class="secao-titulo" style="margin:0; display:flex; align-items:center; gap:.5rem;">
+                ${SVG.trendingUp} Evolução do Faturamento
+              </h3>
+              <span class="badge badge-verde">Últimos 6 Meses</span>
+            </div>
+            
+            <div style="flex:1; position:relative; min-height: 280px; width: 100%;">
+              <canvas id="graficoFaturamento"></canvas>
+            </div>
+          </div>
 
-          <!-- Pedidos por status -->
+          <!-- COLUNA DIREITA: Resumo compacto de pedidos -->
           <div class="card">
-            <h3 class="secao-titulo">📦 Pedidos por status</h3>
-            ${Object.keys(porStatus).length === 0
-              ? '<p style="color:var(--texto-secundario);font-size:.9rem;">Nenhum pedido cadastrado.</p>'
-              : statusOrdem.filter(s => porStatus[s]).map(s => {
+            <h3 class="secao-titulo" style="display:flex; align-items:center; gap:.5rem; margin-bottom:1rem;">
+              ${SVG.box} Status dos Pedidos
+            </h3>
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+              ${statusOrdem.filter(s => porStatus[s]).map(s => {
                   const qtd = porStatus[s];
-                  const pct = (qtd / maxStatus) * 100;
+                  const pct = (qtd / pedidos.length) * 100;
                   return `
-                    <div style="margin-bottom:.75rem;">
-                      <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.25rem;">
-                        <span><span class="badge ${classeStatus(s)}" style="font-size:.7rem;">${rotuloStatus(s)}</span></span>
+                    <div>
+                      <div style="display:flex; justify-content:space-between; font-size:.8rem; margin-bottom:.25rem;">
+                        <span class="badge ${classeStatus(s)}" style="font-size:.7rem; padding: .15rem .4rem;">${rotuloStatus(s)}</span>
                         <strong>${qtd}</strong>
                       </div>
-                      <div style="height:6px;background:var(--superficie);border-radius:3px;overflow:hidden;">
-                        <div style="height:100%;width:${pct}%;background:var(--verde);"></div>
+                      <div style="height:4px;background:var(--borda-suave);border-radius:2px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:var(--texto-secundario);"></div>
                       </div>
                     </div>
                   `;
                 }).join('')}
+            </div>
           </div>
 
-          <!-- Estoque baixo -->
+        </div>
+
+        <!-- ===== 2 colunas: Estoque baixo + Últimos Pedidos ===== -->
+        <div class="grid-dashboard" style="display:grid;grid-template-columns:1fr 1fr; gap: 1rem; margin-top: 1rem;">
+          
           <div class="card">
-            <h3 class="secao-titulo">⚠️ Estoque baixo</h3>
+            <h3 class="secao-titulo" style="display:flex; align-items:center; gap:.5rem;">
+              ${SVG.alert} Estoque baixo
+            </h3>
             ${produtosCriticos.length === 0
-              ? '<p style="color:var(--verde-escuro);font-size:.9rem;">✅ Tudo em ordem! Nenhum produto crítico.</p>'
+              ? `<p style="color:var(--verde-escuro);font-size:.9rem;display:flex;align-items:center;gap:.4rem;">${SVG.check} Tudo em ordem! Nenhum produto crítico.</p>`
               : produtosCriticos.map(({ p, atual, minimo }) => `
                   <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--borda);font-size:.9rem;">
                     <div>
@@ -154,78 +246,234 @@
               <a href="relatorios.html" style="font-size:.85rem;">Ver relatório completo →</a>
             </div>` : ''}
           </div>
-        </div>
 
-        <!-- ===== Últimos pedidos ===== -->
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-            <h3 class="secao-titulo" style="margin:0;">🧾 Últimos pedidos</h3>
-            <a href="pedidos.html" style="font-size:.85rem;">Ver todos →</a>
-          </div>
-          ${ultimosPedidos.length === 0
-            ? '<p style="color:var(--texto-secundario);font-size:.9rem;">Nenhum pedido cadastrado.</p>'
-            : `<table class="tabela tabela-mini">
-                <thead>
-                  <tr>
-                    <th>Número</th>
-                    <th>Cliente</th>
-                    <th>Data</th>
-                    <th>Status</th>
-                    <th class="text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${ultimosPedidos.map(p => `
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+              <h3 class="secao-titulo" style="margin:0; display:flex; align-items:center; gap:.5rem;">
+                ${SVG.fileText} Últimos pedidos
+              </h3>
+              <a href="pedidos.html" style="font-size:.85rem;">Ver todos →</a>
+            </div>
+            ${ultimosPedidos.length === 0
+              ? '<p style="color:var(--texto-secundario);font-size:.9rem;">Nenhum pedido cadastrado.</p>'
+              : `<table class="tabela tabela-mini">
+                  <thead>
                     <tr>
-                      <td><strong>${escapeHtml(p.numeroPedido)}</strong></td>
-                      <td>${escapeHtml(p.clienteNome)}</td>
-                      <td>${formatarData(p.criadoEm)}</td>
-                      <td><span class="badge ${classeStatus(p.status)}">${rotuloStatus(p.status)}</span></td>
-                      <td class="text-right"><strong>R$ ${formatarPreco(p.total)}</strong></td>
+                      <th>Número</th>
+                      <th>Cliente</th>
+                      <th>Data</th>
+                      <th>Status</th>
+                      <th class="text-right">Total</th>
                     </tr>
-                  `).join('')}
-                </tbody>
-              </table>`}
+                  </thead>
+                  <tbody>
+                    ${ultimosPedidos.map(p => `
+                      <tr>
+                        <td><strong>${escapeHtml(p.numeroPedido)}</strong></td>
+                        <td>${escapeHtml(p.clienteNome)}</td>
+                        <td>${formatarData(p.criadoEm)}</td>
+                        <td><span class="badge ${classeStatus(p.status)}">${rotuloStatus(p.status)}</span></td>
+                        <td class="text-right"><strong>R$ ${formatarPreco(p.total)}</strong></td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>`}
+          </div>
         </div>
 
         <!-- ===== Atalhos rápidos ===== -->
         <div class="card">
-          <h3 class="secao-titulo">⚡ Atalhos rápidos</h3>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;">
-            <a href="produto-form.html" class="atalho">
-              <span style="font-size:1.5rem;">📦</span>
-              <span>Novo produto</span>
+          <h3 class="secao-titulo" style="display:flex; align-items:center; gap:.5rem;">
+            ${SVG.zap} Atalhos rápidos
+          </h3>
+          <style>
+            .atalho-card {
+              display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #fff;
+              border: 1px solid var(--borda-suave); border-radius: var(--radius-sm);
+              text-decoration: none; color: var(--texto-primario); transition: all 0.25s ease;
+              box-shadow: var(--sombra-xs);
+            }
+            .atalho-card:hover {
+              background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFB 100%);
+              border-color: var(--verde); transform: translateY(-3px);
+              box-shadow: var(--sombra-md), 0 4px 12px rgba(55, 182, 176, 0.15);
+            }
+            .atalho-icone {
+              width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center;
+              flex-shrink: 0; transition: transform 0.25s ease;
+            }
+            .atalho-card:hover .atalho-icone { transform: scale(1.08); }
+            .atalho-texto { font-weight: 600; font-size: 0.9rem; letter-spacing: -0.01em; }
+          </style>
+          
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
+            <a href="produto-form.html" class="atalho-card">
+              <div class="atalho-icone" style="background:var(--verde-claro); color:var(--verde-escuro);">${SVG.box}</div>
+              <span class="atalho-texto">Novo produto</span>
             </a>
-            <a href="categorias.html" class="atalho">
-              <span style="font-size:1.5rem;">📂</span>
-              <span>Gerenciar categorias</span>
+            <a href="categorias.html" class="atalho-card">
+              <div class="atalho-icone" style="background:var(--alerta-bg); color:#92400E;">${SVG.folder}</div>
+              <span class="atalho-texto">Gerenciar categorias</span>
             </a>
-            
-            <!-- 👇 CUPONS AQUI 👇 -->
-            <a href="cupons.html" class="atalho">
-              <span style="font-size:1.5rem;">🏷️</span>
-              <span>Gerenciar cupons</span>
+            <a href="cupons.html" class="atalho-card">
+              <div class="atalho-icone" style="background:var(--rosa-claro); color:var(--rosa-escuro);">${SVG.tag}</div>
+              <span class="atalho-texto">Gerenciar cupons</span>
             </a>
-
-            <a href="pedidos.html" class="atalho">
-              <span style="font-size:1.5rem;">🧾</span>
-              <span>Ver pedidos</span>
+            <a href="pedidos.html" class="atalho-card">
+              <div class="atalho-icone" style="background:var(--info-bg); color:#1E40AF;">${SVG.receipt}</div>
+              <span class="atalho-texto">Ver pedidos</span>
             </a>
-            <a href="estoque.html" class="atalho">
-              <span style="font-size:1.5rem;">📊</span>
-              <span>Movimentar estoque</span>
+            <a href="estoque.html" class="atalho-card">
+              <div class="atalho-icone" style="background:var(--superficie-alt); color:var(--texto-primario);">${SVG.chartBar}</div>
+              <span class="atalho-texto">Movimentar estoque</span>
             </a>
-            ${ehAdmin() ? `<a href="relatorios.html" class="atalho">
-              <span style="font-size:1.5rem;">📈</span>
-              <span>Relatórios</span>
+            ${ehAdmin() ? `
+            <a href="relatorios.html" class="atalho-card">
+              <div class="atalho-icone" style="background:var(--sucesso-bg); color:#065F46;">${SVG.trendingUp}</div>
+              <span class="atalho-texto">Relatórios</span>
             </a>
-            <a href="configuracoes.html" class="atalho">
-              <span style="font-size:1.5rem;">⚙️</span>
-              <span>Configurações</span>
-            </a>` : ''}
+            <a href="configuracoes.html" class="atalho-card">
+              <div class="atalho-icone" style="background:var(--borda-suave); color:var(--texto-secundario);">${SVG.settings}</div>
+              <span class="atalho-texto">Configurações</span>
+            </a>
+            ` : ''}
           </div>
         </div>
       `;
+
+      // Chama a função para renderizar o gráfico após o HTML ser inserido
+      renderizarGraficoFaturamento(pedidosValidos, metaMensal);
+    }
+
+    // ===== Função do Gráfico (Chart.js) =====
+    function renderizarGraficoFaturamento(pedidosValidos, metaMensal) {
+      const canvas = document.getElementById('graficoFaturamento');
+      if (!canvas) return;
+
+      const hoje = new Date();
+      const labels = [];
+      const dadosFaturamento = [];
+      const dadosMeta = [];
+
+      // Gera os últimos 6 meses
+      for (let i = 5; i >= 0; i--) {
+        const dataRef = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+        const mesAnoStr = dataRef.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+        
+        // Deixa a primeira letra maiúscula (Ex: "Out/23")
+        labels.push(mesAnoStr.charAt(0).toUpperCase() + mesAnoStr.slice(1).replace('.', ''));
+
+        // Calcula o faturamento do mês
+        const faturamentoMes = pedidosValidos.filter(p => {
+          const d = new Date(p.criadoEm);
+          return d.getMonth() === dataRef.getMonth() && d.getFullYear() === dataRef.getFullYear();
+        }).reduce((s, p) => s + Number(p.total || 0), 0);
+
+        dadosFaturamento.push(faturamentoMes);
+        dadosMeta.push(metaMensal);
+      }
+
+      const ctx = canvas.getContext('2d');
+      
+      // Gradiente para o fundo do gráfico
+      let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+      gradient.addColorStop(0, 'rgba(237, 131, 164, 0.4)'); // Rosa
+      gradient.addColorStop(1, 'rgba(237, 131, 164, 0.0)');
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Faturamento',
+              data: dadosFaturamento,
+              borderColor: '#ED83A4', 
+              backgroundColor: gradient,
+              borderWidth: 3,
+              pointBackgroundColor: '#fff',
+              pointBorderColor: '#ED83A4',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              fill: true, 
+              tension: 0.4
+            },
+            {
+              label: 'Meta',
+              data: dadosMeta,
+              borderColor: '#37B6B0', 
+              borderWidth: 2,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false,
+              tension: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: {
+            padding: {
+              top: 10,
+              bottom: 10
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'end',
+              labels: { 
+                usePointStyle: true, 
+                pointStyle: 'line', // Linhas em vez de bolinhas
+                boxWidth: 24,        // Linha mais larga
+                boxHeight: 3,
+                padding: 25,         // Mais espaço entre as legendas
+                font: { 
+                  family: "'Inter', sans-serif", 
+                  size: 13, 
+                  weight: '600' 
+                },
+                color: '#64748B' // Cor padrão de texto secundário
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(20, 39, 58, 0.9)',
+              titleFont: { family: "'Inter', sans-serif", size: 13 },
+              bodyFont: { family: "'Inter', sans-serif", size: 14, weight: 'bold' },
+              padding: 12,
+              cornerRadius: 8,
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) label += ': ';
+                  if (context.parsed.y !== null) {
+                    label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y);
+                  }
+                  return label;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(226, 232, 240, 0.5)' },
+              ticks: {
+                font: { family: "'Inter', sans-serif", size: 11 },
+                callback: function(value) {
+                  return 'R$ ' + value.toLocaleString('pt-BR');
+                }
+              }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: "'Inter', sans-serif", size: 11 } }
+            }
+          }
+        }
+      });
     }
 
     /* ===== Helpers ===== */

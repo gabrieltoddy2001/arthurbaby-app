@@ -19,56 +19,59 @@
    }
    
    function renderTabela(lista) {
-    const conteudo = document.getElementById('conteudo');
-  
-    // Se a estrutura ainda não existe, cria ela UMA vez
-    if (!document.getElementById('tabela-categorias')) {
-      conteudo.innerHTML = `
-        <div class="acoes-topo">
-          <input type="text" id="filtro" placeholder="Filtrar por nome..." oninput="filtrar()">
-          <button class="btn btn-primary" onclick="criar()">+ Nova categoria</button>
-        </div>
-        <table class="tabela">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nome</th>
-              <th>Categoria pai</th>
-              <th>Status</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody id="tabela-categorias"></tbody>
-        </table>
-      `;
-    }
-  
-    // Agora só atualiza o corpo da tabela
-    const tbody = document.getElementById('tabela-categorias');
-  
-    const raizes = lista.filter(c => !c.categoriaPaiId);
-    const filhas = lista.filter(c => c.categoriaPaiId);
-  
-    const linhas = [];
-  
-    raizes.forEach(c => {
-      linhas.push(linhaTabela(c, false));
-      filhas
-        .filter(f => f.categoriaPaiId === c.id)
-        .forEach(f => linhas.push(linhaTabela(f, true)));
-    });
-  
-    const idsRaizes = raizes.map(r => r.id);
-    filhas
-      .filter(f => !idsRaizes.includes(f.categoriaPaiId))
-      .forEach(f => linhas.push(linhaTabela(f, true)));
-  
-    tbody.innerHTML = linhas.length === 0
-      ? `<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--texto-secundario)">
-           Nenhuma categoria encontrada.
-         </td></tr>`
-      : linhas.join('');
-  }
+     const conteudo = document.getElementById('conteudo');
+   
+     // Se a estrutura ainda não existe, cria ela UMA vez
+     if (!document.getElementById('tabela-categorias')) {
+       conteudo.innerHTML = `
+         <div class="filtros">
+           <input type="text" id="filtro" placeholder="Filtrar por nome..." oninput="filtrar()">
+           <button class="btn btn-primary" onclick="criar()">+ Nova categoria</button>
+         </div>
+         
+         <div class="tabela-rolavel">
+           <table class="tabela">
+             <thead>
+               <tr>
+                 <th>ID</th>
+                 <th>Nome</th>
+                 <th>Categoria pai</th>
+                 <th>Status</th>
+                 <th>Ações</th>
+               </tr>
+             </thead>
+             <tbody id="tabela-categorias"></tbody>
+           </table>
+         </div>
+       `;
+     }
+   
+     // Agora só atualiza o corpo da tabela
+     const tbody = document.getElementById('tabela-categorias');
+   
+     const raizes = lista.filter(c => !c.categoriaPaiId);
+     const filhas = lista.filter(c => c.categoriaPaiId);
+   
+     const linhas = [];
+   
+     raizes.forEach(c => {
+       linhas.push(linhaTabela(c, false));
+       filhas
+         .filter(f => f.categoriaPaiId === c.id)
+         .forEach(f => linhas.push(linhaTabela(f, true)));
+     });
+   
+     const idsRaizes = raizes.map(r => r.id);
+     filhas
+       .filter(f => !idsRaizes.includes(f.categoriaPaiId))
+       .forEach(f => linhas.push(linhaTabela(f, true)));
+   
+     tbody.innerHTML = linhas.length === 0
+       ? `<tr><td colspan="5" class="text-center" style="padding:2rem;color:var(--texto-secundario)">
+            Nenhuma categoria encontrada.
+          </td></tr>`
+       : linhas.join('');
+   }
    
    function linhaTabela(c, ehSub) {
      const pai = c.categoriaPaiId

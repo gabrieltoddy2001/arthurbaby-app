@@ -7,6 +7,10 @@
    let movimentacoes = [];
    let abaAtual = 'visao';
    
+   // Variáveis para os Selects Customizados
+   let valorSituacao = '';
+   let valorTipo = '';
+   
    async function carregar() {
      const conteudo = document.getElementById('conteudo');
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
@@ -51,36 +55,84 @@
    }
    
    /* ============================================
+      FUNÇÕES DOS SELECTS CUSTOMIZADOS
+      ============================================ */
+   function toggleSelect(id) {
+     document.getElementById(`${id}-options`).classList.toggle('hidden');
+   }
+   
+   function selecionarOpcao(id, valor, label) {
+     if (id === 'situacao') {
+       valorSituacao = valor;
+       aplicarFiltroVisao();
+     } else if (id === 'tipo') {
+       valorTipo = valor;
+       aplicarFiltroMov();
+     }
+     
+     document.getElementById(`${id}-label`).textContent = label;
+     document.getElementById(`${id}-options`).classList.add('hidden');
+   }
+   
+   // Fecha os selects se clicar fora
+   document.addEventListener('click', (e) => {
+     const selSituacao = document.getElementById('custom-situacao');
+     if (selSituacao && !selSituacao.contains(e.target)) {
+       document.getElementById('situacao-options')?.classList.add('hidden');
+     }
+     
+     const selTipo = document.getElementById('custom-tipo');
+     if (selTipo && !selTipo.contains(e.target)) {
+       document.getElementById('tipo-options')?.classList.add('hidden');
+     }
+   });
+   
+   /* ============================================
       VISÃO GERAL (por produto)
       ============================================ */
    
    function renderVisao() {
      const painel = document.getElementById('painel-estoque');
    
+     // Cria a estrutura só uma vez
      if (!document.getElementById('tabela-visao-estoque')) {
        painel.innerHTML = `
          <div class="filtros">
-           <input type="text" id="f-busca-visao" placeholder="Buscar produto..." oninput="aplicarFiltroVisao()">
-           <select id="f-situacao" onchange="aplicarFiltroVisao()">
-             <option value="">Todas as situações</option>
-             <option value="OK">Estoque OK</option>
-             <option value="BAIXO">Estoque baixo</option>
-             <option value="ZERADO">Zerado</option>
-           </select>
+           <input type="text" id="f-busca-visao" placeholder="Buscar produto por nome..." oninput="aplicarFiltroVisao()">
+           
+           <!-- SELECT CUSTOMIZADO DE SITUAÇÃO -->
+           <div class="custom-select" id="custom-situacao" style="position:relative; min-width:180px;">
+             <div class="custom-select-trigger" onclick="toggleSelect('situacao')">
+               <span id="situacao-label">Todas as situações</span>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+             
+             <div class="custom-select-options hidden" id="situacao-options">
+               <div class="custom-option" onclick="selecionarOpcao('situacao', '', 'Todas as situações')">Todas as situações</div>
+               <div class="custom-option" onclick="selecionarOpcao('situacao', 'OK', 'Estoque OK')">Estoque OK</div>
+               <div class="custom-option" onclick="selecionarOpcao('situacao', 'BAIXO', 'Estoque baixo')">Estoque baixo</div>
+               <div class="custom-option" onclick="selecionarOpcao('situacao', 'ZERADO', 'Zerado')">Zerado</div>
+             </div>
+           </div>
+           <!-- FIM SELECT CUSTOMIZADO -->
+   
            <button class="btn btn-primary" onclick="abrirModalMovimentacao()">+ Nova movimentação</button>
          </div>
-         <table class="tabela">
-           <thead>
-             <tr>
-               <th>Produto</th>
-               <th>Código</th>
-               <th class="text-center">Estoque atual</th>
-               <th class="text-center">Estoque mínimo</th>
-               <th class="text-center">Situação</th>
-             </tr>
-           </thead>
-           <tbody id="tabela-visao-estoque"></tbody>
-         </table>
+         
+         <div class="tabela-rolavel">
+           <table class="tabela">
+             <thead>
+               <tr>
+                 <th>Produto</th>
+                 <th>Código</th>
+                 <th class="text-center">Estoque atual</th>
+                 <th class="text-center">Estoque mínimo</th>
+                 <th class="text-center">Situação</th>
+               </tr>
+             </thead>
+             <tbody id="tabela-visao-estoque"></tbody>
+           </table>
+         </div>
        `;
      }
    
@@ -89,11 +141,10 @@
    
    function aplicarFiltroVisao() {
      const input = document.getElementById('f-busca-visao');
-     const sel = document.getElementById('f-situacao');
-     if (!input || !sel) return;
+     if (!input) return;
    
      const busca = input.value.toLowerCase().trim();
-     const situacao = sel.value;
+     const situacao = valorSituacao;
    
      const linhas = produtos
        .filter(p => !busca || p.nome.toLowerCase().includes(busca))
@@ -145,32 +196,46 @@
      if (!document.getElementById('tabela-movimentacoes')) {
        painel.innerHTML = `
          <div class="filtros">
-           <input type="text" id="f-busca-mov" placeholder="Buscar produto..." oninput="aplicarFiltroMov()">
-           <select id="f-tipo" onchange="aplicarFiltroMov()">
-             <option value="">Todos os tipos</option>
-             <option value="ENTRADA">ENTRADA</option>
-             <option value="SAIDA">SAIDA</option>
-             <option value="AJUSTE">AJUSTE</option>
-             <option value="RESERVA">RESERVA</option>
-             <option value="ESTORNO">ESTORNO</option>
-           </select>
+           <input type="text" id="f-busca-mov" placeholder="Buscar por produto ou SKU..." oninput="aplicarFiltroMov()">
+           
+           <!-- SELECT CUSTOMIZADO DE TIPO -->
+           <div class="custom-select" id="custom-tipo" style="position:relative; min-width:180px;">
+             <div class="custom-select-trigger" onclick="toggleSelect('tipo')">
+               <span id="tipo-label">Todos os tipos</span>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+             
+             <div class="custom-select-options hidden" id="tipo-options">
+               <div class="custom-option" onclick="selecionarOpcao('tipo', '', 'Todos os tipos')">Todos os tipos</div>
+               <div class="custom-option" onclick="selecionarOpcao('tipo', 'ENTRADA', 'ENTRADA')">ENTRADA</div>
+               <div class="custom-option" onclick="selecionarOpcao('tipo', 'SAIDA', 'SAIDA')">SAIDA</div>
+               <div class="custom-option" onclick="selecionarOpcao('tipo', 'AJUSTE', 'AJUSTE')">AJUSTE</div>
+               <div class="custom-option" onclick="selecionarOpcao('tipo', 'RESERVA', 'RESERVA')">RESERVA</div>
+               <div class="custom-option" onclick="selecionarOpcao('tipo', 'ESTORNO', 'ESTORNO')">ESTORNO</div>
+             </div>
+           </div>
+           <!-- FIM SELECT CUSTOMIZADO -->
+   
            <button class="btn btn-primary" onclick="abrirModalMovimentacao()">+ Nova movimentação</button>
          </div>
-         <table class="tabela">
-           <thead>
-             <tr>
-               <th>Data</th>
-               <th>Produto</th>
-               <th>Tipo</th>
-               <th class="text-center">Qtd</th>
-               <th class="text-center">Antes</th>
-               <th class="text-center">Depois</th>
-               <th>Usuário</th>
-               <th>Observação</th>
-             </tr>
-           </thead>
-           <tbody id="tabela-movimentacoes"></tbody>
-         </table>
+         
+         <div class="tabela-rolavel">
+           <table class="tabela">
+             <thead>
+               <tr>
+                 <th>Data</th>
+                 <th>Produto</th>
+                 <th>Tipo</th>
+                 <th class="text-center">Qtd</th>
+                 <th class="text-center">Antes</th>
+                 <th class="text-center">Depois</th>
+                 <th>Usuário</th>
+                 <th>Observação</th>
+               </tr>
+             </thead>
+             <tbody id="tabela-movimentacoes"></tbody>
+           </table>
+         </div>
        `;
      }
    
@@ -179,11 +244,10 @@
    
    function aplicarFiltroMov() {
      const input = document.getElementById('f-busca-mov');
-     const sel = document.getElementById('f-tipo');
-     if (!input || !sel) return;
+     if (!input) return;
    
      const busca = input.value.toLowerCase().trim();
-     const tipo = sel.value;
+     const tipo = valorTipo;
    
      const filtradas = movimentacoes
        .filter(m => {
@@ -220,7 +284,6 @@
          }).join('');
    }
    
-   // O backend grava a quantidade sempre positiva; o sinal vem do tipo (ou da diferença, no ajuste)
    function sinalMovimentacao(m) {
      if (m.tipo === 'SAIDA' || m.tipo === 'RESERVA') return '-';
      if (m.tipo === 'AJUSTE') return (m.estoquePosterior ?? 0) < (m.estoqueAnterior ?? 0) ? '-' : '+';

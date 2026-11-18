@@ -34,9 +34,9 @@
              <button class="btn btn-primary" onclick="salvar()" id="btn-salvar">Salvar alterações</button>
            </div>
          </div>
-
+   
          <div id="alerta-config" class="alert alert-sucesso hidden"></div>
-
+   
          <div class="card">
            <h3 class="secao-titulo">Dados da loja, contato e redes sociais</h3>
            <div class="grid-4">
@@ -72,6 +72,13 @@
                <label for="c-instagram">Instagram</label>
                <input type="text" id="c-instagram" value="${escapeAttr(config.instagram || '')}" placeholder="@loja">
              </div>
+             
+             <!-- 👇 NOVO CAMPO: META DE FATURAMENTO AQUI 👇 -->
+             <div class="field">
+               <label for="c-metaFaturamento">Meta Faturamento Mensal (R$)</label>
+               <input type="number" id="c-metaFaturamento" step="0.01" min="0" value="${escapeAttr(config.metaFaturamentoMensal || '')}" placeholder="Ex: 50000.00">
+             </div>
+             
              <div class="field" style="grid-column: span 2;">
                <label for="c-shopeeUrl">Shopee</label>
                <input type="url" id="c-shopeeUrl" value="${escapeAttr(config.shopeeUrl || '')}" placeholder="https://...">
@@ -82,7 +89,7 @@
              </div>
            </div>
          </div>
-
+   
          <div class="linha-cards">
            <div class="card">
              <h3 class="secao-titulo">Endereço da loja física</h3>
@@ -117,7 +124,7 @@
                </div>
              </div>
            </div>
-
+   
            <div class="card">
              <h3 class="secao-titulo">Cores da marca (app e painel)</h3>
              <div class="grid-2">
@@ -202,6 +209,9 @@
        uf: getVal('c-uf').trim().toUpperCase(),
        corPrimaria: getVal('c-corPrimaria').trim().toUpperCase(),
        corDestaque: getVal('c-corDestaque').trim().toUpperCase(),
+       
+       // 👇 NOVO CAMPO ADICIONADO NA HORA DE SALVAR 👇
+       metaFaturamentoMensal: getVal('c-metaFaturamento') ? parseFloat(getVal('c-metaFaturamento')) : null,
      };
    
      if (!novoConfig.nomeFantasia) {
@@ -222,7 +232,7 @@
          : await adminApi.criar('configuracoes-loja', corpo);
    
        alerta.className = 'alert alert-sucesso';
-       alerta.textContent = '✅ Configurações salvas com sucesso!';
+       alerta.textContent = 'Configurações salvas com sucesso!'; // Emoji removido
        alerta.classList.remove('hidden');
    
        window.scrollTo({ top: 0, behavior: 'smooth' });

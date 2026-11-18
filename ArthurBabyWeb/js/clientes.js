@@ -5,6 +5,9 @@
    let clientes = [];
    let pedidos = [];
    
+   // Variável para o Select Customizado
+   let valorStatus = '';
+   
    async function carregar() {
      const conteudo = document.getElementById('conteudo');
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
@@ -31,39 +34,74 @@
        conteudo.innerHTML = `
          <div class="filtros">
            <input type="text" id="f-busca" placeholder="Buscar por nome, e-mail ou CPF..." oninput="aplicarFiltros()">
-           <select id="f-status" onchange="aplicarFiltros()">
-             <option value="">Todos os status</option>
-             <option value="ATIVO">ATIVO</option>
-             <option value="INATIVO">INATIVO</option>
-             <option value="BLOQUEADO">BLOQUEADO</option>
-           </select>
+           
+           <!-- SELECT CUSTOMIZADO DE STATUS -->
+           <div class="custom-select" id="custom-status" style="position:relative; min-width:160px;">
+             <div class="custom-select-trigger" onclick="toggleSelect('status')">
+               <span id="status-label" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Todos os status</span>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+             <div class="custom-select-options hidden" id="status-options">
+               <div class="custom-option" onclick="selecionarFiltro('status', '', 'Todos os status')">Todos os status</div>
+               <div class="custom-option" onclick="selecionarFiltro('status', 'ATIVO', 'ATIVO')">ATIVO</div>
+               <div class="custom-option" onclick="selecionarFiltro('status', 'INATIVO', 'INATIVO')">INATIVO</div>
+               <div class="custom-option" onclick="selecionarFiltro('status', 'BLOQUEADO', 'BLOQUEADO')">BLOQUEADO</div>
+             </div>
+           </div>
+           <!-- FIM SELECT CUSTOMIZADO -->
+           
          </div>
-         <table class="tabela">
-           <thead>
-             <tr>
-               <th>Cliente</th>
-               <th>CPF</th>
-               <th>Telefone</th>
-               <th class="text-center">Pedidos</th>
-               <th>Status</th>
-               <th>Ações</th>
-             </tr>
-           </thead>
-           <tbody id="tabela-clientes"></tbody>
-         </table>
+         
+         <div class="tabela-rolavel">
+           <table class="tabela">
+             <thead>
+               <tr>
+                 <th>Cliente</th>
+                 <th>CPF</th>
+                 <th>Telefone</th>
+                 <th class="text-center">Pedidos</th>
+                 <th>Status</th>
+                 <th>Ações</th>
+               </tr>
+             </thead>
+             <tbody id="tabela-clientes"></tbody>
+           </table>
+         </div>
        `;
      }
    
      aplicarFiltros();
    }
    
+   /* ============================================
+      CONTROLE DO SELECT CUSTOMIZADO
+      ============================================ */
+   function toggleSelect(id) {
+     document.getElementById(`${id}-options`).classList.toggle('hidden');
+   }
+   
+   // Fecha o select se clicar fora
+   document.addEventListener('click', (e) => {
+     if (!e.target.closest('#custom-status')) {
+       document.getElementById('status-options')?.classList.add('hidden');
+     }
+   });
+   
+   function selecionarFiltro(tipo, valor, label) {
+     if (tipo === 'status') {
+       valorStatus = valor;
+       document.getElementById('status-label').textContent = label;
+       document.getElementById('status-options').classList.add('hidden');
+     }
+     aplicarFiltros();
+   }
+   
    function aplicarFiltros() {
      const input = document.getElementById('f-busca');
-     const sel = document.getElementById('f-status');
-     if (!input || !sel) return;
+     if (!input) return;
    
      const busca = input.value.toLowerCase().trim();
-     const status = sel.value;
+     const status = valorStatus;
    
      const filtrados = clientes.filter(c => {
        if (busca) {
@@ -241,7 +279,7 @@
      }
      const c = clientes.find(x => x.id === id);
      if (!c) return;
-
+   
      fecharModal();
      const nova = prompt(`Nova senha para "${c.nome}"\n${POLITICA_SENHA}`);
      if (nova === null) return;
@@ -263,7 +301,7 @@
        alert('Erro ao redefinir senha: ' + err.message);
      }
    }
-
+   
    function novoPedidoPara(id) {
      window.location.href = `pedido-novo.html?clienteId=${id}`;
    }

@@ -4,6 +4,10 @@
 
    let usuarios = [];
 
+   // Variáveis para os Selects Customizados
+   let valorPerfil = '';
+   let valorStatus = '';
+   
    async function carregar() {
      const conteudo = document.getElementById('conteudo');
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
@@ -25,46 +29,90 @@
        conteudo.innerHTML = `
          <div class="filtros">
            <input type="text" id="f-busca" placeholder="Buscar por nome ou e-mail..." oninput="aplicarFiltros()">
-           <select id="f-perfil" onchange="aplicarFiltros()">
-             <option value="">Todos os perfis</option>
-             <option value="ADMINISTRADOR">Administrador</option>
-             <option value="VENDEDOR">Vendedor</option>
-           </select>
-           <select id="f-status" onchange="aplicarFiltros()">
-             <option value="">Todos os status</option>
-             <option value="ATIVO">ATIVO</option>
-             <option value="INATIVO">INATIVO</option>
-             <option value="BLOQUEADO">BLOQUEADO</option>
-           </select>
+           
+           <!-- SELECT PERFIL -->
+           <div class="custom-select" id="custom-perfil" style="position:relative; min-width:160px;">
+             <div class="custom-select-trigger" onclick="toggleSelect('perfil')">
+               <span id="perfil-label" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Todos os perfis</span>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+             <div class="custom-select-options hidden" id="perfil-options">
+               <div class="custom-option" onclick="selecionarFiltro('perfil', '', 'Todos os perfis')">Todos os perfis</div>
+               <div class="custom-option" onclick="selecionarFiltro('perfil', 'ADMINISTRADOR', 'Administrador')">Administrador</div>
+               <div class="custom-option" onclick="selecionarFiltro('perfil', 'VENDEDOR', 'Vendedor')">Vendedor</div>
+             </div>
+           </div>
+   
+           <!-- SELECT STATUS -->
+           <div class="custom-select" id="custom-status" style="position:relative; min-width:160px;">
+             <div class="custom-select-trigger" onclick="toggleSelect('status')">
+               <span id="status-label" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Todos os status</span>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+             <div class="custom-select-options hidden" id="status-options">
+               <div class="custom-option" onclick="selecionarFiltro('status', '', 'Todos os status')">Todos os status</div>
+               <div class="custom-option" onclick="selecionarFiltro('status', 'ATIVO', 'ATIVO')">ATIVO</div>
+               <div class="custom-option" onclick="selecionarFiltro('status', 'INATIVO', 'INATIVO')">INATIVO</div>
+               <div class="custom-option" onclick="selecionarFiltro('status', 'BLOQUEADO', 'BLOQUEADO')">BLOQUEADO</div>
+             </div>
+           </div>
+           
            <button class="btn btn-primary" onclick="criar()">+ Novo usuário</button>
          </div>
-         <table class="tabela">
-           <thead>
-             <tr>
-               <th>Nome</th>
-               <th>E-mail</th>
-               <th>Perfil</th>
-               <th>Status</th>
-               <th>Ações</th>
-             </tr>
-           </thead>
-           <tbody id="tabela-usuarios"></tbody>
-         </table>
+         
+         <div class="tabela-rolavel">
+           <table class="tabela">
+             <thead>
+               <tr>
+                 <th>Nome</th>
+                 <th>E-mail</th>
+                 <th>Perfil</th>
+                 <th>Status</th>
+                 <th>Ações</th>
+               </tr>
+             </thead>
+             <tbody id="tabela-usuarios"></tbody>
+           </table>
+         </div>
        `;
      }
    
      aplicarFiltros();
    }
    
+   /* ============================================
+      CONTROLE DOS SELECTS CUSTOMIZADOS
+      ============================================ */
+   function toggleSelect(id) {
+     document.getElementById(`${id}-options`).classList.toggle('hidden');
+   }
+   
+   // Fecha os selects se clicar fora
+   document.addEventListener('click', (e) => {
+     if (!e.target.closest('#custom-perfil')) document.getElementById('perfil-options')?.classList.add('hidden');
+     if (!e.target.closest('#custom-status')) document.getElementById('status-options')?.classList.add('hidden');
+   });
+   
+   function selecionarFiltro(tipo, valor, label) {
+     if (tipo === 'perfil') {
+       valorPerfil = valor;
+       document.getElementById('perfil-label').textContent = label;
+       document.getElementById('perfil-options').classList.add('hidden');
+     } else if (tipo === 'status') {
+       valorStatus = valor;
+       document.getElementById('status-label').textContent = label;
+       document.getElementById('status-options').classList.add('hidden');
+     }
+     aplicarFiltros();
+   }
+   
    function aplicarFiltros() {
      const input = document.getElementById('f-busca');
-     const selPerfil = document.getElementById('f-perfil');
-     const selStatus = document.getElementById('f-status');
-     if (!input || !selPerfil || !selStatus) return;
+     if (!input) return;
    
      const busca = input.value.toLowerCase().trim();
-     const perfil = selPerfil.value;
-     const status = selStatus.value;
+     const perfil = valorPerfil;
+     const status = valorStatus;
    
      const filtrados = usuarios.filter(u => {
        if (busca) {
