@@ -3,6 +3,7 @@ package br.com.arthurbaby.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter @Setter @Entity
@@ -33,6 +34,11 @@ public class ConfiguracaoLoja {
     private String corSuperficie;
     private String corTextoPrimario;
     private String corTextoSecundario;
+
+    // NOVO CAMPO DE META
+    @Column(precision = 12, scale = 2)
+    private BigDecimal metaFaturamentoMensal;
+
     private LocalDateTime atualizadoEm;
     @PrePersist @PreUpdate void touch() { atualizadoEm = LocalDateTime.now(); }
 }

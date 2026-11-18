@@ -78,23 +78,26 @@
      // Cria a estrutura da aba só uma vez
      if (!document.getElementById(`tabela-${abaAtual}`)) {
        painel.innerHTML = `
-         <div class="acoes-topo">
+         <div class="filtros">
            <input type="text" id="filtro" placeholder="Filtrar por nome..." oninput="filtrar()">
            <button class="btn btn-primary" onclick="criar()">+ ${cfg.artigo} ${cfg.singular}</button>
          </div>
-         <table class="tabela">
-           <thead>
-             <tr id="cabecalho">
-               <th>ID</th>
-               <th>Nome</th>
-               ${cfg.temHex ? '<th>Cor</th>' : ''}
-               ${cfg.temOrdem ? '<th>Ordem</th>' : ''}
-               <th>Status</th>
-               <th>Ações</th>
-             </tr>
-           </thead>
-           <tbody id="tabela-${abaAtual}"></tbody>
-         </table>
+         
+         <div class="tabela-rolavel">
+           <table class="tabela">
+             <thead>
+               <tr id="cabecalho">
+                 <th>ID</th>
+                 <th>Nome</th>
+                 ${cfg.temHex ? '<th>Cor</th>' : ''}
+                 ${cfg.temOrdem ? '<th>Ordem</th>' : ''}
+                 <th>Status</th>
+                 <th>Ações</th>
+               </tr>
+             </thead>
+             <tbody id="tabela-${abaAtual}"></tbody>
+           </table>
+         </div>
        `;
      }
    

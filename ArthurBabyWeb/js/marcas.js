@@ -18,51 +18,55 @@
    }
    
    function renderTabela(lista) {
-    const conteudo = document.getElementById('conteudo');
-  
-    // Cria a estrutura só uma vez
-    if (!document.getElementById('tabela-marcas')) {
-      conteudo.innerHTML = `
-        <div class="acoes-topo">
-          <input type="text" id="filtro" placeholder="Filtrar por nome..." oninput="filtrar()">
-          <button class="btn btn-primary" onclick="criar()">+ Nova marca</button>
-        </div>
-        <table class="tabela">
-          <thead>
-            <tr><th>ID</th><th>Nome</th><th>Status</th><th>Ações</th></tr>
-          </thead>
-          <tbody id="tabela-marcas"></tbody>
-        </table>
-      `;
-    }
-  
-    // Atualiza só o corpo
-    const tbody = document.getElementById('tabela-marcas');
-  
-    tbody.innerHTML = lista.length === 0
-      ? `<tr><td colspan="4" class="text-center" style="padding:2rem;color:var(--texto-secundario)">
-           Nenhuma marca encontrada.
-         </td></tr>`
-      : lista.map(m => `
-        <tr>
-          <td>${m.id}</td>
-          <td><strong>${escapeHtml(m.nome)}</strong></td>
-          <td>
-            <span class="badge ${m.status === 'ATIVA' ? 'badge-ativo' : 'badge-inativo'}">
-              ${m.status}
-            </span>
-          </td>
-          <td>
-            <div class="acoes-linha">
-              <button class="btn-mini editar" onclick="editar(${m.id})">Editar</button>
-              <button class="btn-mini ${m.status === 'ATIVA' ? 'inativar' : 'ativar'}"
-                      onclick="alternar(${m.id})">
-                ${m.status === 'ATIVA' ? 'Inativar' : 'Ativar'}
-              </button>
-            </div>
-          </td>
-        </tr>`).join('');
-  }
+     const conteudo = document.getElementById('conteudo');
+   
+     // Cria a estrutura só uma vez
+     if (!document.getElementById('tabela-marcas')) {
+       conteudo.innerHTML = `
+         <div class="filtros">
+           <input type="text" id="filtro" placeholder="Filtrar por nome..." oninput="filtrar()">
+           <button class="btn btn-primary" onclick="criar()">+ Nova marca</button>
+         </div>
+         
+         <div class="tabela-rolavel">
+           <table class="tabela">
+             <thead>
+               <tr><th>ID</th><th>Nome</th><th>Status</th><th>Ações</th></tr>
+             </thead>
+             <tbody id="tabela-marcas"></tbody>
+           </table>
+         </div>
+       `;
+     }
+   
+     // Atualiza só o corpo
+     const tbody = document.getElementById('tabela-marcas');
+   
+     tbody.innerHTML = lista.length === 0
+       ? `<tr><td colspan="4" class="text-center" style="padding:2rem;color:var(--texto-secundario)">
+            Nenhuma marca encontrada.
+          </td></tr>`
+       : lista.map(m => `
+         <tr>
+           <td>${m.id}</td>
+           <td><strong>${escapeHtml(m.nome)}</strong></td>
+           <td>
+             <span class="badge ${m.status === 'ATIVA' ? 'badge-ativo' : 'badge-inativo'}">
+               ${m.status}
+             </span>
+           </td>
+           <td>
+             <div class="acoes-linha">
+               <button class="btn-mini editar" onclick="editar(${m.id})">Editar</button>
+               <button class="btn-mini ${m.status === 'ATIVA' ? 'inativar' : 'ativar'}"
+                       onclick="alternar(${m.id})">
+                 ${m.status === 'ATIVA' ? 'Inativar' : 'Ativar'}
+               </button>
+             </div>
+           </td>
+         </tr>`).join('');
+   }
+   
    function filtrar() {
      const termo = document.getElementById('filtro').value.toLowerCase();
      renderTabela(cache.filter(m => m.nome.toLowerCase().includes(termo)));

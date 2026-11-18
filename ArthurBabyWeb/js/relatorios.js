@@ -7,6 +7,18 @@
    let pedidos = [];
    let abaAtual = 'mais-vendidos';
    
+   // Variável para o Select Customizado
+   let valorPeriodo = '';
+   
+   // Ícones SVG para substituir os emojis
+   const SVG = {
+     trophy: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+     alert: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+     money: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+     check: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--verde); margin-bottom: 1rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+     download: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+   };
+   
    async function carregar() {
      const conteudo = document.getElementById('conteudo');
      conteudo.innerHTML = '<div class="loading">Carregando...</div>';
@@ -30,26 +42,50 @@
      if (!document.getElementById('abas-relatorios')) {
        conteudo.innerHTML = `
          <div class="abas" id="abas-relatorios">
-           <button class="aba" data-aba="mais-vendidos" onclick="trocarAba('mais-vendidos')">🏆 Mais vendidos</button>
-           <button class="aba" data-aba="estoque-baixo" onclick="trocarAba('estoque-baixo')">⚠️ Estoque baixo</button>
-           <button class="aba" data-aba="faturamento" onclick="trocarAba('faturamento')">💰 Faturamento</button>
+           <button class="aba" data-aba="mais-vendidos" onclick="trocarAba('mais-vendidos')" style="display:flex; align-items:center; gap:.4rem;">
+             ${SVG.trophy} Mais vendidos
+           </button>
+           <button class="aba" data-aba="estoque-baixo" onclick="trocarAba('estoque-baixo')" style="display:flex; align-items:center; gap:.4rem;">
+             ${SVG.alert} Estoque baixo
+           </button>
+           <button class="aba" data-aba="faturamento" onclick="trocarAba('faturamento')" style="display:flex; align-items:center; gap:.4rem;">
+             ${SVG.money} Faturamento
+           </button>
          </div>
+         
          <div class="filtros no-print">
-           <select id="f-periodo" onchange="renderTudo()" title="Vale para Mais vendidos e Faturamento">
-             <option value="">Todo o período</option>
-             <option value="7">Últimos 7 dias</option>
-             <option value="30">Últimos 30 dias</option>
-             <option value="90">Últimos 90 dias</option>
-             <option value="mes">Mês atual</option>
-             <option value="ano">Ano atual</option>
-           </select>
-           <button class="btn btn-primary" id="btn-pdf" onclick="gerarPdf()">Gerar PDF</button>
+           
+           <!-- SELECT CUSTOMIZADO DE PERÍODO -->
+           <div class="custom-select" id="custom-periodo" style="position:relative; min-width:160px;">
+             <div class="custom-select-trigger" onclick="toggleSelect('periodo')">
+               <span id="periodo-label" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Todo o período</span>
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+             <div class="custom-select-options hidden" id="periodo-options">
+               <div class="custom-option" onclick="selecionarPeriodo('', 'Todo o período')">Todo o período</div>
+               <div class="custom-option" onclick="selecionarPeriodo('7', 'Últimos 7 dias')">Últimos 7 dias</div>
+               <div class="custom-option" onclick="selecionarPeriodo('30', 'Últimos 30 dias')">Últimos 30 dias</div>
+               <div class="custom-option" onclick="selecionarPeriodo('90', 'Últimos 90 dias')">Últimos 90 dias</div>
+               <div class="custom-option" onclick="selecionarPeriodo('mes', 'Mês atual')">Mês atual</div>
+               <div class="custom-option" onclick="selecionarPeriodo('ano', 'Ano atual')">Ano atual</div>
+             </div>
+           </div>
+           <!-- FIM SELECT CUSTOMIZADO -->
+   
+           <button class="btn btn-primary" id="btn-pdf" onclick="gerarPdf()" style="display:flex; align-items:center; gap:.5rem;">
+             ${SVG.download} Gerar PDF
+           </button>
          </div>
          <div id="painel-relatorios"></div>
        `;
      }
-     const selPeriodo = document.getElementById('f-periodo');
-     if (selPeriodo) selPeriodo.disabled = abaAtual === 'estoque-baixo';
+     
+     // Desabilita o seletor de período se estiver na aba de estoque
+     const triggerPeriodo = document.querySelector('#custom-periodo .custom-select-trigger');
+     if (triggerPeriodo) {
+       triggerPeriodo.style.opacity = abaAtual === 'estoque-baixo' ? '0.5' : '1';
+       triggerPeriodo.style.pointerEvents = abaAtual === 'estoque-baixo' ? 'none' : 'auto';
+     }
    
      document.querySelectorAll('#abas-relatorios .aba').forEach(btn => {
        btn.classList.toggle('ativa', btn.dataset.aba === abaAtual);
@@ -66,6 +102,26 @@
    }
    
    /* ============================================
+      CONTROLE DO SELECT CUSTOMIZADO
+      ============================================ */
+   function toggleSelect(id) {
+     document.getElementById(`${id}-options`).classList.toggle('hidden');
+   }
+   
+   document.addEventListener('click', (e) => {
+     if (!e.target.closest('#custom-periodo')) {
+       document.getElementById('periodo-options')?.classList.add('hidden');
+     }
+   });
+   
+   function selecionarPeriodo(valor, label) {
+     valorPeriodo = valor;
+     document.getElementById('periodo-label').textContent = label;
+     document.getElementById('periodo-options').classList.add('hidden');
+     renderTudo();
+   }
+   
+   /* ============================================
       RELATÓRIO 1 — MAIS VENDIDOS
       ============================================ */
    
@@ -75,7 +131,6 @@
      // Consolida itens dos pedidos por produto
      const vendasPorProduto = {};
      pedidosFiltrados().forEach(p => {
-       // Ignora pedidos cancelados
        if (p.status === 'CANCELADO') return;
        (p.itens || []).forEach(it => {
          const key = it.produtoId;
@@ -103,17 +158,24 @@
        return;
      }
    
-     // Descobre o máximo pra calcular a barra proporcional
      const maxQtd = Math.max(...ranking.map(r => r.quantidade));
      const totalQtd = ranking.reduce((s, r) => s + r.quantidade, 0);
      const totalFat = ranking.reduce((s, r) => s + r.faturamento, 0);
    
      const linhas = ranking.map((r, i) => {
        const pct = (r.quantidade / maxQtd) * 100;
-       const medalha = ['🥇', '🥈', '🥉'][i] || `${i + 1}º`;
+       
+       let medalhaStyle = '';
+       if (i === 0) medalhaStyle = 'background: #FEF3C7; color: #92400E; font-weight: 800;';
+       else if (i === 1) medalhaStyle = 'background: #F1F5F9; color: #475569; font-weight: 800;';
+       else if (i === 2) medalhaStyle = 'background: #FFEDD5; color: #9A3412; font-weight: 800;';
+       else medalhaStyle = 'color: var(--texto-secundario); font-weight: 600;';
+   
        return `
          <tr>
-           <td style="font-size:1.1rem;text-align:center;width:60px;">${medalha}</td>
+           <td class="text-center" style="width:60px;">
+             <span class="badge" style="${medalhaStyle} border-radius:50%; width: 28px; height: 28px; display:inline-flex; align-items:center; justify-content:center; padding:0;">${i + 1}</span>
+           </td>
            <td>
              <strong>${escapeHtml(r.nome)}</strong>
              <div style="margin-top:.4rem;">
@@ -167,7 +229,6 @@
    function renderEstoqueBaixo() {
      const painel = document.getElementById('painel-relatorios');
    
-     // Filtra produtos com estoque <= mínimo
      const criticos = produtos
        .map(p => {
          const atual = estoqueProduto(p);
@@ -179,9 +240,9 @@
    
      if (criticos.length === 0) {
        painel.innerHTML = `
-         <div class="card text-center" style="padding:2rem;">
-           <p style="font-size:2rem;">✅</p>
-           <p style="color:var(--texto-secundario);">Nenhum produto com estoque crítico. Tudo em ordem!</p>
+         <div class="card text-center" style="padding:3rem;">
+           ${SVG.check}
+           <p style="color:var(--texto-secundario); font-size: 1.05rem;">Nenhum produto com estoque crítico. Tudo em ordem!</p>
          </div>`;
        return;
      }
@@ -251,13 +312,11 @@
    function renderFaturamento() {
      const painel = document.getElementById('painel-relatorios');
    
-     // Considera só pedidos não cancelados
      const lista = pedidosFiltrados();
      const validos = lista.filter(p => p.status !== 'CANCELADO');
      const faturamento = validos.reduce((s, p) => s + Number(p.total || 0), 0);
      const ticketMedio = validos.length > 0 ? faturamento / validos.length : 0;
-
-     // Faturamento por mês (mais recente primeiro)
+   
      const porMes = {};
      validos.forEach(p => {
        const d = new Date(p.criadoEm);
@@ -276,14 +335,12 @@
          <td class="text-right">R$ ${formatarPreco(porMes[k].total / porMes[k].pedidos)}</td>
        </tr>`;
      }).join('');
-
-     // Conta pedidos por status
+   
      const porStatus = {};
      lista.forEach(p => {
        porStatus[p.status] = (porStatus[p.status] || 0) + 1;
      });
    
-     // Faturamento por status (só não cancelados)
      const fatPorStatus = {};
      validos.forEach(p => {
        fatPorStatus[p.status] = (fatPorStatus[p.status] || 0) + Number(p.total || 0);
@@ -353,7 +410,7 @@
            <tbody>${linhasStatus}</tbody>
          </table>
        </div>
-
+   
        <div class="card">
          <h3 class="secao-titulo">Faturamento por mês</h3>
          ${linhasMes ? `
@@ -371,12 +428,12 @@
        </div>
      `;
    }
-
+   
    /* ============================================
       PERÍODO
       ============================================ */
    function pedidosFiltrados() {
-     const v = document.getElementById('f-periodo')?.value || '';
+     const v = valorPeriodo;
      if (!v) return pedidos;
      const hoje = new Date();
      let inicio;
@@ -385,24 +442,21 @@
      else { inicio = new Date(); inicio.setHours(0, 0, 0, 0); inicio.setDate(inicio.getDate() - Number(v)); }
      return pedidos.filter(p => new Date(p.criadoEm) >= inicio);
    }
-
+   
    function descricaoPeriodo() {
      if (abaAtual === 'estoque-baixo') return 'Posição atual do estoque';
-     const sel = document.getElementById('f-periodo');
-     return 'Período: ' + (sel ? sel.options[sel.selectedIndex].text : 'Todo o período');
+     return 'Período: ' + document.getElementById('periodo-label').textContent;
    }
-
+   
    /* ============================================
       EXPORTAR PDF
-      Usa html2pdf.js (carregado sob demanda do CDN). Sem internet, cai para a
-      impressão do navegador, onde é possível escolher "Salvar como PDF".
       ============================================ */
    const TITULOS_RELATORIO = {
      'mais-vendidos': 'Produtos mais vendidos',
      'estoque-baixo': 'Produtos com estoque baixo',
      'faturamento': 'Faturamento',
    };
-
+   
    function carregarHtml2Pdf() {
      if (window.html2pdf) return Promise.resolve(window.html2pdf);
      return new Promise((resolve, reject) => {
@@ -413,7 +467,7 @@
        document.head.appendChild(s);
      });
    }
-
+   
    function montarDocumentoPdf() {
      const titulo = TITULOS_RELATORIO[abaAtual];
      const usuario = getUsuario();
@@ -433,11 +487,12 @@
      `;
      return doc;
    }
-
+   
    async function gerarPdf() {
      const btn = document.getElementById('btn-pdf');
+     const textoOriginal = btn.innerHTML;
      btn.disabled = true;
-     btn.textContent = 'Gerando PDF...';
+     btn.innerHTML = 'Gerando PDF...';
      const doc = montarDocumentoPdf();
      try {
        const html2pdf = await carregarHtml2Pdf();
@@ -452,7 +507,6 @@
        }).from(doc).save();
      } catch (err) {
        console.warn(err);
-       // Alternativa offline: impressão do navegador (opção "Salvar como PDF")
        const area = document.createElement('div');
        area.id = 'area-impressao';
        area.appendChild(doc);
@@ -464,7 +518,7 @@
        area.remove();
      } finally {
        btn.disabled = false;
-       btn.textContent = 'Gerar PDF';
+       btn.innerHTML = textoOriginal;
      }
    }
    
