@@ -1,6 +1,7 @@
 package br.com.arthurbaby.entity;
 
 import br.com.arthurbaby.entity.Enums.TipoCupom;
+import com.fasterxml.jackson.annotation.JsonFormat; // IMPORT ADICIONADO
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,19 +15,45 @@ import java.time.LocalDateTime;
 @Getter @Setter @Entity
 public class Cupom {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
-    @Column(nullable = false, unique = true, length = 50) private String codigo;
-    @Enumerated(EnumType.STRING) @Column(nullable = false, length = 20) private TipoCupom tipo = TipoCupom.PERCENTUAL;
-    @Column(precision = 12, scale = 2) private BigDecimal valor;
+
+    @Column(nullable = false, unique = true, length = 50)
+    private String codigo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private TipoCupom tipo = TipoCupom.PERCENTUAL;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal valor;
+
     /** Subtotal minimo para o cupom valer. */
-    @Column(precision = 12, scale = 2) private BigDecimal valorMinimo;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal valorMinimo;
+
     /** Teto do desconto (util em cupons percentuais). */
-    @Column(precision = 12, scale = 2) private BigDecimal valorMaximoDesconto;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal valorMaximoDesconto;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") // ADICIONADO PARA O FRONT
     private LocalDateTime validoDe;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") // ADICIONADO PARA O FRONT
     private LocalDateTime validoAte;
+
     private boolean ativo = true;
-    @Column(length = 200) private String descricao;
+
+    @Column(length = 200)
+    private String descricao;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") // ADICIONADO PARA O FRONT
     private LocalDateTime criadoEm;
-    @PrePersist void prePersist() { criadoEm = LocalDateTime.now(); }
+
+    @PrePersist
+    void prePersist() {
+        if (criadoEm == null) {
+            criadoEm = LocalDateTime.now();
+        }
+    }
 
     /** Motivo pelo qual o cupom nao vale para o subtotal informado, ou {@code null} se ele puder ser aplicado. */
     public String motivoInvalido(BigDecimal subtotal, LocalDateTime agora) {

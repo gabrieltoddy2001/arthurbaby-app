@@ -4,6 +4,7 @@ import br.com.arthurbaby.entity.Auditoria;
 import br.com.arthurbaby.entity.Categoria;
 import br.com.arthurbaby.entity.ConfiguracaoLoja;
 import br.com.arthurbaby.entity.Cor;
+import br.com.arthurbaby.entity.Cupom; // NOVO IMPORT
 import br.com.arthurbaby.entity.Endereco;
 import br.com.arthurbaby.entity.Favorito;
 import br.com.arthurbaby.entity.Marca;
@@ -21,6 +22,7 @@ import br.com.arthurbaby.repository.AuditoriaRepository;
 import br.com.arthurbaby.repository.CategoriaRepository;
 import br.com.arthurbaby.repository.ConfiguracaoLojaRepository;
 import br.com.arthurbaby.repository.CorRepository;
+import br.com.arthurbaby.repository.CupomRepository; // NOVO IMPORT
 import br.com.arthurbaby.repository.EnderecoRepository;
 import br.com.arthurbaby.repository.FavoritoRepository;
 import br.com.arthurbaby.repository.MarcaRepository;
@@ -91,6 +93,7 @@ public class AdminCrudService {
             Map.entry("tamanhos", Regra.EQUIPE_EDITA),
             Map.entry("cores", Regra.EQUIPE_EDITA),
             Map.entry("modelos", Regra.EQUIPE_EDITA),
+            Map.entry("cupons", Regra.EQUIPE_EDITA), // NOVO
             Map.entry("usuarios", Regra.ADMIN_EDITA),
             Map.entry("configuracoes-loja", Regra.ADMIN_EDITA),
             Map.entry("produto-variacoes", Regra.EQUIPE_LE),
@@ -115,7 +118,8 @@ public class AdminCrudService {
                             ProdutoVariacaoRepository variacoes, MovimentacaoEstoqueRepository movimentos,
                             PedidoRepository pedidos, PedidoItemRepository itens,
                             PedidoStatusHistoricoRepository historicos, ConfiguracaoLojaRepository configs,
-                            FavoritoRepository favoritos, AuditoriaRepository auditoria, ObjectMapper mapper, PasswordEncoder encoder,
+                            FavoritoRepository favoritos, AuditoriaRepository auditoria, CupomRepository cupons, // NOVO PARAMETRO
+                            ObjectMapper mapper, PasswordEncoder encoder,
                             AuditoriaService auditoriaService, EstoqueService estoqueService) {
         this.mapper = mapper;
         this.encoder = encoder;
@@ -131,6 +135,7 @@ public class AdminCrudService {
                 recurso("tamanhos", tamanhos, Tamanho.class),
                 recurso("cores", cores, Cor.class),
                 recurso("modelos", modelos, Modelo.class),
+                recurso("cupons", cupons, Cupom.class), // NOVO RECURSO
                 recurso("produto-variacoes", variacoes, ProdutoVariacao.class),
                 recurso("movimentacoes-estoque", movimentos, MovimentacaoEstoque.class),
                 recurso("pedidos", pedidos, Pedido.class),

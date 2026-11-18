@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cupons — ArthurBaby Admin</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/layout.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Monta o menu
+      if (!montarLayout('Cupons', 'cupons')) return;
+      
+      // 2. Espera a div 'conteudo' ser criada pelo layout.js
+      // (Usamos um setTimeout de 50ms para garantir que o DOM do layout esteja pronto)
+      setTimeout(async () => {
+        const conteudo = document.getElementById('conteudo');
+        if (!conteudo) {
+          console.error("A div 'conteudo' não foi encontrada na página.");
+          return;
+        }
+
+        // 3. Renderiza a base (tabela vazia + modal)
+        renderTelaBase();
+        
+        // 4. Busca os dados
+        try {
+          await carregarCupons();
+        } catch (err) {
+          const tbody = document.getElementById('tbodyCupons');
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center alert-erro" style="color:red; padding: 2rem;">Erro na API: ${err.message}</td></tr>`;
+          }
+        }
+      }, 50);
+    });
+
+    let listaCupons = [];
+    let editandoId = null;
+
+    // Função que desenha a tabela vazia e o modal na tela
+    function renderTelaBase() {
+      const conteudo = document.getElementById('conteudo');
+      conteudo.innerHTML = `
+        <div class="filtros">
+          <input type="text" id="buscaCupom" placeholder="Buscar por código ou descrição..." oninput="filtrarTabela()">
+          <button class="btn btn-primary" onclick="abrirModal()">+ Novo Cupom</button>
+        </div>
+
+        <div class="tabela-rolavel">
+          <table class="tabela">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th>Tipo</th>
+                <th>Valor</th>
+                <th>Validade</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCupons">
+              <tr><td colspan="7" class="text-center loading">Buscando cupons na API...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Modal de Cadastro/Edição -->
+        <div id="modalCupom" class="modal-overlay hidden">
+          <div class="modal">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+              <h2 id="modalTitulo" style="margin:0; font-size:1.25rem;">Novo Cupom</h2>
+              <button class="btn-ghost" style="padding:.25rem .5rem; border:none; font-size:1.5rem; cursor:pointer;" onclick="fecharModal()">&times;</button>
+            </div>
+
+            <form id="formCupom" onsubmit="salvarCupom(event)">
+              <input type="hidden" id="cupomId">
+
+              <div class="grid-2">
+                <div class="field">
+                  <label>Código do Cupom *</label>
+                  <input type="text" id="codigo" placeholder="Ex: BEMVINDO10" required maxlength="50" style="text-transform: uppercase;">
+                </div>
+                <div class="field">
+                  <label>Tipo *</label>
+                  <select id="tipo" required>
+                    <option value="PERCENTUAL">Percentual (%)</option>
+                    <option value="VALOR_FIXO">Valor Fixo (R$)</option>
+                    <option value="FRETE_GRATIS">Frete Grátis</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Descrição</label>
+                <input type="text" id="descricao" placeholder="Ex: 10% na primeira compra" maxlength="200">
+              </div>
+
+              <div class="grid-3">
+                <div class="field">
+                  <label>Valor</label>
+                  <input type="number" id="valor" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="field">
+                  <label>Compra Mínima (R$)</label>
+                  <input type="number" id="valorMinimo" step="0.01" min="0" placeholder="Opcional">
+                </div>
+                <div class="field">
+                  <label>Teto de Desconto (R$)</label>
+                  <input type="number" id="valorMaximoDesconto" step="0.01" min="0" placeholder="Opcional">
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="field">
+                  <label>Válido De *</label>
+                  <input type="datetime-local" id="validoDe" required>
+                </div>
+                <div class="field">
+                  <label>Válido Até *</label>
+                  <input type="datetime-local" id="validoAte" required>
+                </div>
+              </div>
+
+              <div class="checkboxes">
+                <label><input type="checkbox" id="ativo" checked> Cupom Ativo</label>
+              </div>
+
+              <div class="modal-acoes">
+                <button type="button" class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="btnSalvar">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    async function carregarCupons() {
+      // Puxa os dados usando o padrão do seu sistema
+      listaCupons = await adminApi.listar('cupons');
+      
+      // Se chegou aqui, deu certo! Vamos renderizar os dados.
+      renderDadosTabela();
+    }
+
+    function renderDadosTabela() {
+      const tbody = document.getElementById('tbodyCupons');
+      if(!tbody) return;
+
+      const fmtMoeda = (v) => v ? Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-';
+      const fmtData = (d) => d ? new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+      
+      const getBadgeTipo = (tipo) => {
+        switch (tipo) {
+          case 'PERCENTUAL': return 'badge-info';
+          case 'VALOR_FIXO': return 'badge-verde';
+          case 'FRETE_GRATIS': return 'badge-rosa';
+          default: return '';
+        }
+      };
+      
+      const fmtValor = (c) => {
+        if (c.tipo === 'PERCENTUAL') return `${c.valor}%`;
+        if (c.tipo === 'FRETE_GRATIS') return 'Grátis';
+        return fmtMoeda(c.valor);
+      };
+
+      tbody.innerHTML = listaCupons.length === 0 
+        ? '<tr><td colspan="7" class="text-center texto-sec">Nenhum cupom cadastrado.</td></tr>'
+        : listaCupons.map(c => `
+          <tr>
+            <td><strong>${escapeHtml(c.codigo)}</strong></td>
+            <td>${escapeHtml(c.descricao || '-')}</td>
+            <td><span class="badge ${getBadgeTipo(c.tipo)}">${c.tipo.replace('_', ' ')}</span></td>
+            <td><strong>${fmtValor(c)}</strong></td>
+            <td>
+              <div class="texto-mini">
+                De: ${fmtData(c.validoDe)}<br>
+                Até: ${fmtData(c.validoAte)}
+              </div>
+            </td>
+            <td><span class="badge ${c.ativo ? 'badge-ativo' : 'badge-inativo'}">${c.ativo ? 'Ativo' : 'Inativo'}</span></td>
+            <td>
+              <div class="acoes-linha">
+                <button class="btn-mini editar" onclick="editarCupom(${c.id})">Editar</button>
+                <button class="btn-mini ${c.ativo ? 'inativar' : 'ativar'}" onclick="alternarStatus(${c.id}, ${c.ativo})">
+                  ${c.ativo ? 'Inativar' : 'Ativar'}
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+    }
+
+    function abrirModal() {
+      editandoId = null;
+      document.getElementById('formCupom').reset();
+      document.getElementById('cupomId').value = '';
+      document.getElementById('ativo').checked = true;
+      document.getElementById('modalTitulo').textContent = 'Novo Cupom';
+      
+      const hoje = new Date();
+      const daqui30 = new Date();
+      daqui30.setDate(hoje.getDate() + 30);
+      
+      const formatarInput = (d) => {
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
+      
+      document.getElementById('validoDe').value = formatarInput(hoje);
+      document.getElementById('validoAte').value = formatarInput(daqui30);
+
+      document.getElementById('modalCupom').classList.remove('hidden');
+    }
+
+    function editarCupom(id) {
+      const c = listaCupons.find(x => x.id === id);
+      if (!c) return;
+
+      editandoId = id;
+      document.getElementById('modalTitulo').textContent = 'Editar Cupom';
+      document.getElementById('cupomId').value = c.id;
+      document.getElementById('codigo').value = c.codigo;
+      document.getElementById('descricao').value = c.descricao || '';
+      document.getElementById('tipo').value = c.tipo;
+      document.getElementById('valor').value = c.valor || '';
+      document.getElementById('valorMinimo').value = c.valorMinimo || '';
+      document.getElementById('valorMaximoDesconto').value = c.valorMaximoDesconto || '';
+      document.getElementById('ativo').checked = c.ativo;
+
+      document.getElementById('validoDe').value = c.validoDe ? c.validoDe.slice(0, 16) : '';
+      document.getElementById('validoAte').value = c.validoAte ? c.validoAte.slice(0, 16) : '';
+
+      document.getElementById('modalCupom').classList.remove('hidden');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalCupom').classList.add('hidden');
+    }
+
+    async function salvarCupom(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSalvar');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+
+      const dados = {
+        codigo: document.getElementById('codigo').value.trim().toUpperCase(),
+        descricao: document.getElementById('descricao').value.trim(),
+        tipo: document.getElementById('tipo').value,
+        valor: document.getElementById('tipo').value === 'FRETE_GRATIS' ? null : parseFloat(document.getElementById('valor').value) || null,
+        validoDe: document.getElementById('validoDe').value ? document.getElementById('validoDe').value + ':00' : null,
+        validoAte: document.getElementById('validoAte').value ? document.getElementById('validoAte').value + ':00' : null,
+        valorMinimo: document.getElementById('valorMinimo').value ? parseFloat(document.getElementById('valorMinimo').value) : null,
+        valorMaximoDesconto: document.getElementById('valorMaximoDesconto').value ? parseFloat(document.getElementById('valorMaximoDesconto').value) : null,
+        ativo: document.getElementById('ativo').checked
+      };
+
+      try {
+        if (editandoId) {
+          await adminApi.atualizar('cupons', editandoId, dados);
+        } else {
+          await adminApi.criar('cupons', dados);
+        }
+        
+        fecharModal();
+        await carregarCupons();
+      } catch (err) {
+        alert(`Erro ao salvar: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Salvar';
+      }
+    }
+
+    async function alternarStatus(id, statusAtual) {
+      const acao = statusAtual ? 'inativar' : 'ativar';
+      if (!confirm(`Deseja realmente ${acao} este cupom?`)) return;
+
+      try {
+        const c = listaCupons.find(x => x.id === id);
+        const dados = { ...c, ativo: !statusAtual };
+        await adminApi.atualizar('cupons', id, dados);
+        await carregarCupons();
+      } catch (err) {
+        alert(`Erro ao alterar status: ${err.message}`);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
+    }
+
+    function filtrarTabela() {
+      const termo = document.getElementById('buscaCupom').value.toLowerCase();
+      const linhas = document.querySelectorAll('#tbodyCupons tr');
+      linhas.forEach(linha => {
+        const texto = linha.innerText.toLowerCase();
+        linha.style.display = texto.includes(termo) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>
