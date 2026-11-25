@@ -1,7 +1,7 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY . .
-RUN mvn clean package -DskipTests
+RUN mvn -Dmaven.repo.local=/root/.m2/repository clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
