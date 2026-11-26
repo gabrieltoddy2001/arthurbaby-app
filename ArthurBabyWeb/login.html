@@ -400,11 +400,11 @@
       const bolinha = document.getElementById('status-bolinha');
       const texto = document.getElementById('status-texto');
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
 
       try {
         // HEAD é mais leve que GET, mas alguns servidores bloqueiam. Se der erro, o timeout garante o catch.
-        await fetch('http://localhost:8080/', { method: 'GET', mode: 'no-cors', signal: controller.signal });
+        await fetch('https://arthurbaby-app.onrender.com/', { method: 'GET', mode: 'no-cors', signal: controller.signal });
         bolinha.style.backgroundColor = 'var(--sucesso)';
         bolinha.style.boxShadow = '0 0 6px var(--sucesso)';
         texto.textContent = 'API Online';

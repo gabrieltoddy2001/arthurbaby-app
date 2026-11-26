@@ -4,7 +4,7 @@
    ============================================ */
 
 const MOCK = false;
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = 'https://arthurbaby-app.onrender.com/api';
 
 /* ============================================
    SESSÃO

@@ -20,6 +20,16 @@ import br.com.arthurbaby.network.dto.PedidoStatusHistoricoResponse;
 import br.com.arthurbaby.network.dto.ProdutoResponse;
 
 public class Conversor {
+    private static String corrigirUrlImagem(String url) {
+        if (url == null) return null;
+        String caminho = "/api/produtos/imagens/";
+        int pos = url.indexOf(caminho);
+        if (pos >= 0) {
+            return RetrofitClient.getBaseUrl().replaceAll("/+$", "") + url.substring(pos);
+        }
+        return url;
+    }
+
 
     // ---------- CATEGORIA ----------
     public static Categoria paraCategoria(CategoriaResponse c) {
@@ -71,7 +81,7 @@ public class Conversor {
             // Procura a imagem principal
             for (ProdutoResponse.ImagemResponse img : p.imagens) {
                 if (img.principal && img.url != null && !img.url.isEmpty()) {
-                    imagemUrl = img.url;
+                    imagemUrl = corrigirUrlImagem(img.url);
                     break;
                 }
             }
@@ -79,7 +89,7 @@ public class Conversor {
             if (imagemUrl == null) {
                 for (ProdutoResponse.ImagemResponse img : p.imagens) {
                     if (img.url != null && !img.url.isEmpty()) {
-                        imagemUrl = img.url;
+                        imagemUrl = corrigirUrlImagem(img.url);
                         break;
                     }
                 }
@@ -113,7 +123,7 @@ public class Conversor {
         if (p.imagens != null) {
             List<String> urls = new ArrayList<>();
             for (ProdutoResponse.ImagemResponse img : p.imagens) {
-                if (img.url != null) urls.add(img.url);
+                if (img.url != null) urls.add(corrigirUrlImagem(img.url));
             }
             produto.setImagens(urls);
         }

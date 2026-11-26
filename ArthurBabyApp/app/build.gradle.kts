@@ -10,7 +10,7 @@ val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
-val apiUrl: String = (localProps.getProperty("api.url") ?: "http://192.168.100.171:8080/")
+val apiUrl: String = (localProps.getProperty("api.url") ?: "https://arthurbaby-app.onrender.com/")
     .let { if (it.endsWith("/")) it else "$it/" }
 
 android {
