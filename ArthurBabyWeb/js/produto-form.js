@@ -1427,7 +1427,7 @@
        // Resolve a marca antes de enviar o produto.
        body.marcaId = await resolverMarcaId();
 
-       const payload = MOCK ? body : paraEntidade(body);
+       const payload = paraEntidade(body);
 
        if (editando) {
          await adminApi.atualizar('produtos', editando.id, payload);

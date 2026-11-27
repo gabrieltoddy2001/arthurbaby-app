@@ -13,3 +13,5 @@ Thumbs.db
 # Arquivos locais
 *.local
 *.bak
+# Configuração local do Claude Code
+.claude/

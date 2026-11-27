@@ -50,7 +50,7 @@ public class SchemaMigration implements CommandLineRunner {
     }
 
     /**
-     * Bancos criados pelo script arthurbaby_bd.sql usam ids BIGINT UNSIGNED (usuario, produto...); o Hibernate cria
+     * Bancos criados pelo antigo script arthurbaby_bd.sql (removido) usam ids BIGINT UNSIGNED (usuario, produto...); o Hibernate cria
      * as colunas de FK das tabelas novas (password_reset_token, avaliacao) como BIGINT e o MySQL recusa a FK.
      * Aqui a coluna e alinhada ao tipo do id referenciado e a FK (ON DELETE CASCADE) e criada se ainda faltar.
      * Os nomes de tabela/coluna sao constantes do proprio codigo (nunca vem de fora), por isso podem ir no SQL.

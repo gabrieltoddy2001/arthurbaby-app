@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * Cada cliente avalia o mesmo produto uma única vez (uk_cliente_produto). A média das notas
  * é calculada na hora no detalhe do produto (ver AvaliacaoRepository#calcularMediaAvaliacoesByProdutoId).
  * A tabela é criada sozinha pelo Hibernate ({@code ddl-auto=update}); no MySQL o SchemaMigration
- * alinha as FKs com os ids BIGINT UNSIGNED do arthurbaby_bd.sql.
+ * alinha as FKs com os ids BIGINT UNSIGNED do antigo arthurbaby_bd.sql (removido).
  */
 @Getter @Setter @Entity
 @Table(name = "avaliacao", uniqueConstraints = @UniqueConstraint(name = "uk_cliente_produto", columnNames = {"cliente_id", "produto_id"}))
