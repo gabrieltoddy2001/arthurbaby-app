@@ -382,12 +382,12 @@ SELECT 'ARTHURBABY', 'ARTHUR BABY ENXOVAIS LTDA - ME', '35.671.222/0001-10', '(7
 
 INSERT IGNORE INTO categoria (nome, descricao, ordem_exibicao, icone) VALUES
     ('Enxoval', 'Categoria Enxoval', 1, 'enxoval'),
-    ('Roupas para Bebes', 'Categoria Roupas para Bebes', 2, 'roupas_para_bebes'),
+    ('Roupas para Bebês', 'Categoria Roupas para Bebês', 2, 'roupas_para_bebes'),
     ('Roupas Infantis', 'Categoria Roupas Infantis', 3, 'roupas_infantis'),
-    ('Acessorios', 'Categoria Acessorios', 4, 'acessorios'),
+    ('Acessórios', 'Categoria Acessórios', 4, 'acessorios'),
     ('Higiene e Cuidados', 'Categoria Higiene e Cuidados', 5, 'higiene_e_cuidados'),
-    ('Alimentacao', 'Categoria Alimentacao', 6, 'alimentacao'),
-    ('Quarto do Bebe', 'Categoria Quarto do Bebe', 7, 'quarto_do_bebe'),
+    ('Alimentação', 'Categoria Alimentação', 6, 'alimentacao'),
+    ('Quarto do Bebê', 'Categoria Quarto do Bebê', 7, 'quarto_do_bebe'),
     ('Presentes', 'Categoria Presentes', 8, 'presentes'),
     ('Kits', 'Categoria Kits', 9, 'kits'),
     ('Promocoes', 'Categoria Promocoes', 10, 'promocoes');
@@ -410,7 +410,7 @@ INSERT IGNORE INTO marca (nome) VALUES ('ArthurBaby');
 INSERT INTO produto (categoria_id, marca_id, codigo, sku, nome, descricao, preco, destaque, promocao, avaliacao)
 SELECT (SELECT id FROM categoria ORDER BY id LIMIT 1),
        (SELECT id FROM marca WHERE nome = 'ArthurBaby' LIMIT 1),
-       'AB-001', 'AB-001', 'Kit Enxoval Bebe', 'Produto inicial para testes da API', 129.90, 1, 0, 5.0
+       'AB-001', 'AB-001', 'Kit Enxoval Bebê', 'Produto inicial para testes da API', 129.90, 1, 0, 5.0
 WHERE NOT EXISTS (SELECT 1 FROM produto WHERE codigo = 'AB-001');
 
 INSERT INTO produto_variacao (produto_id, sku, tamanho_id, cor_id, modelo_id, estoque_atual)
@@ -434,7 +434,7 @@ INSERT IGNORE INTO cupom (codigo, tipo, valor, descricao, ativo, criado_em) VALU
 
 -- Subcategorias de exemplo (categoria "Enxoval")
 INSERT IGNORE INTO categoria (categoria_pai_id, nome, descricao, ordem_exibicao)
-SELECT (SELECT id FROM categoria WHERE nome = 'Enxoval' LIMIT 1), 'Kit Berco', 'Subcategoria de Enxoval', 1
+SELECT (SELECT id FROM categoria WHERE nome = 'Enxoval' LIMIT 1), 'Kit Berço', 'Subcategoria de Enxoval', 1
 WHERE EXISTS (SELECT 1 FROM categoria WHERE nome = 'Enxoval');
 INSERT IGNORE INTO categoria (categoria_pai_id, nome, descricao, ordem_exibicao)
 SELECT (SELECT id FROM categoria WHERE nome = 'Enxoval' LIMIT 1), 'Mantas e Cobertores', 'Subcategoria de Enxoval', 2

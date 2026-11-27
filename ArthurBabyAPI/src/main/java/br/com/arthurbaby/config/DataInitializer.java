@@ -43,13 +43,12 @@ public class DataInitializer {
                 Usuario vendedor = usuario("Carlos Almeida", "vendedor@arthurbaby.com.br", senhaSeed, Perfil.VENDEDOR, encoder);
                 Usuario ana = usuario("Ana Souza", "ana.souza@email.com", senhaSeed, Perfil.CLIENTE, encoder);
                 Usuario mariana = usuario("Mariana Santos", "mariana.santos@email.com", senhaSeed, Perfil.CLIENTE, encoder);
-                Usuario mariaTeste = usuario("Maria Teste Silva Atualizada", "maria.teste@exemplo.com", senhaSeed, Perfil.CLIENTE, encoder);
-                usuarios.saveAll(List.of(admin, vendedor, ana, mariana, mariaTeste));
+                usuarios.saveAll(List.of(admin, vendedor, ana, mariana));
             }
             if (categorias.count() == 0) {
                 int i = 1;
-                for (String nome : List.of("Enxoval", "Roupas para Bebes", "Roupas Infantis", "Acessorios", "Higiene e Cuidados",
-                        "Alimentacao", "Quarto do Bebe", "Presentes", "Kits", "Promocoes")) {
+                for (String nome : List.of("Enxoval", "Roupas para Bebês", "Roupas Infantis", "Acessórios", "Higiene e Cuidados",
+                        "Alimentação", "Quarto do Bebê", "Presentes", "Kits", "Promoções")) {
                     Categoria c = new Categoria();
                     c.setNome(nome); c.setDescricao("Categoria " + nome); c.setOrdemExibicao(i++);
                     c.setIcone(iconeDe(nome));
@@ -57,7 +56,7 @@ public class DataInitializer {
                 }
                 Categoria enxoval = categorias.findAll().get(0);
                 int j = 1;
-                for (String nome : List.of("Kit Berco", "Mantas e Cobertores", "Toalhas")) {
+                for (String nome : List.of("Kit Berço", "Mantas e Cobertores", "Toalhas")) {
                     Categoria sub = new Categoria();
                     sub.setNome(nome); sub.setDescricao("Subcategoria de Enxoval"); sub.setOrdemExibicao(j++);
                     sub.setCategoriaPai(enxoval);
@@ -94,7 +93,7 @@ public class DataInitializer {
             if (produtos.findByCodigo("AB-001").isEmpty()) {
                 Produto p = new Produto();
                 p.setCategoria(categorias.findAll().get(0)); p.setMarca(marcas.findAll().get(0));
-                p.setCodigo("AB-001"); p.setSku("AB-001"); p.setNome("Kit Enxoval Bebe");
+                p.setCodigo("AB-001"); p.setSku("AB-001"); p.setNome("Kit Enxoval Bebê");
                 p.setDescricao("Produto inicial para testes da API"); p.setPreco(new BigDecimal("129.90"));
                 p.setDestaque(true); p.setPromocao(false); p.setAvaliacao(new BigDecimal("5.0"));
                 ProdutoVariacao v = new ProdutoVariacao();
