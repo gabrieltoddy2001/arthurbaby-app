@@ -106,7 +106,11 @@ public class ImagemUploadController {
         Files.createDirectories(diretorio);
         String nome = UUID.randomUUID() + extensao;
         Files.write(diretorio.resolve(nome), bytes, StandardOpenOption.CREATE_NEW);
-        return baseUrl + "/api/produtos/imagens/" + nome;
+        // Sem base-url configurada, usa o endereço pelo qual a API foi chamada (no Render, o domínio público).
+        String base = baseUrl.isBlank()
+                ? ServletUriComponentsBuilder.fromCurrentContextPath().toUriString()
+                : baseUrl.replaceAll("/+$", "");
+        return base + "/api/produtos/imagens/" + nome;
     }
 
     @GetMapping("/api/produtos/imagens/{nome}")

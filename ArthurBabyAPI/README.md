@@ -42,6 +42,8 @@ DB_URL=jdbc:mysql://localhost:3306/arthurbaby?createDatabaseIfNotExist=true
 DB_USER=root
 DB_PASSWORD=Admin321
 JWT_SECRET=troque-por-uma-chave-grande-em-producao
+IMAGEM_BASE_URL=https://seu-dominio  # opcional; vazio = endereço pelo qual a API foi chamada
+PORT=8080  # o Render define automaticamente
 ```
 
 ## Executar em teste rapido com H2 (em memoria, sem MySQL)
