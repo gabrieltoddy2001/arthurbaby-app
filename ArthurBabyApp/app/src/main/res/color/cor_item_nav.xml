@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aba ativa em rosa; abas inativas em cinza, para ficar claro onde a usuária está -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/rosa_arthur" android:state_checked="true" />
+    <item android:color="@color/cinza_texto" />
+</selector>

@@ -41,7 +41,7 @@ public class PerfilFragment extends Fragment {
 
         // === VISITANTE ===
         if (!AuthGuard.estaLogado(requireContext())) {
-            tvNome.setText("Bem-vindo(a)!");
+            tvNome.setText("Bem-vinda!");
             tvEmail.setText("Entre para aproveitar tudo");
 
             v.findViewById(R.id.opMeusDados).setOnClickListener(x ->

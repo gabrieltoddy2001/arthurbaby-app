@@ -47,7 +47,7 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.VH> 
 
         // Contador de subcategorias
         if (c.temSubcategorias()) {
-            h.tvSeta.setText("› " + c.getSubcategorias().size());
+            h.tvSeta.setText(c.getSubcategorias().size() + "  ›");
         } else {
             h.tvSeta.setText("›");
         }

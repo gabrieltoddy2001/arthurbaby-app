@@ -7,9 +7,12 @@ public final class AvaliacaoUtils {
 
     private AvaliacaoUtils() {}
 
-    /** Ex.: 4.5 → "★★★★★", 3.2 → "★★★☆☆", 0 → "☆☆☆☆☆" (arredonda para a estrela mais próxima). */
+    /**
+     * Ex.: 4.5 → "★★★★☆", 4.6 → "★★★★★", 3.2 → "★★★☆☆", 0 → "☆☆☆☆☆".
+     * Meia estrela arredonda para baixo, para a nota 4,5 não aparecer como 5 estrelas cheias.
+     */
     public static String estrelas(double media) {
-        int cheias = (int) Math.round(Math.max(0, Math.min(5, media)));
+        int cheias = (int) Math.ceil(Math.max(0, Math.min(5, media)) - 0.5);
         StringBuilder sb = new StringBuilder(5);
         for (int i = 0; i < 5; i++) sb.append(i < cheias ? '★' : '☆');
         return sb.toString();

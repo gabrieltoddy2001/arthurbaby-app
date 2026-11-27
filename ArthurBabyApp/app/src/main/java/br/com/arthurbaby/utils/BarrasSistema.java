@@ -3,6 +3,8 @@ package br.com.arthurbaby.utils;
 import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -50,6 +52,7 @@ public final class BarrasSistema {
         View content = activity.findViewById(android.R.id.content);
         FaixasDrawable fundo = new FaixasDrawable(
                 ContextCompat.getColor(activity, R.color.verde_arthur),
+                ContextCompat.getColor(activity, R.color.rosa_arthur),
                 ContextCompat.getColor(activity, R.color.branco));
         content.setBackground(fundo);
 
@@ -72,14 +75,16 @@ public final class BarrasSistema {
         ViewCompat.requestApplyInsets(content);
     }
 
-    /** Pinta a faixa da barra de status (verde) e a da barra de navegação (branca). */
+    /** Pinta a faixa da barra de status (degradê verde → rosa, igual ao cabeçalho) e a da barra de navegação (branca). */
     private static class FaixasDrawable extends Drawable {
         private final Paint pTopo = new Paint();
+        private final int corTopoInicio, corTopoFim;
         private final Paint pBase = new Paint();
         private int topo, base;
 
-        FaixasDrawable(int corTopo, int corBase) {
-            pTopo.setColor(corTopo);
+        FaixasDrawable(int corTopoInicio, int corTopoFim, int corBase) {
+            this.corTopoInicio = corTopoInicio;
+            this.corTopoFim = corTopoFim;
             pBase.setColor(corBase);
         }
 
@@ -87,6 +92,12 @@ public final class BarrasSistema {
             this.topo = topo;
             this.base = base;
             invalidateSelf();
+        }
+
+        @Override
+        protected void onBoundsChange(@NonNull Rect b) {
+            pTopo.setShader(new LinearGradient(b.left, 0, b.right, 0,
+                    corTopoInicio, corTopoFim, Shader.TileMode.CLAMP));
         }
 
         @Override

@@ -47,6 +47,7 @@ public class CarrinhoFragment extends Fragment {
     private RecyclerView rvCarrinho;
     private TextView tvSubtotal, tvFrete, tvTotal, tvContador;
     private View tvVazio;
+    private View layoutCheckout, btnFinalizar;
     private ItemCarrinhoAdapter adapter;
     private CarrinhoRepository repo;
     private double descontoAplicado = 0;
@@ -81,6 +82,8 @@ public class CarrinhoFragment extends Fragment {
         tvFrete = v.findViewById(R.id.tvFrete);
         tvTotal = v.findViewById(R.id.tvTotal);
         tvVazio = v.findViewById(R.id.tvVazio);
+        layoutCheckout = v.findViewById(R.id.layoutCheckout);
+        btnFinalizar = v.findViewById(R.id.btnFinalizar);
         tvContador = v.findViewById(R.id.tvContadorItens);
 
         rvCarrinho.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -476,7 +479,11 @@ public class CarrinhoFragment extends Fragment {
         tvSubtotal.setText(MoedaUtils.formatar(subtotal));
         tvFrete.setText(frete == 0 ? "Grátis" : MoedaUtils.formatar(frete));
         tvTotal.setText(MoedaUtils.formatar(total));
-        tvVazio.setVisibility(repo.getItens().isEmpty() ? View.VISIBLE : View.GONE);
+        boolean carrinhoVazio = repo.getItens().isEmpty();
+        tvVazio.setVisibility(carrinhoVazio ? View.VISIBLE : View.GONE);
+        // Com o carrinho vazio, esconde recebimento, cupom, observação, resumo e o botão de finalizar
+        layoutCheckout.setVisibility(carrinhoVazio ? View.GONE : View.VISIBLE);
+        btnFinalizar.setVisibility(carrinhoVazio ? View.GONE : View.VISIBLE);
         tvContador.setText(repo.getTotalItens() + (repo.getTotalItens() == 1 ? " item" : " itens"));
         adapter.notifyDataSetChanged();
     }
