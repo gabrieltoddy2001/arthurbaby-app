@@ -44,7 +44,11 @@ DB_PASSWORD=Admin321
 JWT_SECRET=troque-por-uma-chave-grande-em-producao
 IMAGEM_BASE_URL=https://seu-dominio  # opcional; vazio = endereço pelo qual a API foi chamada
 PORT=8080  # o Render define automaticamente
+SEED_SENHA_INICIAL=  # senha das contas criadas num banco vazio (veja "Usuarios iniciais")
 ```
+
+As fotos dos produtos enviadas pelo painel ficam no banco (tabela `imagem_arquivo`), porque o disco do
+Render e apagado a cada deploy. A pasta `uploads/` so e lida como reserva para fotos antigas locais.
 
 ## Executar em teste rapido com H2 (em memoria, sem MySQL)
 
@@ -62,15 +66,21 @@ Console H2: http://localhost:8080/h2-console
 
 ## Usuarios iniciais
 
-- Admin: `admin@arthurbaby.com.br` / `admin123`
-- Cliente: `cliente@teste.com` / `cliente123`
+Criados so quando o banco esta vazio:
+
+- Admin: `admin@arthurbaby.com.br`
+- Vendedor: `vendedor@arthurbaby.com.br`
+- Clientes: `ana.souza@email.com`, `mariana.santos@email.com`
+
+A senha de todos vem da variavel `SEED_SENHA_INICIAL`. Sem ela, a API sorteia uma senha e mostra no log
+na primeira inicializacao. Troque as senhas depois do primeiro acesso.
 
 ## Fluxo minimo de teste
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login ^
   -H "Content-Type: application/json" ^
-  -d "{\"login\":\"admin@arthurbaby.com.br\",\"senha\":\"admin123\"}"
+  -d "{\"login\":\"admin@arthurbaby.com.br\",\"senha\":\"SUA_SENHA_INICIAL\"}"
 ```
 
 Use o campo `token` retornado:

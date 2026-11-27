@@ -19,3 +19,5 @@ Thumbs.db
 # Senhas locais
 application-local.properties
 application-secret.properties
+# Fotos enviadas em desenvolvimento local (em produção ficam no banco)
+uploads/
