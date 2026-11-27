@@ -23,6 +23,9 @@ public class SobreFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_sobre, container, false);
 
+        // Versão lida do próprio app (build.gradle.kts), para não ficar desatualizada a cada release
+        ((android.widget.TextView) v.findViewById(R.id.tvVersao)).setText("Versão " + br.com.arthurbaby.BuildConfig.VERSION_NAME);
+
         // Ano atual no rodapé (antes ficava fixo em 2025)
         int ano = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
         ((android.widget.TextView) v.findViewById(R.id.tvRodape)).setText(

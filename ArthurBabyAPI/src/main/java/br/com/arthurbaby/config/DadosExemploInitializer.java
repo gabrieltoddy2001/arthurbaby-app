@@ -360,7 +360,25 @@ public class DadosExemploInitializer implements CommandLineRunner {
             foto("EX-007", "kit-higiene.jpg", 7),
             foto("EX-008", "babadores.jpg", 8),
             foto("EX-009", "mosquiteiro.jpg", 9),
-            foto("EX-010", "kit-presente.jpg", 10));
+            foto("EX-010", "kit-presente.jpg", 10),
+            foto("EX-011", "body-listrado.jpg", 12),
+            foto("EX-012", "conjunto-body-calca.jpg", 13),
+            foto("EX-013", "pijama.jpg", 14),
+            foto("EX-014", "vestido-jeans.jpg", 15),
+            foto("EX-015", "sapatinho-trico.jpg", 16),
+            foto("EX-016", "meias.jpg", 17),
+            foto("EX-017", "touca.jpg", 18),
+            foto("EX-018", "faixa-cabelo.jpg", 19),
+            foto("EX-019", "banheira.jpg", 20),
+            foto("EX-020", "toalhinhas-boca.jpg", 21),
+            foto("EX-021", "mamadeiras.jpg", 22),
+            foto("EX-022", "copo-transicao.jpg", 23),
+            foto("EX-023", "mobile.jpg", 24),
+            foto("EX-024", "organizador-fraldas.jpg", 25),
+            foto("EX-025", "lencol-berco.jpg", 26),
+            foto("EX-026", "protetor-berco.jpg", 27),
+            foto("EX-027", "cesta-cha-bebe.jpg", 28),
+            foto("EX-028", "kit-bodies.jpg", 29));
 
     private static java.util.Map.Entry<String, String[]> foto(String codigo, String arquivo, int numero) {
         return java.util.Map.entry(codigo, new String[]{"seed/" + arquivo,
