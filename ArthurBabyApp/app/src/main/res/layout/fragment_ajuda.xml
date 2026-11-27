@@ -18,7 +18,7 @@
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/branco" />
+            app:tint="@color/branco_fixo" />
 
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
             android:text="@string/ajuda"
             android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
-            android:textColor="@color/branco"
+            android:textColor="@color/branco_fixo"
             app:iconeTitulo="@drawable/ic_ajuda"
             app:iconeClaro="true" />
 
@@ -70,7 +70,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/como_podemos_ajudar"
-                        android:textColor="@color/branco"
+                        android:textColor="@color/branco_fixo"
                         android:textSize="@dimen/texto_titulo"
                         android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/estamos_aqui_para_voce"
-                        android:textColor="@color/branco"
+                        android:textColor="@color/branco_fixo"
                         android:textSize="@dimen/texto_corpo"
                         android:alpha="0.95"
                         android:layout_marginTop="4dp" />
@@ -373,11 +373,11 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/falar_no_whatsapp"
                 android:backgroundTint="@color/rosa_arthur"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:textStyle="bold"
                 app:cornerRadius="28dp"
                 app:icon="@drawable/ic_whatsapp"
-                app:iconTint="@color/branco"
+                app:iconTint="@color/branco_fixo"
                 app:iconGravity="textStart" />
 
         </LinearLayout>

@@ -17,7 +17,7 @@
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/branco" />
+            app:tint="@color/branco_fixo" />
 
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
@@ -25,7 +25,7 @@
             android:text="@string/meus_cupons"
             android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
-            android:textColor="@color/branco"
+            android:textColor="@color/branco_fixo"
             app:iconeTitulo="@drawable/ic_cupom"
             app:iconeClaro="true" />
 

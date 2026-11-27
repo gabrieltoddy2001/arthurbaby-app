@@ -23,7 +23,7 @@
             <ImageButton
                 android:id="@+id/btnVoltar"
                 style="@style/BotaoVoltar"
-                app:tint="@color/branco" />
+                app:tint="@color/branco_fixo" />
 
             <br.com.arthurbaby.utils.TituloComIcone
                 android:id="@+id/tvTitulo"
@@ -32,7 +32,7 @@
                 android:text="@string/pedido"
                 android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 app:iconeTitulo="@drawable/ic_pedidos"
             app:iconeClaro="true" />
 
@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/status"
                 android:textStyle="bold"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:background="@color/rosa_arthur"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp" />
@@ -226,7 +226,7 @@
                 android:layout_marginBottom="20dp"
                 android:text="@string/cancelar_pedido"
                 android:backgroundTint="@color/vermelho_desconto"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 app:cornerRadius="28dp" />
 
         </LinearLayout>

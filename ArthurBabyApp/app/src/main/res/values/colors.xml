@@ -23,6 +23,8 @@
          NEUTRAS ACOLHEDORAS
          ============================================ -->
     <color name="branco">#FFFFFF</color>
+    <!-- Branco que não muda no modo escuro: texto e ícones sobre o degradê, botões e selos coloridos -->
+    <color name="branco_fixo">#FFFFFF</color>
     <color name="branco_quente">#FFFCFA</color>       <!-- fundo mais quente -->
     <color name="fundo_claro">#FBF6F8</color>          <!-- rosa super claro -->
     <color name="cinza_borda">#F0E4E9</color>

@@ -73,6 +73,13 @@ public class CategoriaIconeAdapter extends RecyclerView.Adapter<CategoriaIconeAd
 
         // Cor do círculo baseada na categoria
         int corFundo = corPorCategoria(c.getNome());
+        // Modo escuro: os tons pastel ficariam claros demais; mistura com a superfície escura mantendo a cor de cada categoria
+        android.content.Context ctx = h.itemView.getContext();
+        int modo = ctx.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        if (modo == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
+            corFundo = androidx.core.graphics.ColorUtils.blendARGB(corFundo,
+                    androidx.core.content.ContextCompat.getColor(ctx, br.com.arthurbaby.R.color.branco), 0.78f);
+        }
         GradientDrawable bg = new GradientDrawable();
         bg.setShape(GradientDrawable.OVAL);
         bg.setColor(corFundo);

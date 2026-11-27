@@ -18,13 +18,13 @@
         <ImageButton
             android:id="@+id/btnVoltarCategorias"
             style="@style/BotaoVoltar"
-            app:tint="@color/branco" />
+            app:tint="@color/branco_fixo" />
 
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/categorias"
-            android:textColor="@color/branco"
+            android:textColor="@color/branco_fixo"
             android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
             app:iconeTitulo="@drawable/ic_categorias"

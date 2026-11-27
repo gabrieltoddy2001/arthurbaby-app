@@ -76,7 +76,18 @@ public class CatalogoService {
                     cb.like(cb.lower(root.get("sku")), term),
                     cb.like(cb.lower(root.get("descricao")), term)));
         }
-        if (categoriaId != null) spec = spec.and((root, query, cb) -> cb.equal(root.get("categoria").get("id"), categoriaId));
+        if (categoriaId != null) {
+            Categoria categoria = categorias.findById(categoriaId).orElse(null);
+            if (categoria != null && "promocoes".equals(categoria.getIcone())) {
+                // A categoria "Promoções" é uma vitrine: mostra os produtos marcados em promoção, de qualquer categoria
+                spec = spec.and((root, query, cb) -> cb.isTrue(root.get("promocao")));
+            } else {
+                // A categoria-mãe mostra também os produtos das suas subcategorias
+                List<Long> ids = new java.util.ArrayList<>(List.of(categoriaId));
+                categorias.findByCategoriaPaiId(categoriaId).forEach(sub -> ids.add(sub.getId()));
+                spec = spec.and((root, query, cb) -> root.get("categoria").get("id").in(ids));
+            }
+        }
         if (precoMin != null) spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("preco"), precoMin));
         if (precoMax != null) spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("preco"), precoMax));
         if (Boolean.TRUE.equals(promocao)) spec = spec.and((root, query, cb) -> cb.isTrue(root.get("promocao")));

@@ -64,10 +64,10 @@ public class CategoriaAdapter extends RecyclerView.Adapter<CategoriaAdapter.VH> 
                 chip.setPadding((int) (12 * dp), (int) (5 * dp), (int) (12 * dp), (int) (5 * dp));
                 android.graphics.drawable.GradientDrawable fundo =
                         new android.graphics.drawable.GradientDrawable();
-                fundo.setColor(0xFFFAD1DE);
+                fundo.setColor(androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), br.com.arthurbaby.R.color.rosa_claro));
                 fundo.setCornerRadius(14 * dp);
                 chip.setBackground(fundo);
-                chip.setTextColor(0xFFD56586);
+                chip.setTextColor(androidx.core.content.ContextCompat.getColor(h.itemView.getContext(), br.com.arthurbaby.R.color.rosa_escuro));
                 chip.setLayoutParams(new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT));

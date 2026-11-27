@@ -23,7 +23,7 @@
             <ImageButton
                 android:id="@+id/btnVoltar"
                 style="@style/BotaoVoltar"
-                app:tint="@color/branco" />
+                app:tint="@color/branco_fixo" />
 
             <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
@@ -31,7 +31,7 @@
                 android:text="@string/editar_perfil"
                 android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 app:iconeTitulo="@drawable/ic_perfil"
             app:iconeClaro="true" />
 
@@ -149,7 +149,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:text="@string/salvar_alteracoes"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:textStyle="bold"
                 android:backgroundTint="@color/rosa_arthur"
                 app:cornerRadius="28dp"

@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         if (total > 0) {
             BadgeDrawable badge = bottomNav.getOrCreateBadge(R.id.nav_carrinho);
             badge.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.verde_arthur));
-            badge.setBadgeTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.branco));
+            badge.setBadgeTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.branco_fixo));
             badge.setMaxCharacterCount(3); // acima de 99 mostra "99+"
             badge.setNumber(total);
             badge.setVisible(true);

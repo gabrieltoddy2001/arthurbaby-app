@@ -366,7 +366,7 @@ public class PesquisaFragment extends Fragment {
         bg.setCornerRadius(dp(20));
         if (ativo) {
             bg.setColor(ContextCompat.getColor(requireContext(), R.color.verde_arthur));
-            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.branco));
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.branco_fixo));
             chip.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
             bg.setColor(ContextCompat.getColor(requireContext(), R.color.rosa_suave));

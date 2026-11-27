@@ -17,7 +17,7 @@
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/branco" />
+            app:tint="@color/branco_fixo" />
 
         <!-- Título + ícone da categoria logo depois do nome -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -34,7 +34,7 @@
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintHorizontal_chainStyle="packed"

@@ -14,7 +14,7 @@ import java.util.List;
 
 @Configuration
 public class DataInitializer {
-    static final String IMAGEM_PLACEHOLDER = "https://placehold.co/400x400/ED83A4/FFFFFF?text=Produto";
+    static final String IMAGEM_PLACEHOLDER = "https://placehold.co/400x400/ED83A4/FFFFFF/png?text=Produto";
 
     /** Roda depois da {@link SchemaMigration} (ordem 1). Cada bloco so insere o que ainda falta. */
     @Bean

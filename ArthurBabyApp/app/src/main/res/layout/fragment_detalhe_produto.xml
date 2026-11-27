@@ -374,12 +374,12 @@
             android:layout_height="56dp"
             android:text="@string/adicionar_ao_carrinho"
             android:backgroundTint="@color/rosa_arthur"
-            android:textColor="@color/branco"
+            android:textColor="@color/branco_fixo"
             android:textStyle="bold"
             android:textSize="@dimen/texto_corpo"
             app:cornerRadius="28dp"
             app:icon="@drawable/ic_carrinho"
-            app:iconTint="@color/branco"
+            app:iconTint="@color/branco_fixo"
             app:iconGravity="textStart" />
     </LinearLayout>
 

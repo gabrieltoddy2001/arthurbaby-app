@@ -117,25 +117,68 @@ public class DadosExemploInitializer implements CommandLineRunner {
 
         // Cada produto: código, nome, categoria, marca, preço, preço promocional, destaque, tamanhos e cores das variações
         Produto body = produto("EX-001", "Body Manga Curta Ursinho", "Body 100% algodão com estampa de ursinho e abertura com botões de pressão.",
-                "Roupas para Bebês", babyConfort, "39.90", "34.90", true, "Ursinho", List.of("RN", "P", "M"), List.of("Branco", "Azul"), admin);
+                "Roupas para Bebês › Bodies", babyConfort, "39.90", "34.90", true, "Ursinho", List.of("RN", "P", "M"), List.of("Branco", "Azul"), admin);
         Produto macacao = produto("EX-002", "Macacão Plush Estrelinhas", "Macacão em plush macio, com pezinho, ideal para dias frios.",
-                "Roupas para Bebês", babyConfort, "79.90", null, false, "Padrão", List.of("P", "M", "G"), List.of("Rosa", "Azul"), admin);
+                "Roupas para Bebês › Macacões", babyConfort, "79.90", null, false, "Padrão", List.of("P", "M", "G"), List.of("Rosa", "Azul"), admin);
         Produto manta = produto("EX-003", "Manta Soft Bebê", "Manta antialérgica de microfibra soft, 90 x 110 cm.",
-                "Enxoval", arthurBaby, "69.90", null, true, "Padrão", List.of("RN"), List.of("Branco", "Rosa", "Azul"), admin);
+                "Enxoval › Mantas e Cobertores", arthurBaby, "69.90", null, true, "Padrão", List.of("RN"), List.of("Branco", "Rosa", "Azul"), admin);
         Produto toalha = produto("EX-004", "Toalha de Banho com Capuz", "Toalha felpuda com capuz bordado, 100% algodão.",
-                "Enxoval", arthurBaby, "49.90", "44.90", false, "Padrão", List.of("RN"), List.of("Branco", "Amarelo"), admin);
+                "Enxoval › Toalhas", arthurBaby, "49.90", "44.90", false, "Padrão", List.of("RN"), List.of("Branco", "Amarelo"), admin);
         Produto vestido = produto("EX-005", "Vestido Infantil Floral", "Vestido de tricoline com estampa floral e laço na cintura.",
-                "Roupas Infantis", kidsFashion, "89.90", null, true, "Floral", List.of("2", "4", "6"), List.of("Rosa"), admin);
+                "Roupas Infantis › Vestidos", kidsFashion, "89.90", null, true, "Floral", List.of("2", "4", "6"), List.of("Rosa"), admin);
         Produto conjunto = produto("EX-006", "Conjunto Moletom Infantil", "Blusa e calça em moletom flanelado, com punhos canelados.",
-                "Roupas Infantis", kidsFashion, "109.90", "99.90", false, "Padrão", List.of("2", "4", "6", "8"), List.of("Azul", "Verde"), admin);
+                "Roupas Infantis › Conjuntos", kidsFashion, "109.90", "99.90", false, "Padrão", List.of("2", "4", "6", "8"), List.of("Azul", "Verde"), admin);
         Produto kitHigiene = produto("EX-007", "Kit Higiene Bebê 4 Peças", "Escova, pente, cortador de unhas e tesourinha de pontas arredondadas.",
-                "Higiene e Cuidados", arthurBaby, "59.90", null, false, "Padrão", List.of(), List.of("Branco"), admin);
+                "Higiene e Cuidados › Cuidados Diários", arthurBaby, "59.90", null, false, "Padrão", List.of(), List.of("Branco"), admin);
         Produto babador = produto("EX-008", "Kit 3 Babadores Impermeáveis", "Babadores com forro impermeável e fecho de velcro.",
-                "Alimentação", babyConfort, "29.90", "24.90", false, "Padrão", List.of(), List.of("Branco", "Verde"), admin);
+                "Alimentação › Babadores", babyConfort, "29.90", "24.90", false, "Padrão", List.of(), List.of("Branco", "Verde"), admin);
         Produto mosquiteiro = produto("EX-009", "Mosquiteiro para Berço", "Mosquiteiro de tule com elástico, serve em berços padrão.",
-                "Quarto do Bebê", arthurBaby, "89.90", null, false, "Padrão", List.of(), List.of("Branco"), admin);
+                "Quarto do Bebê › Mosquiteiros", arthurBaby, "89.90", null, false, "Padrão", List.of(), List.of("Branco"), admin);
         Produto kitPresente = produto("EX-010", "Kit Presente Maternidade", "Caixa presente com body, manta, toalha e naninha.",
-                "Presentes", arthurBaby, "199.90", "179.90", true, "Premium", List.of("RN"), List.of("Branco", "Azul", "Rosa"), admin);
+                "Presentes › Maternidade", arthurBaby, "199.90", "179.90", true, "Premium", List.of("RN"), List.of("Branco", "Azul", "Rosa"), admin);
+
+        // Catálogo ampliado: todas as categorias com produtos e subcategorias preenchidas
+        produto("EX-011", "Body Manga Longa Listrado", "Body de manga longa em algodão listrado, com botões de pressão no entrepernas.",
+                "Roupas para Bebês › Bodies", babyConfort, "44.90", null, false, "Padrão", List.of("RN", "P", "M", "G"), List.of("Branco", "Azul"), admin);
+        produto("EX-012", "Conjunto Body e Calça Bichinhos", "Body de manga curta e calça com pezinho, estampa de bichinhos.",
+                "Roupas para Bebês › Conjuntinhos", babyConfort, "69.90", "59.90", true, "Padrão", List.of("P", "M", "G"), List.of("Amarelo", "Verde"), admin);
+        produto("EX-013", "Pijama Infantil Estrelinhas", "Pijama de malha macia, blusa de manga longa e calça, estampa de estrelinhas.",
+                "Roupas Infantis › Pijamas", kidsFashion, "64.90", null, false, "Padrão", List.of("2", "4", "6", "8"), List.of("Azul", "Rosa"), admin);
+        produto("EX-014", "Vestido Jeans com Babado", "Vestido em jeans leve com babado na barra e botões frontais.",
+                "Roupas Infantis › Vestidos", kidsFashion, "99.90", null, false, "Padrão", List.of("2", "4", "6"), List.of("Azul"), admin);
+        produto("EX-015", "Sapatinho de Tricô", "Sapatinho de tricô com cordão de amarrar, macio para os primeiros meses.",
+                "Acessórios › Sapatinhos", arthurBaby, "39.90", null, true, "Padrão", List.of("RN", "P"), List.of("Branco", "Rosa", "Azul"), admin);
+        produto("EX-016", "Kit 3 Pares de Meias Antiderrapantes", "Meias de algodão com sola antiderrapante, para os primeiros passos.",
+                "Acessórios › Meias e Luvas", babyConfort, "29.90", "24.90", false, "Padrão", List.of("P", "M"), List.of("Branco"), admin);
+        produto("EX-017", "Touca de Algodão com Orelhinhas", "Touca de malha de algodão com orelhinhas de urso.",
+                "Acessórios › Toucas e Laços", arthurBaby, "24.90", null, false, "Padrão", List.of("RN", "P"), List.of("Branco", "Amarelo"), admin);
+        produto("EX-018", "Faixa de Cabelo com Laço", "Faixa elástica de meia de seda com laço, não aperta a cabecinha.",
+                "Acessórios › Toucas e Laços", arthurBaby, "19.90", null, false, "Padrão", List.of(), List.of("Rosa", "Branco"), admin);
+        produto("EX-019", "Banheira com Suporte", "Banheira anatômica com suporte dobrável e tampa de escoamento.",
+                "Higiene e Cuidados › Banho", babyConfort, "189.90", "169.90", true, "Padrão", List.of(), List.of("Branco", "Azul"), admin);
+        produto("EX-020", "Toalhinhas de Boca 6 Unidades", "Fraldinhas de boca em algodão com bordado, kit com 6 unidades.",
+                "Higiene e Cuidados › Banho", arthurBaby, "34.90", null, false, "Padrão", List.of(), List.of("Branco"), admin);
+        produto("EX-021", "Kit 3 Mamadeiras Anticólica", "Mamadeiras de 150, 240 e 300 ml com bico de silicone e válvula anticólica.",
+                "Alimentação › Mamadeiras e Copos", babyConfort, "89.90", "79.90", false, "Padrão", List.of(), List.of("Branco"), admin);
+        produto("EX-022", "Copo de Transição com Alças", "Copo com bico de silicone e alças laterais, à prova de vazamento.",
+                "Alimentação › Mamadeiras e Copos", babyConfort, "34.90", null, false, "Padrão", List.of(), List.of("Verde", "Rosa"), admin);
+        produto("EX-023", "Móbile de Bichinhos", "Móbile musical para berço com bichinhos de pelúcia.",
+                "Quarto do Bebê › Decoração", arthurBaby, "119.90", null, true, "Padrão", List.of(), List.of("Branco"), admin);
+        produto("EX-024", "Organizador de Fraldas", "Organizador de tecido para pendurar no trocador, com 5 bolsos.",
+                "Quarto do Bebê › Organização", arthurBaby, "59.90", null, false, "Padrão", List.of(), List.of("Branco", "Verde"), admin);
+        produto("EX-025", "Kit Lençol de Berço 3 Peças", "Lençol com elástico, lençol de cima e fronha em percal 180 fios.",
+                "Enxoval › Kit Berço", arthurBaby, "119.90", null, false, "Padrão", List.of(), List.of("Branco", "Azul", "Rosa"), admin);
+        produto("EX-026", "Protetor de Berço Nuvens", "Protetor de berço acolchoado com estampa de nuvens, 4 peças.",
+                "Enxoval › Kit Berço", arthurBaby, "149.90", "129.90", false, "Padrão", List.of(), List.of("Branco", "Azul"), admin);
+        produto("EX-027", "Cesta Chá de Bebê", "Cesta com body, toalhinhas, sapatinho e mordedor, pronta para presente.",
+                "Presentes › Chá de Bebê", arthurBaby, "229.90", null, false, "Premium", List.of(), List.of("Branco"), admin);
+        produto("EX-028", "Kit 5 Bodies Básicos", "Cinco bodies de manga curta em algodão, cores lisas.",
+                "Kits", babyConfort, "119.90", "99.90", true, "Padrão", List.of("RN", "P", "M"), List.of("Branco"), admin);
+        // O produto inicial AB-001 (DataInitializer) também é um kit
+        produtos.findByCodigo("AB-001").ifPresent(p -> {
+            Categoria kits = categoria("Kits");
+            if (p.getCategoria() == null || !p.getCategoria().getId().equals(kits.getId())) { p.setCategoria(kits); produtos.save(p); }
+        });
 
         // ---------- Pedidos em vários status (itens: produto e quantidade; usa a 1ª variação do produto) ----------
         pedido("PED-EX-0001", beatriz, vendedor, PedidoStatus.ENTREGUE, FormaRecebimento.ENTREGA, "15.00",
@@ -239,7 +282,16 @@ public class DadosExemploInitializer implements CommandLineRunner {
                             String preco, String precoPromocional, boolean destaque, String nomeModelo,
                             List<String> nomesTamanhos, List<String> nomesCores, Usuario responsavel) {
         Optional<Produto> existente = produtos.findByCodigo(codigo);
-        if (existente.isPresent()) return existente.get();
+        if (existente.isPresent()) {
+            // Produto já existe: só confere a categoria (move para a subcategoria certa em bancos antigos)
+            Produto p = existente.get();
+            Categoria alvo = categoria(nomeCategoria);
+            if (p.getCategoria() == null || !p.getCategoria().getId().equals(alvo.getId())) {
+                p.setCategoria(alvo);
+                return produtos.save(p);
+            }
+            return p;
+        }
 
         Produto p = new Produto();
         p.setCodigo(codigo); p.setSku(codigo); p.setNome(nome); p.setDescricao(descricao);
@@ -357,7 +409,7 @@ public class DadosExemploInitializer implements CommandLineRunner {
     private static ProdutoImagem imagem(Produto p, String corFundo, String texto, String descricao, int ordem, boolean principal) {
         ProdutoImagem img = new ProdutoImagem();
         img.setProduto(p);
-        img.setUrl("https://placehold.co/400x400/" + corFundo + "/FFFFFF?text=" + URLEncoder.encode(texto, StandardCharsets.UTF_8));
+        img.setUrl("https://placehold.co/400x400/" + corFundo + "/FFFFFF/png?text=" + URLEncoder.encode(texto, StandardCharsets.UTF_8));
         img.setDescricao(descricao); img.setOrdemExibicao(ordem); img.setPrincipal(principal);
         return img;
     }
@@ -472,10 +524,28 @@ public class DadosExemploInitializer implements CommandLineRunner {
     }
 
     /** Categoria pelo nome, ignorando acentos (o banco MySQL tem "Bebês" e o H2 "Bebes"); cai na 1ª se não achar. */
+    /**
+     * Categoria pelo nome. Aceita "Categoria › Subcategoria": a subcategoria é criada embaixo da categoria-mãe
+     * se ainda não existir (assim bancos já existentes também ganham as subcategorias novas).
+     */
     private Categoria categoria(String nome) {
+        String[] partes = nome.split("\\s*›\\s*", 2);
         List<Categoria> todas = categorias.findAll();
-        return todas.stream().filter(c -> c.getCategoriaPai() == null && mesmoNome(c.getNome(), nome)).findFirst()
+        Categoria raiz = todas.stream().filter(c -> c.getCategoriaPai() == null && mesmoNome(c.getNome(), partes[0])).findFirst()
                 .orElse(todas.get(0));
+        if (partes.length == 1) return raiz;
+        return todas.stream()
+                .filter(c -> c.getCategoriaPai() != null && c.getCategoriaPai().getId().equals(raiz.getId())
+                        && mesmoNome(c.getNome(), partes[1]))
+                .findFirst()
+                .orElseGet(() -> {
+                    Categoria sub = new Categoria();
+                    sub.setNome(partes[1]);
+                    sub.setDescricao("Subcategoria de " + raiz.getNome());
+                    sub.setCategoriaPai(raiz);
+                    sub.setOrdemExibicao(categorias.findByCategoriaPaiId(raiz.getId()).size() + 1);
+                    return categorias.save(sub);
+                });
     }
 
     private Tamanho tamanho(String nome) {

@@ -20,7 +20,7 @@
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/branco" />
+            app:tint="@color/branco_fixo" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -40,7 +40,7 @@
                     android:text="@string/promocoes"
                     android:textSize="@dimen/texto_subtitulo"
                     android:textStyle="bold"
-                    android:textColor="@color/branco"
+                    android:textColor="@color/branco_fixo"
                     app:iconeTitulo="@drawable/ic_promocao"
 
                     app:iconeClaro="true" />
@@ -50,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/ofertas_especiais_para_voce"
                     android:textSize="@dimen/texto_pequeno"
-                    android:textColor="@color/branco"
+                    android:textColor="@color/branco_fixo"
                     android:alpha="0.9" />
             </LinearLayout>
         </LinearLayout>

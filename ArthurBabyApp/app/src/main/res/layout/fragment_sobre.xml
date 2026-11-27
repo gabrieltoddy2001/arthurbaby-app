@@ -23,7 +23,7 @@
             <ImageButton
                 android:id="@+id/btnVoltar"
                 style="@style/BotaoVoltar"
-                app:tint="@color/branco" />
+                app:tint="@color/branco_fixo" />
 
             <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
@@ -31,7 +31,7 @@
                 android:text="@string/sobre"
                 android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 app:iconeTitulo="@drawable/ic_info"
             app:iconeClaro="true" />
 
@@ -72,7 +72,7 @@
                 android:text="@string/arthurbaby_2"
                 android:textStyle="bold"
                 android:textSize="@dimen/texto_titulo"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:letterSpacing="0.1"
                 android:layout_marginTop="8dp" />
 
@@ -80,7 +80,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/enxoval_e_moda_infantil"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:textSize="@dimen/texto_corpo"
                 android:alpha="0.9" />
 
@@ -89,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/versao_1_0"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:textSize="@dimen/texto_pequeno"
                 android:alpha="0.8"
                 android:layout_marginTop="4dp" />

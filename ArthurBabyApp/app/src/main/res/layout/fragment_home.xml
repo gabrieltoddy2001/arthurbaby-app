@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/ola"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold" />
 
@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/bem_vinda_a_arthurbaby"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:textSize="@dimen/texto_pequeno"
                 android:alpha="0.9"
                 android:layout_marginTop="2dp" />
@@ -131,7 +131,7 @@
             android:paddingHorizontal="28dp"
             android:text="@string/tentar_de_novo"
             android:textAllCaps="false"
-            android:textColor="@color/branco"
+            android:textColor="@color/branco_fixo"
             android:textSize="@dimen/texto_destaque"
             android:textStyle="bold"
             app:cornerRadius="26dp" />
@@ -202,7 +202,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/conforto_e_carinho_para_o_seu_bebe"
-                        android:textColor="@color/branco"
+                        android:textColor="@color/branco_fixo"
                         android:textSize="@dimen/texto_titulo"
                         android:textStyle="bold"
                         android:lineSpacingMultiplier="1.15" />
@@ -211,7 +211,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feito_com_amor"
-                        android:textColor="@color/branco"
+                        android:textColor="@color/branco_fixo"
                         android:textSize="@dimen/texto_pequeno"
                         android:alpha="0.95"
                         android:layout_marginTop="6dp" />

@@ -156,7 +156,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="12dp"
                 android:text="@string/salvar"
-                android:textColor="@color/branco"
+                android:textColor="@color/branco_fixo"
                 android:textStyle="bold"
                 android:backgroundTint="@color/rosa_arthur"
                 app:cornerRadius="26dp" />

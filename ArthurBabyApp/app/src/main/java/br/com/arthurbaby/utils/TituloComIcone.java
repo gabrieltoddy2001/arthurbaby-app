@@ -58,7 +58,7 @@ public class TituloComIcone extends AppCompatTextView {
         if (icone == null) return;
         icone = DrawableCompat.wrap(icone.mutate());
         DrawableCompat.setTint(icone, claro
-                ? ContextCompat.getColor(getContext(), R.color.branco)
+                ? ContextCompat.getColor(getContext(), R.color.branco_fixo)
                 : ContextCompat.getColor(getContext(), R.color.rosa_arthur));
 
         GradientDrawable circulo = new GradientDrawable();
