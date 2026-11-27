@@ -5,7 +5,7 @@ Feito em Java no Android Studio (minSdk 24) e integrado à API do projeto (`Arth
 
 ## Endereço da API
 
-Por padrão o app usa a API publicada no Render: `https://arthurbaby-app.onrender.com/`.
+Por padrão o app usa a API publicada no Render: `https://arthurbaby-api.onrender.com/`.
 
 Para apontar para a API rodando no seu computador, crie ou edite `local.properties` (não vai para o Git):
 

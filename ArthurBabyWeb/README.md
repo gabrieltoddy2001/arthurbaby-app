@@ -9,7 +9,7 @@ Sirva a pasta com qualquer servidor estático na porta 5500 ou 5501 (são as lib
 O endereço da API é escolhido sozinho em `js/api.js`:
 
 - aberto em `localhost` / `127.0.0.1` → API local em `http://localhost:8080`
-- publicado (Vercel) → API no Render, `https://arthurbaby-app.onrender.com`
+- publicado (Vercel) → API no Render, `https://arthurbaby-api.onrender.com`
 
 Para usar o painel local contra a API do Render, rode no console do navegador:
 

@@ -9,7 +9,7 @@ const API_SERVIDOR = (() => {
   const local = ['localhost', '127.0.0.1'].includes(location.hostname);
   let forcarNuvem = false;
   try { forcarNuvem = localStorage.getItem('ab_api') === 'nuvem'; } catch (_) {}
-  return local && !forcarNuvem ? 'http://localhost:8080' : 'https://arthurbaby-app.onrender.com';
+  return local && !forcarNuvem ? 'http://localhost:8080' : 'https://arthurbaby-api.onrender.com';
 })();
 const API_BASE = `${API_SERVIDOR}/api`;
 
