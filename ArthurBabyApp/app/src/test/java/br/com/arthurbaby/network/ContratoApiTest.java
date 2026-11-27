@@ -67,7 +67,10 @@ public class ContratoApiTest {
 
     @Test
     public void estrelasRefletemAMedia() {
-        assertEquals("★★★★★", AvaliacaoUtils.estrelas(4.5));
+        // Meia estrela arredonda para baixo: 4,5 não aparece como 5 estrelas cheias
+        assertEquals("★★★★☆", AvaliacaoUtils.estrelas(4.5));
+        assertEquals("★★★★★", AvaliacaoUtils.estrelas(4.6));
+        assertEquals("★★★★★", AvaliacaoUtils.estrelas(5.0));
         assertEquals("★★★☆☆", AvaliacaoUtils.estrelas(3.2));
         assertEquals("☆☆☆☆☆", AvaliacaoUtils.estrelas(0));
         assertEquals("(4,5)", AvaliacaoUtils.nota(4.5, ""));
