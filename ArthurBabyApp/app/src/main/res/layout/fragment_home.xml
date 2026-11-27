@@ -28,17 +28,17 @@
                 android:id="@+id/tvSaudacao"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Olá! 💕"
+                android:text="@string/ola"
                 android:textColor="@color/branco"
-                android:textSize="18sp"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bem-vinda à ArthurBaby"
+                android:text="@string/bem_vinda_a_arthurbaby"
                 android:textColor="@color/branco"
-                android:textSize="12sp"
+                android:textSize="@dimen/texto_pequeno"
                 android:alpha="0.9"
                 android:layout_marginTop="2dp" />
         </LinearLayout>
@@ -47,10 +47,10 @@
             android:id="@+id/btnEntrarHome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Entrar"
+            android:text="@string/entrar_2"
             android:textColor="@color/rosa_arthur"
             android:textStyle="bold"
-            android:textSize="13sp"
+            android:textSize="@dimen/texto_corpo"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
             android:background="@drawable/bg_botao_branco"
@@ -59,7 +59,7 @@
         <ImageView
             android:id="@+id/btnFavoritos"
             android:tooltipText="Meus favoritos"
-            android:contentDescription="Meus favoritos"
+            android:contentDescription="@string/meus_favoritos"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="6dp"
@@ -74,14 +74,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Sair"
+            android:text="@string/sair"
             android:textColor="@color/rosa_arthur"
             android:textStyle="bold"
-            android:textSize="13sp"
+            android:textSize="@dimen/texto_corpo"
             android:paddingHorizontal="16dp"
             android:paddingVertical="8dp"
             android:background="@drawable/bg_botao_branco"
-            android:contentDescription="Sair da conta"
+            android:contentDescription="@string/sair_da_conta"
             android:visibility="gone" />
     </LinearLayout>
 
@@ -108,9 +108,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Não foi possível carregar a loja"
+            android:text="@string/nao_foi_possivel_carregar_a_loja"
             android:textColor="@color/texto_primario"
-            android:textSize="18sp"
+            android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold" />
 
         <TextView
@@ -118,9 +118,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:gravity="center"
-            android:text="Verifique sua internet e tente de novo. Na primeira vez do dia o servidor pode levar até um minuto para responder."
+            android:text="@string/verifique_sua_internet_e_tente_de_novo_n"
             android:textColor="@color/cinza_medio"
-            android:textSize="14sp" />
+            android:textSize="@dimen/texto_corpo" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnTentarNovamente"
@@ -129,10 +129,10 @@
             android:layout_marginTop="20dp"
             android:backgroundTint="@color/rosa_arthur"
             android:paddingHorizontal="28dp"
-            android:text="Tentar de novo"
+            android:text="@string/tentar_de_novo"
             android:textAllCaps="false"
             android:textColor="@color/branco"
-            android:textSize="15sp"
+            android:textSize="@dimen/texto_destaque"
             android:textStyle="bold"
             app:cornerRadius="26dp" />
     </LinearLayout>
@@ -170,14 +170,14 @@
                     android:layout_height="20dp"
                     android:src="@drawable/ic_busca"
                     app:tint="@color/rosa_arthur"
-                    android:contentDescription="Buscar" />
+                    android:contentDescription="@string/buscar" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Buscar produtos..."
+                    android:text="@string/buscar_produtos"
                     android:textColor="@color/cinza_texto"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/texto_corpo"
                     android:layout_marginStart="10dp" />
             </LinearLayout>
 
@@ -201,18 +201,18 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Conforto\ne carinho\npara o seu bebê"
+                        android:text="@string/conforto_e_carinho_para_o_seu_bebe"
                         android:textColor="@color/branco"
-                        android:textSize="22sp"
+                        android:textSize="@dimen/texto_titulo"
                         android:textStyle="bold"
                         android:lineSpacingMultiplier="1.15" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Feito com amor 💕"
+                        android:text="@string/feito_com_amor"
                         android:textColor="@color/branco"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/texto_pequeno"
                         android:alpha="0.95"
                         android:layout_marginTop="6dp" />
 
@@ -220,8 +220,8 @@
                         android:id="@+id/btnBanner"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ver promoções"
-                        android:textSize="12sp"
+                        android:text="@string/ver_promocoes"
+                        android:textSize="@dimen/texto_pequeno"
                         android:textStyle="bold"
                         android:backgroundTint="@color/branco"
                         android:textColor="@color/rosa_escuro"
@@ -244,18 +244,18 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Categorias"
+                    android:text="@string/categorias"
                     android:textColor="@color/texto_primario"
                     android:textStyle="bold"
-                    android:textSize="17sp" />
+                    android:textSize="@dimen/texto_subtitulo" />
 
                 <TextView
                     android:id="@+id/txtVerTodasCategorias"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ver todas"
+                    android:text="@string/ver_todas"
                     android:textColor="@color/rosa_arthur"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/texto_corpo"
                     android:padding="4dp" />
             </LinearLayout>
 
@@ -285,18 +285,18 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Produtos em destaque"
+                    android:text="@string/produtos_em_destaque"
                     android:textColor="@color/texto_primario"
                     android:textStyle="bold"
-                    android:textSize="17sp" />
+                    android:textSize="@dimen/texto_subtitulo" />
 
                 <TextView
                     android:id="@+id/txtVerTodosProdutos"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ver todos"
+                    android:text="@string/ver_todos"
                     android:textColor="@color/rosa_arthur"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/texto_corpo"
                     android:padding="4dp" />
             </LinearLayout>
 

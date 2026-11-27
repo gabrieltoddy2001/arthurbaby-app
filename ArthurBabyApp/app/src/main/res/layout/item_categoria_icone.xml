@@ -22,16 +22,16 @@
             android:layout_height="34dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_cat_enxoval"
-            android:contentDescription="Categoria" />
+            android:contentDescription="@string/categoria" />
     </FrameLayout>
 
     <TextView
         android:id="@+id/tvNome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enxoval"
+        android:text="@string/enxoval"
         android:textColor="@color/texto_primario"
-        android:textSize="11sp"
+        android:textSize="@dimen/texto_pequeno"
         android:gravity="center"
         android:lines="2"
         android:maxLines="2"

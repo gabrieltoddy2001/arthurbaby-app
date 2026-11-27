@@ -135,6 +135,10 @@ async function redefinirSenhaUsuario(u, aoConcluir) {
 function formatarMoeda(v) {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+/** Valor para campos de dinheiro (input number): 39.9 → "39.90"; vazio continua vazio. */
+function valorDinheiro(v) {
+  return v === null || v === undefined || v === '' || isNaN(Number(v)) ? '' : Number(v).toFixed(2);
+}
 /** Valor sem o "R$", com separador de milhar: 1283.2 → "1.283,20". */
 function formatarPreco(v) {
   return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

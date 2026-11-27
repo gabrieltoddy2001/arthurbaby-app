@@ -27,8 +27,8 @@
                 android:id="@+id/tvCodigo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CODIGO"
-                android:textSize="20sp"
+                android:text="@string/codigo"
+                android:textSize="@dimen/texto_titulo"
                 android:textStyle="bold"
                 android:textColor="@color/rosa_arthur" />
 
@@ -36,8 +36,8 @@
                 android:id="@+id/tvDescricao"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Descrição do cupom"
-                android:textSize="14sp"
+                android:text="@string/descricao_do_cupom"
+                android:textSize="@dimen/texto_corpo"
                 android:textColor="@color/texto_primario"
                 android:layout_marginTop="4dp" />
 
@@ -45,8 +45,8 @@
                 android:id="@+id/tvValidade"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Válido até: 31/12/2026"
-                android:textSize="12sp"
+                android:text="@string/valido_ate_31_12_2026"
+                android:textSize="@dimen/texto_pequeno"
                 android:textColor="@color/cinza_medio"
                 android:layout_marginTop="8dp" />
         </LinearLayout>

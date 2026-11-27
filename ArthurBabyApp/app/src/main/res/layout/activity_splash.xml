@@ -42,9 +42,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tudo para o seu\nbebê em um só lugar!"
+            android:text="@string/tudo_para_o_seu_bebe_em_um_so_lugar"
             android:textColor="@color/rosa_arthur"
-            android:textSize="24sp"
+            android:textSize="@dimen/texto_display"
             android:textStyle="bold"
             android:gravity="center"
             android:lineSpacingMultiplier="1.3"
@@ -53,9 +53,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Feito com amor para mamães 💕"
+            android:text="@string/feito_com_amor_para_mamaes"
             android:textColor="@color/cinza_medio"
-            android:textSize="14sp"
+            android:textSize="@dimen/texto_corpo"
             android:layout_marginTop="10dp" />
     </LinearLayout>
 

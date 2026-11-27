@@ -39,9 +39,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ArthurBaby"
+                    android:text="@string/arthurbaby"
                     android:textColor="@color/branco"
-                    android:textSize="22sp"
+                    android:textSize="@dimen/texto_titulo"
                     android:textStyle="bold"
                     android:letterSpacing="0.05"
                     android:layout_marginTop="8dp" />
@@ -49,9 +49,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enxoval e Moda Infantil"
+                    android:text="@string/enxoval_e_moda_infantil"
                     android:textColor="@color/branco"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/texto_pequeno"
                     android:alpha="0.9"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
@@ -60,7 +60,7 @@
             <ImageView
                 android:id="@+id/btnVoltarLogin"
                 android:tooltipText="Voltar"
-                android:contentDescription="Voltar para a tela inicial"
+                android:contentDescription="@string/voltar_para_a_tela_inicial"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginStart="16dp"
@@ -90,24 +90,24 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bem-vinda! 💕"
+                    android:text="@string/bem_vinda"
                     android:textColor="@color/texto_primario"
-                    android:textSize="22sp"
+                    android:textSize="@dimen/texto_titulo"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Entre com seus dados para continuar"
+                    android:text="@string/entre_com_seus_dados_para_continuar"
                     android:textColor="@color/cinza_medio"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/texto_corpo"
                     android:layout_marginBottom="20dp" />
 
                 <!-- E-MAIL -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="E-mail ou CPF"
+                    android:hint="@string/e_mail_ou_cpf"
                     app:startIconDrawable="@drawable/ic_email"
                     app:startIconTint="@color/rosa_arthur"
                     app:boxStrokeColor="@color/rosa_arthur"
@@ -128,7 +128,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Senha"
+                    android:hint="@string/senha"
                     android:layout_marginTop="12dp"
                     app:passwordToggleEnabled="true"
                     app:startIconDrawable="@drawable/ic_cadeado"
@@ -161,9 +161,9 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:checked="true"
-                        android:text="Lembrar e-mail/CPF"
+                        android:text="@string/lembrar_e_mail_cpf"
                         android:textColor="@color/cinza_medio"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/texto_corpo"
                         app:buttonTint="@color/rosa_arthur"
                         android:tooltipText="Preenche seu e-mail/CPF na próxima vez que entrar" />
 
@@ -171,9 +171,9 @@
                         android:id="@+id/tvEsqueciSenha"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Esqueci minha senha"
+                        android:text="@string/esqueci_minha_senha"
                         android:textColor="@color/rosa_arthur"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:padding="4dp" />
                 </LinearLayout>
 
@@ -181,7 +181,7 @@
                     android:id="@+id/btnEntrar"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="ENTRAR"
+                    android:text="@string/entrar"
                     android:textColor="@color/branco"
                     android:textStyle="bold"
                     android:backgroundTint="@color/rosa_arthur"
@@ -191,17 +191,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Não tem conta?"
+                    android:text="@string/nao_tem_conta"
                     android:textColor="@color/cinza_medio"
                     android:layout_gravity="center_horizontal"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/texto_corpo"
                     android:layout_marginTop="20dp" />
 
                 <TextView
                     android:id="@+id/tvCadastrar"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="CRIAR CONTA"
+                    android:text="@string/criar_conta_2"
                     android:textColor="@color/rosa_arthur"
                     android:textStyle="bold"
                     android:gravity="center"

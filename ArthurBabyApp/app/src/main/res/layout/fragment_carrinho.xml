@@ -29,9 +29,9 @@
             <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Meu Carrinho"
+                android:text="@string/meu_carrinho"
                 android:textColor="@color/branco"
-                android:textSize="18sp"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
                 app:iconeTitulo="@drawable/ic_carrinho"
 
@@ -41,9 +41,9 @@
                 android:id="@+id/tvContadorItens"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0 itens"
+                android:text="@string/n_0_itens"
                 android:textColor="@color/branco"
-                android:textSize="12sp"
+                android:textSize="@dimen/texto_pequeno"
                 android:alpha="0.9" />
         </LinearLayout>
     </LinearLayout>
@@ -70,24 +70,24 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_carrinho"
                 app:tint="@color/rosa_arthur"
-                android:contentDescription="Carrinho vazio" />
+                android:contentDescription="@string/carrinho_vazio" />
         </FrameLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Seu carrinho está vazio"
+            android:text="@string/seu_carrinho_esta_vazio"
             android:textColor="@color/texto_primario"
             android:textStyle="bold"
-            android:textSize="18sp"
+            android:textSize="@dimen/texto_subtitulo"
             android:layout_marginTop="20dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Que tal adicionar produtos do nosso catálogo?"
+            android:text="@string/que_tal_adicionar_produtos_do_nosso_cata"
             android:textColor="@color/cinza_medio"
-            android:textSize="14sp"
+            android:textSize="@dimen/texto_corpo"
             android:gravity="center"
             android:layout_marginTop="6dp" />
     </LinearLayout>
@@ -135,10 +135,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Forma de recebimento"
+                        android:text="@string/forma_de_recebimento"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/texto_corpo" />
 
                     <RadioGroup
                         android:id="@+id/rgRecebimento"
@@ -151,8 +151,8 @@
                             android:id="@+id/rbRetirada"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Retirar na loja"
-                            android:textSize="13sp"
+                            android:text="@string/retirar_na_loja"
+                            android:textSize="@dimen/texto_corpo"
                             android:checked="true"
                             android:buttonTint="@color/rosa_arthur" />
 
@@ -160,8 +160,8 @@
                             android:id="@+id/rbEntrega"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Entrega"
-                            android:textSize="13sp"
+                            android:text="@string/entrega"
+                            android:textSize="@dimen/texto_corpo"
                             android:buttonTint="@color/rosa_arthur"
                             android:layout_marginStart="16dp" />
                     </RadioGroup>
@@ -191,30 +191,30 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Endereço de entrega"
+                                android:text="@string/endereco_de_entrega"
                                 android:textStyle="bold"
                                 android:textColor="@color/texto_primario"
-                                android:textSize="13sp" />
+                                android:textSize="@dimen/texto_corpo" />
 
                             <TextView
                                 android:id="@+id/btnTrocarEndereco"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Trocar"
+                                android:text="@string/trocar"
                                 android:textColor="@color/rosa_arthur"
                                 android:textStyle="bold"
-                                android:textSize="13sp"
+                                android:textSize="@dimen/texto_corpo"
                                 android:padding="6dp"
-                                android:contentDescription="Escolher outro endereço de entrega" />
+                                android:contentDescription="@string/escolher_outro_endereco_de_entrega" />
                         </LinearLayout>
 
                         <TextView
                             android:id="@+id/tvEnderecoEntrega"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Carregando seus endereços…"
+                            android:text="@string/carregando_seus_enderecos"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="13sp"
+                            android:textSize="@dimen/texto_corpo"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -239,10 +239,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cupom de desconto"
+                        android:text="@string/cupom_de_desconto"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/texto_corpo" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -256,21 +256,21 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Digite o cupom"
+                            android:hint="@string/digite_o_cupom"
                             android:background="@drawable/bg_contador_quantidade"
                             android:padding="12dp"
                             android:inputType="text"
-                            android:textSize="13sp" />
+                            android:textSize="@dimen/texto_corpo" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnAplicarCupom"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Aplicar"
+                            android:text="@string/aplicar"
                             android:backgroundTint="@color/rosa_arthur"
                             android:textColor="@color/branco"
                             android:layout_marginStart="8dp"
-                            android:textSize="13sp"
+                            android:textSize="@dimen/texto_corpo"
                             app:cornerRadius="16dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -295,22 +295,22 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Observação"
+                        android:text="@string/observacao"
                         android:textStyle="bold"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp" />
+                        android:textSize="@dimen/texto_corpo" />
 
                     <EditText
                         android:id="@+id/etObservacao"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Alguma observação sobre o pedido?"
+                        android:hint="@string/alguma_observacao_sobre_o_pedido"
                         android:background="@drawable/bg_contador_quantidade"
                         android:padding="12dp"
                         android:inputType="textMultiLine"
                         android:minLines="2"
                         android:gravity="top"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:layout_marginTop="6dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -339,16 +339,16 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Subtotal"
+                            android:text="@string/subtotal"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="13sp" />
+                            android:textSize="@dimen/texto_corpo" />
                         <TextView
                             android:id="@+id/tvSubtotal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="R$ 0,00"
+                            android:text="@string/r_0_00"
                             android:textColor="@color/texto_primario"
-                            android:textSize="13sp" />
+                            android:textSize="@dimen/texto_corpo" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -360,16 +360,16 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Frete"
+                            android:text="@string/frete"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="13sp" />
+                            android:textSize="@dimen/texto_corpo" />
                         <TextView
                             android:id="@+id/tvFrete"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="R$ 0,00"
+                            android:text="@string/r_0_00"
                             android:textColor="@color/texto_primario"
-                            android:textSize="13sp" />
+                            android:textSize="@dimen/texto_corpo" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -383,18 +383,18 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Desconto"
+                            android:text="@string/desconto"
                             android:textColor="@color/verde_arthur"
                             android:textStyle="bold"
-                            android:textSize="13sp" />
+                            android:textSize="@dimen/texto_corpo" />
                         <TextView
                             android:id="@+id/tvDesconto"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="- R$ 0,00"
+                            android:text="@string/r_0_00_2"
                             android:textColor="@color/verde_arthur"
                             android:textStyle="bold"
-                            android:textSize="13sp" />
+                            android:textSize="@dimen/texto_corpo" />
                     </LinearLayout>
 
                     <View
@@ -411,17 +411,17 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Total"
+                            android:text="@string/total"
                             android:textStyle="bold"
-                            android:textSize="18sp"
+                            android:textSize="@dimen/texto_subtitulo"
                             android:textColor="@color/texto_primario" />
                         <TextView
                             android:id="@+id/tvTotal"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="R$ 0,00"
+                            android:text="@string/r_0_00"
                             android:textStyle="bold"
-                            android:textSize="18sp"
+                            android:textSize="@dimen/texto_subtitulo"
                             android:textColor="@color/rosa_arthur" />
                     </LinearLayout>
                 </LinearLayout>
@@ -442,11 +442,11 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="12dp"
-        android:text="FINALIZAR PEDIDO"
+        android:text="@string/finalizar_pedido"
         android:backgroundTint="@color/rosa_arthur"
         android:textColor="@color/branco"
         android:textStyle="bold"
-        android:textSize="14sp"
+        android:textSize="@dimen/texto_corpo"
         app:cornerRadius="28dp"
         app:icon="@drawable/ic_check_circle"
         app:iconTint="@color/branco"

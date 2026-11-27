@@ -23,6 +23,11 @@ public class SobreFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_sobre, container, false);
 
+        // Ano atual no rodapé (antes ficava fixo em 2025)
+        int ano = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
+        ((android.widget.TextView) v.findViewById(R.id.tvRodape)).setText(
+                "© " + ano + " ARTHURBABY\nTodos os direitos reservados\nCNPJ 35.671.222/0001-10");
+
         v.findViewById(R.id.btnVoltar).setOnClickListener(x ->
                 requireActivity().getOnBackPressedDispatcher().onBackPressed()
         );

@@ -13,21 +13,22 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:background="@color/branco">
+        android:background="@drawable/bg_gradiente_header">
 
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/texto_primario" />
+            app:tint="@color/branco" />
 
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ajuda"
-            android:textSize="20sp"
+            android:text="@string/ajuda"
+            android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
-            android:textColor="@color/texto_primario"
-            app:iconeTitulo="@drawable/ic_ajuda" />
+            android:textColor="@color/branco"
+            app:iconeTitulo="@drawable/ic_ajuda"
+            app:iconeClaro="true" />
 
 
         <Space
@@ -68,17 +69,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Como podemos ajudar?"
+                        android:text="@string/como_podemos_ajudar"
                         android:textColor="@color/branco"
-                        android:textSize="20sp"
+                        android:textSize="@dimen/texto_titulo"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Estamos aqui para você 💕"
+                        android:text="@string/estamos_aqui_para_voce"
                         android:textColor="@color/branco"
-                        android:textSize="13sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:alpha="0.95"
                         android:layout_marginTop="4dp" />
                 </LinearLayout>
@@ -111,7 +112,7 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_pedidos"
                             app:tint="@color/rosa_arthur"
-                            android:contentDescription="Pedidos" />
+                            android:contentDescription="@string/pedidos" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -124,17 +125,17 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Como acompanho meu pedido?"
+                            android:text="@string/como_acompanho_meu_pedido"
                             android:textColor="@color/texto_primario"
                             android:textStyle="bold"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/texto_corpo" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Veja o status em Perfil → Meus Pedidos"
+                            android:text="@string/veja_o_status_em_perfil_meus_pedidos"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/texto_pequeno"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -167,7 +168,7 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_carrinho"
                             app:tint="@color/verde_arthur"
-                            android:contentDescription="Entrega" />
+                            android:contentDescription="@string/entrega" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -180,17 +181,17 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Qual o prazo de entrega?"
+                            android:text="@string/qual_o_prazo_de_entrega"
                             android:textColor="@color/texto_primario"
                             android:textStyle="bold"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/texto_corpo" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="De 3 a 7 dias úteis, dependendo da região"
+                            android:text="@string/de_3_a_7_dias_uteis_dependendo_da_regiao"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/texto_pequeno"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -223,7 +224,7 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_localizacao"
                             app:tint="@color/rosa_arthur"
-                            android:contentDescription="Retirada" />
+                            android:contentDescription="@string/retirada" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -236,17 +237,17 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Posso retirar na loja?"
+                            android:text="@string/posso_retirar_na_loja"
                             android:textColor="@color/texto_primario"
                             android:textStyle="bold"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/texto_corpo" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Sim! Escolha 'Retirar na loja' ao finalizar"
+                            android:text="@string/sim_escolha_retirar_na_loja_ao_finalizar"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/texto_pequeno"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -279,7 +280,7 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_sair"
                             app:tint="@color/verde_arthur"
-                            android:contentDescription="Troca" />
+                            android:contentDescription="@string/troca" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -292,17 +293,17 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Como faço uma troca?"
+                            android:text="@string/como_faco_uma_troca"
                             android:textColor="@color/texto_primario"
                             android:textStyle="bold"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/texto_corpo" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Fale conosco pelo WhatsApp em até 7 dias"
+                            android:text="@string/fale_conosco_pelo_whatsapp_em_ate_7_dias"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/texto_pequeno"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -335,7 +336,7 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_whatsapp"
                             app:tint="@color/rosa_arthur"
-                            android:contentDescription="Falar com loja" />
+                            android:contentDescription="@string/falar_com_loja" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -348,17 +349,17 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Como falar com a loja?"
+                            android:text="@string/como_falar_com_a_loja"
                             android:textColor="@color/texto_primario"
                             android:textStyle="bold"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/texto_corpo" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="WhatsApp (71) 99131-1944"
+                            android:text="@string/whatsapp_71_99131_1944"
                             android:textColor="@color/cinza_medio"
-                            android:textSize="12sp"
+                            android:textSize="@dimen/texto_pequeno"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -370,7 +371,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="16dp"
-                android:text="FALAR NO WHATSAPP"
+                android:text="@string/falar_no_whatsapp"
                 android:backgroundTint="@color/rosa_arthur"
                 android:textColor="@color/branco"
                 android:textStyle="bold"

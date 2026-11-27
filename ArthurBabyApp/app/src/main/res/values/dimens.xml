@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Escala de tamanhos de texto do app. Use sempre um destes em vez de valores soltos em sp. -->
+<resources>
+    <dimen name="texto_mini">10sp</dimen>        <!-- selos, legendas muito pequenas -->
+    <dimen name="texto_pequeno">12sp</dimen>     <!-- textos auxiliares, preço riscado, chips -->
+    <dimen name="texto_corpo">14sp</dimen>       <!-- texto padrão, botões, itens de lista -->
+    <dimen name="texto_destaque">16sp</dimen>    <!-- nomes de produto, opções do menu -->
+    <dimen name="texto_subtitulo">18sp</dimen>   <!-- títulos de cabeçalho e de seção -->
+    <dimen name="texto_titulo">22sp</dimen>      <!-- títulos de tela, preço principal -->
+    <dimen name="texto_display">26sp</dimen>     <!-- números e títulos grandes -->
+</resources>

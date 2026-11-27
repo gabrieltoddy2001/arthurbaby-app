@@ -42,7 +42,13 @@ public class PerfilFragment extends Fragment {
         // === VISITANTE ===
         if (!AuthGuard.estaLogado(requireContext())) {
             tvNome.setText("Bem-vinda!");
-            tvEmail.setText("Entre para aproveitar tudo");
+            tvEmail.setText("Entre para ver seus pedidos, cupons e favoritos");
+
+            // Opções que só funcionam com login ficam escondidas até a cliente entrar
+            for (int id : new int[]{R.id.opMeusDados, R.id.opAlterarSenha, R.id.opMeusCupons,
+                    R.id.opMeusPedidos, R.id.opEnderecos, R.id.opFavoritos}) {
+                v.findViewById(id).setVisibility(View.GONE);
+            }
 
             v.findViewById(R.id.opMeusDados).setOnClickListener(x ->
                     AuthGuard.mostrarDialogLogin(requireActivity(),

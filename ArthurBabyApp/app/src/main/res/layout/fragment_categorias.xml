@@ -23,9 +23,9 @@
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Categorias"
+            android:text="@string/categorias"
             android:textColor="@color/branco"
-            android:textSize="18sp"
+            android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
             app:iconeTitulo="@drawable/ic_categorias"
             app:iconeClaro="true" />
@@ -55,15 +55,15 @@
                 android:layout_height="20dp"
                 android:src="@drawable/ic_busca"
                 app:tint="@color/rosa_arthur"
-                android:contentDescription="Buscar" />
+                android:contentDescription="@string/buscar" />
 
             <TextView
                 android:id="@+id/atalhoBuscaCat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Buscar produtos..."
+                android:text="@string/buscar_produtos"
                 android:textColor="@color/cinza_texto"
-                android:textSize="14sp"
+                android:textSize="@dimen/texto_corpo"
                 android:layout_marginStart="10dp" />
         </LinearLayout>
     </LinearLayout>

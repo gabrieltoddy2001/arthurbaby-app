@@ -54,9 +54,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ARTHURBABY"
+            android:text="@string/arthurbaby_2"
             android:textColor="@color/rosa_arthur"
-            android:textSize="26sp"
+            android:textSize="@dimen/texto_display"
             android:textStyle="bold"
             android:letterSpacing="0.1"
             android:layout_marginTop="20dp" />
@@ -64,17 +64,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Obrigada por usar nosso app!"
+            android:text="@string/obrigada_por_usar_nosso_app"
             android:textColor="@color/cinza_medio"
-            android:textSize="14sp"
+            android:textSize="@dimen/texto_corpo"
             android:layout_marginTop="6dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sugira esse app para outras mamães 💕"
+            android:text="@string/sugira_esse_app_para_outras_mamaes"
             android:textColor="@color/rosa_escuro"
-            android:textSize="15sp"
+            android:textSize="@dimen/texto_destaque"
             android:textStyle="bold"
             android:gravity="center"
             android:layout_marginTop="24dp" />
@@ -90,7 +90,7 @@
             <FrameLayout
                 android:id="@+id/btnInstagram"
                 android:tooltipText="Abrir nosso Instagram"
-                android:contentDescription="Abrir nosso Instagram"
+                android:contentDescription="@string/abrir_nosso_instagram"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_circulo_categoria_suave"
@@ -102,13 +102,13 @@
                     android:layout_gravity="center"
                     android:src="@drawable/ic_instagram"
                     app:tint="@color/rosa_arthur"
-                    android:contentDescription="Instagram" />
+                    android:contentDescription="@string/instagram" />
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/btnWhatsapp"
                 android:tooltipText="Falar no WhatsApp"
-                android:contentDescription="Falar no WhatsApp"
+                android:contentDescription="@string/falar_no_whatsapp_2"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_circulo_verde_suave"
@@ -121,13 +121,13 @@
                     android:layout_gravity="center"
                     android:src="@drawable/ic_whatsapp"
                     app:tint="@color/verde_arthur"
-                    android:contentDescription="WhatsApp" />
+                    android:contentDescription="@string/whatsapp" />
             </FrameLayout>
 
             <FrameLayout
                 android:id="@+id/btnShopee"
                 android:tooltipText="Ver nossa loja na Shopee"
-                android:contentDescription="Ver nossa loja na Shopee"
+                android:contentDescription="@string/ver_nossa_loja_na_shopee"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_circulo_categoria_suave"
@@ -140,7 +140,7 @@
                     android:layout_gravity="center"
                     android:src="@drawable/ic_shopee"
                     app:tint="@color/rosa_arthur"
-                    android:contentDescription="Shopee" />
+                    android:contentDescription="@string/shopee" />
             </FrameLayout>
         </LinearLayout>
 
@@ -149,7 +149,7 @@
             android:layout_height="wrap_content"
             android:text="@lojao_arthur_baby"
             android:textColor="@color/cinza_medio"
-            android:textSize="13sp"
+            android:textSize="@dimen/texto_corpo"
             android:layout_marginTop="12dp" />
     </LinearLayout>
 
@@ -160,7 +160,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginHorizontal="32dp"
         android:layout_marginBottom="32dp"
-        android:text="VOLTAR AO INÍCIO"
+        android:text="@string/voltar_ao_inicio"
         android:backgroundTint="@color/rosa_arthur"
         android:textColor="@color/branco"
         android:textStyle="bold"

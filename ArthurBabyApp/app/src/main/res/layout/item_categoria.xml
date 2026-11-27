@@ -31,7 +31,7 @@
                     android:layout_height="32dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_cat_enxoval"
-                    android:contentDescription="Categoria" />
+                    android:contentDescription="@string/categoria" />
             </FrameLayout>
 
             <TextView
@@ -40,9 +40,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Categoria"
+                android:text="@string/categoria"
                 android:textColor="@color/texto_primario"
-                android:textSize="16sp"
+                android:textSize="@dimen/texto_destaque"
                 android:textStyle="bold" />
 
             <TextView
@@ -50,8 +50,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="›"
-                android:textSize="22sp"
+                android:text="@string/texto_4"
+                android:textSize="@dimen/texto_titulo"
                 android:textColor="@color/rosa_arthur" />
         </LinearLayout>
 

@@ -37,8 +37,8 @@
                 <br.com.arthurbaby.utils.TituloComIcone
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Promoções"
-                    android:textSize="20sp"
+                    android:text="@string/promocoes"
+                    android:textSize="@dimen/texto_subtitulo"
                     android:textStyle="bold"
                     android:textColor="@color/branco"
                     app:iconeTitulo="@drawable/ic_promocao"
@@ -48,8 +48,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ofertas especiais para você 💕"
-                    android:textSize="12sp"
+                    android:text="@string/ofertas_especiais_para_voce"
+                    android:textSize="@dimen/texto_pequeno"
                     android:textColor="@color/branco"
                     android:alpha="0.9" />
             </LinearLayout>

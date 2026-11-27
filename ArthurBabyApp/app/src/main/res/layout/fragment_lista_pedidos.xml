@@ -26,24 +26,24 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_caixa_vazia"
                 app:tint="@color/rosa_arthur"
-                android:contentDescription="Sem pedidos" />
+                android:contentDescription="@string/sem_pedidos" />
         </FrameLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nenhum pedido por aqui"
+            android:text="@string/nenhum_pedido_por_aqui"
             android:textColor="@color/texto_primario"
             android:textStyle="bold"
-            android:textSize="18sp"
+            android:textSize="@dimen/texto_subtitulo"
             android:layout_marginTop="20dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Seus pedidos aparecerão aqui assim que você fizer uma compra"
+            android:text="@string/seus_pedidos_aparecerao_aqui_assim_que_v"
             android:textColor="@color/cinza_medio"
-            android:textSize="14sp"
+            android:textSize="@dimen/texto_corpo"
             android:gravity="center"
             android:layout_marginTop="6dp" />
     </LinearLayout>

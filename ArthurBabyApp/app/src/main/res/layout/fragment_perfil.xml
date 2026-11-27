@@ -45,7 +45,7 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_perfil"
                             app:tint="@color/rosa_arthur"
-                            android:contentDescription="Avatar" />
+                            android:contentDescription="@string/avatar" />
                     </FrameLayout>
                 </FrameLayout>
             </br.com.arthurbaby.utils.EstrelinhasView>
@@ -54,10 +54,10 @@
                 android:id="@+id/tvNome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Maria Silva"
+                android:text="@string/maria_silva"
                 android:textColor="@color/branco"
                 android:textStyle="bold"
-                android:textSize="18sp"
+                android:textSize="@dimen/texto_subtitulo"
                 android:layout_marginTop="14dp"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp" />
@@ -66,9 +66,9 @@
                 android:id="@+id/tvEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="maria@exemplo.com"
+                android:text="@string/maria_exemplo_com"
                 android:textColor="@color/branco"
-                android:textSize="12sp"
+                android:textSize="@dimen/texto_pequeno"
                 android:alpha="0.9"
                 android:layout_marginTop="2dp"
                 android:paddingHorizontal="12dp"
@@ -110,7 +110,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_perfil"
                         app:tint="@color/rosa_arthur"
-                        android:contentDescription="Meus Dados" />
+                        android:contentDescription="@string/meus_dados" />
                 </FrameLayout>
 
                 <TextView
@@ -118,16 +118,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:text="Meus Dados"
+                    android:text="@string/meus_dados"
                     android:textColor="@color/texto_primario"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/texto_destaque"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textSize="22sp"
+                    android:text="@string/texto_4"
+                    android:textSize="@dimen/texto_titulo"
                     android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
@@ -147,8 +147,8 @@
                 <FrameLayout android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/bg_circulo_categoria_suave">
                     <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_cadeado" app:tint="@color/rosa_arthur" />
                 </FrameLayout>
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:text="Alterar Senha" android:textColor="@color/texto_primario" android:textSize="15sp" android:textStyle="bold" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="22sp" android:textColor="@color/rosa_arthur" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:text="@string/alterar_senha" android:textColor="@color/texto_primario" android:textSize="@dimen/texto_destaque" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/texto_4" android:textSize="@dimen/texto_titulo" android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
             <LinearLayout
@@ -167,8 +167,8 @@
                 <FrameLayout android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/bg_circulo_categoria_suave">
                     <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_cupom" app:tint="@color/rosa_arthur" />
                 </FrameLayout>
-                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:text="Meus Cupons" android:textColor="@color/texto_primario" android:textSize="15sp" android:textStyle="bold" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="22sp" android:textColor="@color/rosa_arthur" />
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:text="@string/meus_cupons" android:textColor="@color/texto_primario" android:textSize="@dimen/texto_destaque" android:textStyle="bold" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/texto_4" android:textSize="@dimen/texto_titulo" android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
             <LinearLayout
@@ -196,7 +196,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_pedidos"
                         app:tint="@color/rosa_arthur"
-                        android:contentDescription="Meus Pedidos" />
+                        android:contentDescription="@string/meus_pedidos" />
                 </FrameLayout>
 
                 <TextView
@@ -204,16 +204,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:text="Meus Pedidos"
+                    android:text="@string/meus_pedidos"
                     android:textColor="@color/texto_primario"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/texto_destaque"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textSize="22sp"
+                    android:text="@string/texto_4"
+                    android:textSize="@dimen/texto_titulo"
                     android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
@@ -242,7 +242,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_localizacao"
                         app:tint="@color/rosa_arthur"
-                        android:contentDescription="Endereços" />
+                        android:contentDescription="@string/enderecos" />
                 </FrameLayout>
 
                 <TextView
@@ -250,16 +250,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:text="Endereços"
+                    android:text="@string/enderecos"
                     android:textColor="@color/texto_primario"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/texto_destaque"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textSize="22sp"
+                    android:text="@string/texto_4"
+                    android:textSize="@dimen/texto_titulo"
                     android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
@@ -288,7 +288,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_favorito"
                         app:tint="@color/rosa_arthur"
-                        android:contentDescription="Favoritos" />
+                        android:contentDescription="@string/favoritos" />
                 </FrameLayout>
 
                 <TextView
@@ -296,16 +296,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:text="Favoritos"
+                    android:text="@string/favoritos"
                     android:textColor="@color/texto_primario"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/texto_destaque"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textSize="22sp"
+                    android:text="@string/texto_4"
+                    android:textSize="@dimen/texto_titulo"
                     android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
@@ -334,7 +334,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_ajuda"
                         app:tint="@color/rosa_arthur"
-                        android:contentDescription="Ajuda" />
+                        android:contentDescription="@string/ajuda" />
                 </FrameLayout>
 
                 <TextView
@@ -342,16 +342,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:text="Ajuda"
+                    android:text="@string/ajuda"
                     android:textColor="@color/texto_primario"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/texto_destaque"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textSize="22sp"
+                    android:text="@string/texto_4"
+                    android:textSize="@dimen/texto_titulo"
                     android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
@@ -380,7 +380,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_info"
                         app:tint="@color/rosa_arthur"
-                        android:contentDescription="Sobre" />
+                        android:contentDescription="@string/sobre" />
                 </FrameLayout>
 
                 <TextView
@@ -388,16 +388,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:text="Sobre"
+                    android:text="@string/sobre"
                     android:textColor="@color/texto_primario"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/texto_destaque"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="›"
-                    android:textSize="22sp"
+                    android:text="@string/texto_4"
+                    android:textSize="@dimen/texto_titulo"
                     android:textColor="@color/rosa_arthur" />
             </LinearLayout>
 
@@ -427,7 +427,7 @@
                         android:layout_gravity="center"
                         android:src="@drawable/ic_sair"
                         app:tint="@color/vermelho_desconto"
-                        android:contentDescription="Sair" />
+                        android:contentDescription="@string/sair" />
                 </FrameLayout>
 
                 <TextView
@@ -435,9 +435,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="14dp"
-                    android:text="Sair"
+                    android:text="@string/sair"
                     android:textColor="@color/vermelho_desconto"
-                    android:textSize="15sp"
+                    android:textSize="@dimen/texto_destaque"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>

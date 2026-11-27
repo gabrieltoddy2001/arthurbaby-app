@@ -18,21 +18,22 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="16dp"
-            android:background="@color/branco">
+            android:background="@drawable/bg_gradiente_header">
 
             <ImageButton
                 android:id="@+id/btnVoltar"
                 style="@style/BotaoVoltar"
-                app:tint="@color/texto_primario" />
+                app:tint="@color/branco" />
 
             <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Editar Perfil"
-                android:textSize="20sp"
+                android:text="@string/editar_perfil"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
-                android:textColor="@color/texto_primario"
-                app:iconeTitulo="@drawable/ic_perfil" />
+                android:textColor="@color/branco"
+                app:iconeTitulo="@drawable/ic_perfil"
+            app:iconeClaro="true" />
 
 
             <Space
@@ -53,17 +54,17 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Atualize seus dados 💕"
+                android:text="@string/atualize_seus_dados"
                 android:textColor="@color/texto_primario"
-                android:textSize="20sp"
+                android:textSize="@dimen/texto_titulo"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mantenha suas informações sempre atualizadas"
+                android:text="@string/mantenha_suas_informacoes_sempre_atualiz"
                 android:textColor="@color/cinza_medio"
-                android:textSize="13sp"
+                android:textSize="@dimen/texto_corpo"
                 android:layout_marginBottom="20dp" />
 
             <!-- NOME -->
@@ -71,7 +72,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nome completo"
+                android:hint="@string/nome_completo"
                 app:boxStrokeColor="@color/rosa_arthur"
                 app:boxCornerRadiusTopStart="16dp"
                 app:boxCornerRadiusTopEnd="16dp"
@@ -89,7 +90,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="E-mail"
+                android:hint="@string/e_mail"
                 android:layout_marginTop="12dp"
                 app:boxStrokeColor="@color/rosa_arthur"
                 app:boxCornerRadiusTopStart="16dp"
@@ -108,7 +109,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Telefone"
+                android:hint="@string/telefone"
                 android:layout_marginTop="12dp"
                 app:boxStrokeColor="@color/rosa_arthur"
                 app:boxCornerRadiusTopStart="16dp"
@@ -128,7 +129,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="CPF"
+                android:hint="@string/cpf"
                 android:layout_marginTop="12dp"
                 app:boxStrokeColor="@color/rosa_arthur"
                 app:boxCornerRadiusTopStart="16dp"
@@ -147,7 +148,7 @@
                 android:id="@+id/btnSalvar"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="SALVAR ALTERAÇÕES"
+                android:text="@string/salvar_alteracoes"
                 android:textColor="@color/branco"
                 android:textStyle="bold"
                 android:backgroundTint="@color/rosa_arthur"

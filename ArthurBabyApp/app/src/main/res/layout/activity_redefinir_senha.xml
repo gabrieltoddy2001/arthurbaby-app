@@ -28,9 +28,9 @@
             <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Redefinir Senha"
+                android:text="@string/redefinir_senha"
                 android:textColor="@color/verde_arthur"
-                android:textSize="26sp"
+                android:textSize="@dimen/texto_display"
                 android:textStyle="bold"
                 app:iconeTitulo="@drawable/ic_cadeado" />
         </LinearLayout>
@@ -38,7 +38,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cole o código recebido e defina sua nova senha."
+            android:text="@string/cole_o_codigo_recebido_e_defina_sua_nova"
             android:textColor="@color/cinza_medio"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="24dp" />
@@ -47,7 +47,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Código / Token"
+            android:hint="@string/codigo_token"
             app:startIconDrawable="@drawable/ic_check_circle"
             app:startIconTint="@color/rosa_arthur"
             app:boxStrokeColor="@color/rosa_arthur"
@@ -66,7 +66,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Nova senha"
+            android:hint="@string/nova_senha"
             android:layout_marginTop="12dp"
             app:passwordToggleEnabled="true"
             app:helperText="8 a 72 caracteres, com pelo menos uma letra e um número"
@@ -88,7 +88,7 @@
             android:id="@+id/btnRedefinir"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="REDEFINIR SENHA"
+            android:text="@string/redefinir_senha_2"
             android:backgroundTint="@color/rosa_arthur"
             android:textColor="@color/branco"
             android:textStyle="bold"
@@ -99,7 +99,7 @@
             android:id="@+id/tvVoltar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Voltar para o login"
+            android:text="@string/voltar_para_o_login"
             android:textColor="@color/rosa_arthur"
             android:textStyle="bold"
             android:padding="8dp"

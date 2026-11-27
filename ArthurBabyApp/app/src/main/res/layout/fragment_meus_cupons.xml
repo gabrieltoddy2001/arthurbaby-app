@@ -12,21 +12,22 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:background="@color/branco">
+        android:background="@drawable/bg_gradiente_header">
 
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/texto_primario" />
+            app:tint="@color/branco" />
 
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Meus Cupons"
-            android:textSize="20sp"
+            android:text="@string/meus_cupons"
+            android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
-            android:textColor="@color/texto_primario"
-            app:iconeTitulo="@drawable/ic_cupom" />
+            android:textColor="@color/branco"
+            app:iconeTitulo="@drawable/ic_cupom"
+            app:iconeClaro="true" />
 
 
         <Space

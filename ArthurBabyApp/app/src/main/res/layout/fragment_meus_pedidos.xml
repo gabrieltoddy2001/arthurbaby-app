@@ -13,21 +13,22 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:background="@color/branco">
+        android:background="@drawable/bg_gradiente_header">
 
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/texto_primario" />
+            app:tint="@color/branco" />
 
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Meus Pedidos"
-            android:textSize="20sp"
+            android:text="@string/meus_pedidos"
+            android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
-            android:textColor="@color/texto_primario"
-            app:iconeTitulo="@drawable/ic_pedidos" />
+            android:textColor="@color/branco"
+            app:iconeTitulo="@drawable/ic_pedidos"
+            app:iconeClaro="true" />
 
 
         <Space
@@ -42,7 +43,7 @@
         <ImageView
             android:id="@+id/btnFiltrar"
             android:tooltipText="Filtrar pedidos"
-            android:contentDescription="Filtrar pedidos"
+            android:contentDescription="@string/filtrar_pedidos"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:padding="6dp"
@@ -68,18 +69,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Filtro ativo: ..."
+            android:text="@string/filtro_ativo"
             android:textColor="@color/texto_primario"
-            android:textSize="12sp" />
+            android:textSize="@dimen/texto_pequeno" />
 
         <TextView
             android:id="@+id/tvLimparFiltro"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Limpar"
+            android:text="@string/limpar"
             android:textColor="@color/rosa_arthur"
             android:textStyle="bold"
-            android:textSize="12sp"
+            android:textSize="@dimen/texto_pequeno"
             android:padding="4dp" />
     </LinearLayout>
 

@@ -18,21 +18,22 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="16dp"
-            android:background="@color/branco">
+            android:background="@drawable/bg_gradiente_header">
 
             <ImageButton
                 android:id="@+id/btnVoltar"
                 style="@style/BotaoVoltar"
-                app:tint="@color/texto_primario" />
+                app:tint="@color/branco" />
 
             <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sobre"
-                android:textSize="20sp"
+                android:text="@string/sobre"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
-                android:textColor="@color/texto_primario"
-                app:iconeTitulo="@drawable/ic_info" />
+                android:textColor="@color/branco"
+                app:iconeTitulo="@drawable/ic_info"
+            app:iconeClaro="true" />
 
 
             <Space
@@ -68,9 +69,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ARTHURBABY"
+                android:text="@string/arthurbaby_2"
                 android:textStyle="bold"
-                android:textSize="22sp"
+                android:textSize="@dimen/texto_titulo"
                 android:textColor="@color/branco"
                 android:letterSpacing="0.1"
                 android:layout_marginTop="8dp" />
@@ -78,18 +79,18 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Enxoval e Moda Infantil"
+                android:text="@string/enxoval_e_moda_infantil"
                 android:textColor="@color/branco"
-                android:textSize="13sp"
+                android:textSize="@dimen/texto_corpo"
                 android:alpha="0.9" />
 
             <TextView
                 android:id="@+id/tvVersao"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Versão 1.0"
+                android:text="@string/versao_1_0"
                 android:textColor="@color/branco"
-                android:textSize="12sp"
+                android:textSize="@dimen/texto_pequeno"
                 android:alpha="0.8"
                 android:layout_marginTop="4dp" />
         </LinearLayout>
@@ -98,10 +99,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Contato"
+            android:text="@string/contato"
             android:textStyle="bold"
             android:textColor="@color/texto_primario"
-            android:textSize="16sp"
+            android:textSize="@dimen/texto_destaque"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="6dp" />
@@ -143,15 +144,15 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_whatsapp"
                             app:tint="@color/verde_arthur"
-                            android:contentDescription="WhatsApp" />
+                            android:contentDescription="@string/whatsapp" />
                     </FrameLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="(71) 99131-1944"
+                        android:text="@string/n_71_99131_1944"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:layout_marginStart="12dp" />
                 </LinearLayout>
 
@@ -177,15 +178,15 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_email"
                             app:tint="@color/rosa_arthur"
-                            android:contentDescription="E-mail" />
+                            android:contentDescription="@string/e_mail" />
                     </FrameLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="pedidoababy@gmail.com"
+                        android:text="@string/pedidoababy_gmail_com"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:layout_marginStart="12dp" />
                 </LinearLayout>
 
@@ -211,16 +212,16 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_localizacao"
                             app:tint="@color/verde_arthur"
-                            android:contentDescription="Endereço" />
+                            android:contentDescription="@string/endereco" />
                     </FrameLayout>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Av. Sete de Setembro, 548 — Salvador/BA"
+                        android:text="@string/av_sete_de_setembro_548_salvador_ba"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:lineSpacingMultiplier="1.2"
                         android:layout_marginStart="12dp" />
                 </LinearLayout>
@@ -231,10 +232,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Siga a gente"
+            android:text="@string/siga_a_gente"
             android:textStyle="bold"
             android:textColor="@color/texto_primario"
-            android:textSize="16sp"
+            android:textSize="@dimen/texto_destaque"
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="6dp" />
@@ -276,7 +277,7 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_instagram"
                             app:tint="@color/rosa_arthur"
-                            android:contentDescription="Instagram" />
+                            android:contentDescription="@string/instagram" />
                     </FrameLayout>
 
                     <TextView
@@ -284,7 +285,7 @@
                         android:layout_height="wrap_content"
                         android:text="@lojao_arthur_baby"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:layout_marginStart="12dp" />
                 </LinearLayout>
 
@@ -310,15 +311,15 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_shopee"
                             app:tint="@color/verde_arthur"
-                            android:contentDescription="Shopee" />
+                            android:contentDescription="@string/shopee" />
                     </FrameLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="/arthurbabylojao"
+                        android:text="@string/arthurbabylojao"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:layout_marginStart="12dp" />
                 </LinearLayout>
 
@@ -344,28 +345,29 @@
                             android:layout_gravity="center"
                             android:src="@drawable/ic_info"
                             app:tint="@color/rosa_arthur"
-                            android:contentDescription="Facebook" />
+                            android:contentDescription="@string/facebook" />
                     </FrameLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="/lojão-Arthur-baby"
+                        android:text="@string/lojao_arthur_baby"
                         android:textColor="@color/texto_primario"
-                        android:textSize="14sp"
+                        android:textSize="@dimen/texto_corpo"
                         android:layout_marginStart="12dp" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- COPYRIGHT -->
+        <!-- COPYRIGHT (o ano é preenchido pelo SobreFragment) -->
         <TextView
+            android:id="@+id/tvRodape"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="© 2025 ARTHURBABY\nTodos os direitos reservados\nCNPJ 35.671.222/0001-10"
+            android:text="@string/rodape_sobre"
             android:gravity="center"
             android:textColor="@color/cinza_texto"
-            android:textSize="11sp"
+            android:textSize="@dimen/texto_pequeno"
             android:lineSpacingMultiplier="1.4"
             android:paddingHorizontal="24dp"
             android:paddingVertical="14dp" />

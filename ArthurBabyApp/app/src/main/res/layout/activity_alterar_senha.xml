@@ -18,21 +18,22 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="16dp"
-            android:background="@color/branco">
+            android:background="@drawable/bg_gradiente_header">
 
             <ImageButton
                 android:id="@+id/btnVoltar"
                 style="@style/BotaoVoltar"
-                app:tint="@color/texto_primario" />
+                app:tint="@color/branco" />
 
             <br.com.arthurbaby.utils.TituloComIcone
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Alterar Senha"
-                android:textSize="20sp"
+                android:text="@string/alterar_senha"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
-                android:textColor="@color/texto_primario"
-                app:iconeTitulo="@drawable/ic_cadeado" />
+                android:textColor="@color/branco"
+                app:iconeTitulo="@drawable/ic_cadeado"
+            app:iconeClaro="true" />
 
 
             <Space
@@ -53,9 +54,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Segurança"
+                android:text="@string/seguranca"
                 android:textColor="@color/verde_arthur"
-                android:textSize="18sp"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
                 android:layout_marginBottom="20dp" />
 
@@ -63,7 +64,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Senha atual"
+                android:hint="@string/senha_atual"
                 app:passwordToggleEnabled="true"
                 app:boxStrokeColor="@color/rosa_arthur"
                 app:boxCornerRadiusTopStart="16dp"
@@ -81,7 +82,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Nova senha"
+                android:hint="@string/nova_senha"
                 android:layout_marginTop="12dp"
                 app:passwordToggleEnabled="true"
                 app:helperText="8 a 72 caracteres, com pelo menos uma letra e um número"
@@ -101,7 +102,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Confirmar nova senha"
+                android:hint="@string/confirmar_nova_senha"
                 android:layout_marginTop="12dp"
                 app:passwordToggleEnabled="true"
                 app:boxStrokeColor="@color/rosa_arthur"
@@ -120,7 +121,7 @@
                 android:id="@+id/btnSalvarSenha"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="SALVAR NOVA SENHA"
+                android:text="@string/salvar_nova_senha"
                 android:textColor="@color/branco"
                 android:textStyle="bold"
                 android:backgroundTint="@color/rosa_arthur"

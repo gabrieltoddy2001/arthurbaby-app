@@ -202,12 +202,13 @@
            <div class="kpi-valor">${totalQtd}</div>
          </div>
          <div class="kpi-card">
-           <div class="kpi-label">Faturamento</div>
+           <div class="kpi-label" title="Soma dos itens vendidos. O faturamento do Dashboard usa o total dos pedidos, com frete e descontos.">Vendido em produtos</div>
            <div class="kpi-valor">R$ ${formatarPreco(totalFat)}</div>
+           <div style="font-size:.75rem;color:var(--texto-secundario);margin-top:.25rem;">sem frete e descontos</div>
          </div>
        </div>
    
-       <table class="tabela">
+       <div class="tabela-rolavel"><table class="tabela">
          <thead>
            <tr>
              <th class="text-center">#</th>
@@ -218,7 +219,7 @@
            </tr>
          </thead>
          <tbody>${linhas}</tbody>
-       </table>
+       </table></div>
      `;
    }
    
@@ -290,7 +291,7 @@
          </div>
        </div>
    
-       <table class="tabela">
+       <div class="tabela-rolavel"><table class="tabela">
          <thead>
            <tr>
              <th>Produto</th>
@@ -301,7 +302,7 @@
            </tr>
          </thead>
          <tbody>${linhas}</tbody>
-       </table>
+       </table></div>
      `;
    }
    
@@ -398,7 +399,7 @@
    
        <div class="card">
          <h3 class="secao-titulo">Faturamento por status</h3>
-         <table class="tabela">
+         <div class="tabela-rolavel"><table class="tabela">
            <thead>
              <tr>
                <th>Status</th>
@@ -408,13 +409,13 @@
              </tr>
            </thead>
            <tbody>${linhasStatus}</tbody>
-         </table>
+         </table></div>
        </div>
    
        <div class="card">
          <h3 class="secao-titulo">Faturamento por mês</h3>
          ${linhasMes ? `
-         <table class="tabela">
+         <div class="tabela-rolavel"><table class="tabela">
            <thead>
              <tr>
                <th>Mês</th>
@@ -424,7 +425,7 @@
              </tr>
            </thead>
            <tbody>${linhasMes}</tbody>
-         </table>` : '<p class="texto-sec">Nenhum pedido válido no período.</p>'}
+         </table></div>` : '<p class="texto-sec">Nenhum pedido válido no período.</p>'}
        </div>
      `;
    }

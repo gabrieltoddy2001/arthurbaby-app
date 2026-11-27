@@ -210,20 +210,20 @@
                <div class="field">
                  <label for="f-preco">Venda * (R$)</label>
                  <input type="number" step="0.01" min="0" id="f-preco"
-                        value="${p.preco ?? ''}" oninput="atualizarMargem()">
+                        value="${valorDinheiro(p.preco)}" oninput="atualizarMargem()">
                </div>
 
                <div class="field">
                  <label for="f-promo" title="Quando preenchido, é o preço cobrado no pedido">Promocional (R$)</label>
                  <input type="number" step="0.01" min="0" id="f-promo"
-                        value="${p.precoPromocional ?? ''}"
+                        value="${valorDinheiro(p.precoPromocional)}"
                         oninput="aoDigitarPromo(); atualizarMargem()">
                </div>
 
                <div class="field">
                  <label for="f-custo">Custo (R$)</label>
                  <input type="number" step="0.01" min="0" id="f-custo"
-                        value="${p.custo ?? ''}" oninput="atualizarMargem()">
+                        value="${valorDinheiro(p.custo)}" oninput="atualizarMargem()">
                </div>
              </div>
 
@@ -1234,7 +1234,7 @@
                  </td>
 
                  <td>
-                   <input type="number" step="0.01" min="0" value="${v.preco ?? ''}"
+                   <input type="number" step="0.01" min="0" value="${valorDinheiro(v.preco)}"
                           placeholder="padrão"
                           title="Vazio = usa o preço do produto"
                           oninput="variacoes[${i}].preco = this.value ? Number(this.value) : null"

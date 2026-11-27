@@ -37,8 +37,8 @@
                 <br.com.arthurbaby.utils.TituloComIcone
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Buscar"
-                    android:textSize="20sp"
+                    android:text="@string/buscar"
+                    android:textSize="@dimen/texto_subtitulo"
                     android:textStyle="bold"
                     android:textColor="@color/branco"
                     app:iconeTitulo="@drawable/ic_busca"
@@ -48,8 +48,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Encontre tudo para o seu bebê 💕"
-                    android:textSize="12sp"
+                    android:text="@string/encontre_tudo_para_o_seu_bebe"
+                    android:textSize="@dimen/texto_pequeno"
                     android:alpha="0.9"
                     android:textColor="@color/branco" />
             </LinearLayout>
@@ -72,7 +72,7 @@
                 android:layout_height="20dp"
                 android:src="@drawable/ic_busca"
                 app:tint="@color/rosa_arthur"
-                android:contentDescription="Buscar" />
+                android:contentDescription="@string/buscar" />
 
             <EditText
                 android:id="@+id/etBusca"
@@ -80,12 +80,12 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:minHeight="44dp"
-                android:hint="Roupinhas, enxoval, acessórios..."
+                android:hint="@string/roupinhas_enxoval_acessorios"
                 android:textColorHint="@color/cinza_texto"
                 android:textColor="@color/texto_primario"
                 android:background="@android:color/transparent"
                 android:paddingStart="10dp"
-                android:textSize="14sp"
+                android:textSize="@dimen/texto_corpo"
                 android:inputType="text"
                 android:imeOptions="actionSearch"
                 android:singleLine="true" />
@@ -102,7 +102,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:tooltipText="Buscas recentes"
-                android:contentDescription="Buscas recentes" />
+                android:contentDescription="@string/buscas_recentes" />
         </LinearLayout>
     </LinearLayout>
 
@@ -125,41 +125,41 @@
                 android:id="@+id/chipTodas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Todas"
+                android:text="@string/todas"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
-                android:textSize="13sp"
+                android:textSize="@dimen/texto_corpo"
                 android:layout_marginEnd="8dp" />
 
             <TextView
                 android:id="@+id/chipPromocao"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Promoção"
+                android:text="@string/promocao"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
-                android:textSize="13sp"
+                android:textSize="@dimen/texto_corpo"
                 android:layout_marginEnd="8dp" />
 
             <TextView
                 android:id="@+id/chipBaratos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Até R$ 50"
+                android:text="@string/ate_r_50"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
-                android:textSize="13sp"
+                android:textSize="@dimen/texto_corpo"
                 android:layout_marginEnd="8dp" />
 
             <TextView
                 android:id="@+id/chipLimpar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Limpar"
+                android:text="@string/limpar"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="8dp"
                 android:textColor="@color/rosa_escuro"
-                android:textSize="13sp" />
+                android:textSize="@dimen/texto_corpo" />
         </LinearLayout>
     </HorizontalScrollView>
 
@@ -183,18 +183,18 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Buscas recentes"
+                android:text="@string/buscas_recentes"
                 android:textColor="@color/texto_primario"
                 android:textStyle="bold"
-                android:textSize="14sp" />
+                android:textSize="@dimen/texto_corpo" />
 
             <TextView
                 android:id="@+id/btnLimparHistorico"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Limpar"
+                android:text="@string/limpar"
                 android:textColor="@color/rosa_arthur"
-                android:textSize="12sp"
+                android:textSize="@dimen/texto_pequeno"
                 android:padding="4dp" />
         </LinearLayout>
 
@@ -219,7 +219,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textColor="@color/cinza_medio"
-        android:textSize="13sp"
+        android:textSize="@dimen/texto_corpo"
         android:paddingHorizontal="16dp"
         android:paddingVertical="10dp" />
 
@@ -244,16 +244,16 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 android:src="@drawable/ic_busca_bebe"
-                android:contentDescription="Carrinho de bebê" />
+                android:contentDescription="@string/carrinho_de_bebe" />
 
             <TextView
                 android:id="@+id/tvVazioTitulo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="O que o seu bebê precisa hoje?"
+                android:text="@string/o_que_o_seu_bebe_precisa_hoje"
                 android:textColor="@color/rosa_escuro"
-                android:textSize="18sp"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
                 android:gravity="center" />
 
@@ -262,9 +262,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Busque roupinhas, enxoval, acessórios e muito mais — feito com carinho para você."
+                android:text="@string/busque_roupinhas_enxoval_acessorios_e_mu"
                 android:textColor="@color/cinza_medio"
-                android:textSize="14sp"
+                android:textSize="@dimen/texto_corpo"
                 android:lineSpacingMultiplier="1.2"
                 android:gravity="center" />
         </LinearLayout>

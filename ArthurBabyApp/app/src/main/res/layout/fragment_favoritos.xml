@@ -13,21 +13,22 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:background="@color/branco">
+        android:background="@drawable/bg_gradiente_header">
 
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/texto_primario" />
+            app:tint="@color/branco" />
 
         <br.com.arthurbaby.utils.TituloComIcone
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Favoritos"
-            android:textSize="20sp"
+            android:text="@string/favoritos"
+            android:textSize="@dimen/texto_subtitulo"
             android:textStyle="bold"
-            android:textColor="@color/texto_primario"
-            app:iconeTitulo="@drawable/ic_favorito" />
+            android:textColor="@color/branco"
+            app:iconeTitulo="@drawable/ic_favorito"
+            app:iconeClaro="true" />
 
 
         <Space
@@ -71,25 +72,25 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_favorito"
                 app:tint="@color/rosa_arthur"
-                android:contentDescription="Sem favoritos" />
+                android:contentDescription="@string/sem_favoritos" />
         </FrameLayout>
 
         <TextView
             android:id="@+id/tvVazioTitulo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Você ainda não tem favoritos"
+            android:text="@string/voce_ainda_nao_tem_favoritos"
             android:textColor="@color/texto_primario"
             android:textStyle="bold"
-            android:textSize="18sp"
+            android:textSize="@dimen/texto_subtitulo"
             android:layout_marginTop="20dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Toque no ♡ dos produtos que você mais gostou"
+            android:text="@string/toque_no_dos_produtos_que_voce_mais_gost"
             android:textColor="@color/cinza_medio"
-            android:textSize="14sp"
+            android:textSize="@dimen/texto_corpo"
             android:gravity="center"
             android:layout_marginTop="6dp" />
     </LinearLayout>

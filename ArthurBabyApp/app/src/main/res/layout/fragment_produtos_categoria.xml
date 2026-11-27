@@ -12,12 +12,12 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="16dp"
-        android:background="@color/branco">
+        android:background="@drawable/bg_gradiente_header">
 
         <ImageButton
             android:id="@+id/btnVoltar"
             style="@style/BotaoVoltar"
-            app:tint="@color/texto_primario" />
+            app:tint="@color/branco" />
 
         <!-- Título + ícone da categoria logo depois do nome -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,12 +29,12 @@
                 android:id="@+id/tvTitulo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Categoria"
-                android:textSize="20sp"
+                android:text="@string/categoria"
+                android:textSize="@dimen/texto_subtitulo"
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="@color/texto_primario"
+                android:textColor="@color/branco"
                 app:layout_constrainedWidth="true"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintHorizontal_chainStyle="packed"

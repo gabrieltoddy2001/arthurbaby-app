@@ -507,7 +507,7 @@ public class DetalheProdutoFragment extends Fragment {
         TextView chip = new TextView(getContext());
         chip.setText(texto);
         chip.setPadding(dp(18), dp(10), dp(18), dp(10));
-        chip.setTextSize(13f);
+        chip.setTextSize(14f);
         chip.setGravity(Gravity.CENTER);
         aplicarEstiloChip(chip, selecionado);
 

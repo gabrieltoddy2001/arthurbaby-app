@@ -226,7 +226,7 @@ public class PesquisaFragment extends Fragment {
         TextView chip = new TextView(getContext());
         chip.setText(termo);
         chip.setPadding(dp(16), dp(8), dp(16), dp(8));
-        chip.setTextSize(13f);
+        chip.setTextSize(14f);
         chip.setGravity(Gravity.CENTER);
 
         GradientDrawable bg = new GradientDrawable();
