@@ -144,6 +144,16 @@ CREATE TABLE IF NOT EXISTS produto_imagem (
     INDEX idx_produto_imagem_produto (produto_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Conteúdo das fotos enviadas pelo painel (o disco do Render é apagado a cada deploy).
+-- nome = UUID + extensão, o mesmo da URL /api/produtos/imagens/{nome}.
+CREATE TABLE IF NOT EXISTS imagem_arquivo (
+    nome        VARCHAR(64)  NOT NULL PRIMARY KEY,
+    tipo        VARCHAR(30)  NOT NULL,
+    tamanho     BIGINT       NOT NULL,
+    dados       LONGBLOB     NOT NULL,
+    criado_em   DATETIME(6)  NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS produto_variacao (
                                                 id                BIGINT AUTO_INCREMENT PRIMARY KEY,
                                                 produto_id        BIGINT         NOT NULL,

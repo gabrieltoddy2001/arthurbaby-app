@@ -8,12 +8,18 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import br.com.arthurbaby.entity.ImagemArquivo;
+import br.com.arthurbaby.repository.ImagemArquivoRepository;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
-/** Upload administrativo e leitura pública das imagens de produtos. */
+/**
+ * Upload administrativo e leitura pública das imagens de produtos.
+ * As fotos são gravadas no banco (tabela imagem_arquivo), porque o disco do Render é apagado a cada deploy.
+ * A pasta uploads/ só é lida como reserva, para fotos antigas enviadas antes dessa mudança num servidor local.
+ */
 @RestController
 @Tag(name = "Administração - Imagens", description = "Upload de arquivos de imagem para os produtos e leitura pública das imagens salvas.")
 public class ImagemUploadController {
@@ -24,15 +30,19 @@ public class ImagemUploadController {
 
     private final boolean importarCaminhoHabilitado;
 
+    private final ImagemArquivoRepository imagens;
+
     private static final long MAX_BYTES = 5L * 1024 * 1024;
 
     public ImagemUploadController(
             @Value("${arthurbaby.upload.dir:uploads/produtos}") String caminho,
             @Value("${arthurbaby.imagem.base-url:}") String baseUrl,
-            @Value("${IMAGEM_IMPORTAR_CAMINHO:false}") boolean importarCaminhoHabilitado) {
+            @Value("${IMAGEM_IMPORTAR_CAMINHO:false}") boolean importarCaminhoHabilitado,
+            ImagemArquivoRepository imagens) {
         this.diretorio = Paths.get(caminho).toAbsolutePath().normalize();
         this.baseUrl = baseUrl;
         this.importarCaminhoHabilitado = importarCaminhoHabilitado;
+        this.imagens = imagens;
     }
 
     @PostMapping(value = "/api/admin/imagens/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -51,7 +61,7 @@ public class ImagemUploadController {
      */
     @PostMapping(value = "/api/admin/imagens/importar-caminho", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Importar imagem por caminho no servidor", description = "Lê o arquivo do caminho informado (no computador onde a API roda), "
-            + "valida o formato real (JPG, PNG, WEBP ou GIF até 5MB), copia para a pasta de imagens e retorna a URL pública. "
+            + "valida o formato real (JPG, PNG, WEBP ou GIF até 5MB), grava no banco e retorna a URL pública. "
             + "Desativado por padrão (IMAGEM_IMPORTAR_CAMINHO=true para ativar).")
     public Map<String, String> importarCaminho(@RequestBody Map<String, String> corpo) throws IOException {
         if (!importarCaminhoHabilitado) {
@@ -103,9 +113,13 @@ public class ImagemUploadController {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Formato de imagem nao suportado");
         }
-        Files.createDirectories(diretorio);
         String nome = UUID.randomUUID() + extensao;
-        Files.write(diretorio.resolve(nome), bytes, StandardOpenOption.CREATE_NEW);
+        ImagemArquivo imagem = new ImagemArquivo();
+        imagem.setNome(nome);
+        imagem.setTipo(tipo.toString());
+        imagem.setTamanho(bytes.length);
+        imagem.setDados(bytes);
+        imagens.save(imagem);
         // Sem base-url configurada, usa o endereço pelo qual a API foi chamada (no Render, o domínio público).
         String base = baseUrl.isBlank()
                 ? ServletUriComponentsBuilder.fromCurrentContextPath().toUriString()
@@ -114,11 +128,18 @@ public class ImagemUploadController {
     }
 
     @GetMapping("/api/produtos/imagens/{nome}")
-    @Operation(summary = "Obter imagem", description = "Retorna o arquivo de imagem salvo no servidor para exibição no app ou no painel.")
+    @Operation(summary = "Obter imagem", description = "Retorna a imagem salva (no banco, ou na pasta local para fotos antigas) para exibição no app ou no painel.")
     public ResponseEntity<org.springframework.core.io.Resource> obter(@PathVariable String nome) throws IOException {
         if (!nome.matches("[a-fA-F0-9-]{36}\\.(jpg|png|webp|gif)")) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        CacheControl cache = CacheControl.maxAge(java.time.Duration.ofDays(7)).cachePublic();
+        Optional<ImagemArquivo> salva = imagens.findById(nome);
+        if (salva.isPresent()) {
+            return ResponseEntity.ok().contentType(MediaType.parseMediaType(salva.get().getTipo())).cacheControl(cache)
+                    .body(new org.springframework.core.io.ByteArrayResource(salva.get().getDados()));
+        }
+        // Reserva: fotos antigas gravadas na pasta uploads/ antes de irem para o banco
         Path arquivo = diretorio.resolve(nome).normalize();
         if (!arquivo.startsWith(diretorio) || !Files.isRegularFile(arquivo)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -130,7 +151,7 @@ public class ImagemUploadController {
             case "gif" -> MediaType.IMAGE_GIF;
             default -> MediaType.parseMediaType("image/webp");
         };
-        return ResponseEntity.ok().contentType(tipo).cacheControl(CacheControl.maxAge(java.time.Duration.ofDays(7)))
+        return ResponseEntity.ok().contentType(tipo).cacheControl(cache)
                 .body(new org.springframework.core.io.UrlResource(arquivo.toUri()));
     }
 }
