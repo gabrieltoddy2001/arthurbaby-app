@@ -80,8 +80,19 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoAdapter.VH> {
                 h.tvPrecoAntigo.setVisibility(View.GONE);
             }
         }
-        if (h.tvEstrelas != null) h.tvEstrelas.setText(AvaliacaoUtils.estrelas(p.getAvaliacao()));
-        if (h.tvAvaliacao != null) h.tvAvaliacao.setText(AvaliacaoUtils.nota(p.getAvaliacao(), ""));
+        // Sem avaliações: em vez de "☆☆☆☆☆" (que parece nota zero), mostra só o texto
+        boolean avaliado = p.getAvaliacao() > 0;
+        if (h.tvEstrelas != null) {
+            h.tvEstrelas.setVisibility(avaliado ? View.VISIBLE : View.GONE);
+            h.tvEstrelas.setText(AvaliacaoUtils.estrelas(p.getAvaliacao()));
+        }
+        if (h.tvAvaliacao != null) {
+            h.tvAvaliacao.setText(AvaliacaoUtils.nota(p.getAvaliacao(), "Sem avaliações"));
+            // Sem as estrelas ao lado, tira o recuo para o texto alinhar com o nome do produto
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) h.tvAvaliacao.getLayoutParams();
+            lp.setMarginStart(avaliado ? Math.round(4 * h.itemView.getResources().getDisplayMetrics().density) : 0);
+            h.tvAvaliacao.setLayoutParams(lp);
+        }
         h.tvSeloEsgotado.setVisibility(p.isEsgotado() ? View.VISIBLE : View.GONE);
 
         boolean logado = AuthGuard.estaLogado(h.itemView.getContext());

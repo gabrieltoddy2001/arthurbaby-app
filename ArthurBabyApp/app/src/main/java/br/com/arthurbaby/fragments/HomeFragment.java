@@ -192,7 +192,13 @@ public class HomeFragment extends Fragment {
                 });
         rvDestaques.setAdapter(produtoAdapter);
 
-        // Carrega com callback para esconder loading
+        // Carrega com callback para esconder loading (ou mostrar o aviso de erro)
+        View layoutErro = v.findViewById(R.id.layoutErroHome);
+        v.findViewById(R.id.btnTentarNovamente).setOnClickListener(x -> {
+            layoutErro.setVisibility(View.GONE);
+            br.com.arthurbaby.utils.LoadingView.mostrar(progressBar, scrollConteudo);
+            carregarComLoading(progressBar, scrollConteudo);
+        });
         carregarComLoading(progressBar, scrollConteudo);
 
         return v;
@@ -201,13 +207,22 @@ public class HomeFragment extends Fragment {
     private void carregarComLoading(View progressBar, View scrollConteudo) {
         ApiService api = RetrofitClient.getApi(requireContext());
 
-        // Contador de chamadas concluídas (2 = ambas terminaram)
+        // Contador de chamadas concluídas (2 = ambas terminaram) e se alguma falhou
         final int[] concluidas = {0};
+        final boolean[] falhou = {false};
 
         Runnable onFinish = () -> {
             concluidas[0]++;
             if (concluidas[0] >= 2) {
-                br.com.arthurbaby.utils.LoadingView.esconder(progressBar, scrollConteudo);
+                if (falhou[0]) {
+                    // Sem isso a tela ficava só com os títulos, vazia e sem explicação
+                    progressBar.setVisibility(View.GONE);
+                    scrollConteudo.setVisibility(View.GONE);
+                    View erro = getView() == null ? null : getView().findViewById(R.id.layoutErroHome);
+                    if (erro != null) erro.setVisibility(View.VISIBLE);
+                } else {
+                    br.com.arthurbaby.utils.LoadingView.esconder(progressBar, scrollConteudo);
+                }
             }
         };
 
@@ -234,12 +249,14 @@ public class HomeFragment extends Fragment {
                         rv.setAdapter(categoriaAdapter);
                     }
                 }
+                if (!response.isSuccessful()) falhou[0] = true;
                 onFinish.run();
             }
 
             @Override
             public void onFailure(Call<List<CategoriaResponse>> call, Throwable t) {
                 if (!isAdded()) return;
+                falhou[0] = true;
                 onFinish.run();
             }
         });
@@ -268,12 +285,14 @@ public class HomeFragment extends Fragment {
                                 rv.setAdapter(produtoAdapter);
                             }
                         }
+                        if (!response.isSuccessful()) falhou[0] = true;
                         onFinish.run();
                     }
 
                     @Override
                     public void onFailure(Call<PageResponse<ProdutoResponse>> call, Throwable t) {
                         if (!isAdded()) return;
+                        falhou[0] = true;
                         onFinish.run();
                     }
                 });

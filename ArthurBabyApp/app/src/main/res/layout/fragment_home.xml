@@ -94,6 +94,49 @@
         android:indeterminateTint="@color/verde_arthur"
         android:visibility="visible" />
 
+    <!-- ERRO AO CARREGAR (servidor fora do ar ou sem internet) -->
+    <LinearLayout
+        android:id="@+id/layoutErroHome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingHorizontal="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Não foi possível carregar a loja"
+            android:textColor="@color/texto_primario"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:text="Verifique sua internet e tente de novo. Na primeira vez do dia o servidor pode levar até um minuto para responder."
+            android:textColor="@color/cinza_medio"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTentarNovamente"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/rosa_arthur"
+            android:paddingHorizontal="28dp"
+            android:text="Tentar de novo"
+            android:textAllCaps="false"
+            android:textColor="@color/branco"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:cornerRadius="26dp" />
+    </LinearLayout>
+
     <ScrollView
         android:id="@+id/scrollConteudo"
         android:layout_width="match_parent"

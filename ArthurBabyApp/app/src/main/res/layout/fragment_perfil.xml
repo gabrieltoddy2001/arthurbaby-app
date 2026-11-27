@@ -165,7 +165,7 @@
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
                 <FrameLayout android:layout_width="36dp" android:layout_height="36dp" android:background="@drawable/bg_circulo_categoria_suave">
-                    <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_promocao" app:tint="@color/rosa_arthur" />
+                    <ImageView android:layout_width="20dp" android:layout_height="20dp" android:layout_gravity="center" android:src="@drawable/ic_cupom" app:tint="@color/rosa_arthur" />
                 </FrameLayout>
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="14dp" android:text="Meus Cupons" android:textColor="@color/texto_primario" android:textSize="15sp" android:textStyle="bold" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textSize="22sp" android:textColor="@color/rosa_arthur" />

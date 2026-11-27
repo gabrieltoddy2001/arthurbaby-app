@@ -69,8 +69,9 @@ public class RetrofitClient {
                 .addInterceptor(new AuthInterceptor(appContext))
                 .addInterceptor(authCheck)
                 .addInterceptor(logging)
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                // O servidor no Render "dorme" sem uso e leva até ~1 min para responder a primeira chamada
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(70, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .build();
 

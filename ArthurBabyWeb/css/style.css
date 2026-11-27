@@ -439,6 +439,16 @@
      transition: transform .2s;
    }
    .sidebar a.sidebar-logo:hover img { transform: scale(1.03); }
+
+   /* Telas baixas (notebooks de 768px): logo e espaçamentos menores para o menu inteiro caber sem rolar */
+   @media (max-height: 900px) {
+     .sidebar { padding-top: 1rem; padding-bottom: 1rem; }
+     .sidebar a.sidebar-logo { padding: 0 .5rem .75rem; margin-bottom: .25rem; }
+     .sidebar a.sidebar-logo img { width: 84px; }
+     .sidebar .secao { margin: .625rem 0 .25rem .75rem; }
+     .sidebar a { padding: .42rem .75rem; }
+     .sidebar .sair { padding-top: .625rem; }
+   }
    
    /* ===== Main ===== */
    .main {

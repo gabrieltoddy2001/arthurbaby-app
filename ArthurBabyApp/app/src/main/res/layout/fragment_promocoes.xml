@@ -15,7 +15,7 @@
         android:padding="16dp"
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
-        android:background="@drawable/bg_gradiente_promocao">
+        android:background="@drawable/bg_gradiente_header">
 
         <ImageButton
             android:id="@+id/btnVoltar"
