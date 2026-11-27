@@ -185,8 +185,9 @@
             <td><strong>${fmtValor(c)}</strong></td>
             <td>
               <div class="texto-mini">
-                De: ${fmtData(c.validoDe)}<br>
-                Até: ${fmtData(c.validoAte)}
+                ${!c.validoDe && !c.validoAte ? 'Sem validade' : `
+                  ${c.validoDe ? `De: ${fmtData(c.validoDe)}<br>` : ''}
+                  ${c.validoAte ? `Até: ${fmtData(c.validoAte)}` : 'Sem data final'}`}
               </div>
             </td>
             <td><span class="badge ${c.ativo ? 'badge-ativo' : 'badge-inativo'}">${c.ativo ? 'Ativo' : 'Inativo'}</span></td>

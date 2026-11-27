@@ -304,7 +304,6 @@
     </div>
   </div>
 
-  <script src="js/mock-data.js"></script>
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script>
@@ -395,26 +394,34 @@
       }
     });
 
-    // Função para testar se a API está realmente online (com limite de 3s)
+    // Testa se a API responde. No Render o servidor "dorme" e leva até ~1 min para acordar,
+    // então tenta algumas vezes antes de mostrar "API Offline".
     async function verificarStatusApi() {
       const bolinha = document.getElementById('status-bolinha');
       const texto = document.getElementById('status-texto');
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      const pintar = (cor, msg) => {
+        bolinha.style.backgroundColor = `var(${cor})`;
+        bolinha.style.boxShadow = `0 0 6px var(${cor})`;
+        texto.textContent = msg;
+      };
 
-      try {
-        // HEAD é mais leve que GET, mas alguns servidores bloqueiam. Se der erro, o timeout garante o catch.
-        await fetch('https://arthurbaby-app.onrender.com/', { method: 'GET', mode: 'no-cors', signal: controller.signal });
-        bolinha.style.backgroundColor = 'var(--sucesso)';
-        bolinha.style.boxShadow = '0 0 6px var(--sucesso)';
-        texto.textContent = 'API Online';
-      } catch (err) {
-        bolinha.style.backgroundColor = 'var(--erro)';
-        bolinha.style.boxShadow = '0 0 6px var(--erro)';
-        texto.textContent = 'API Offline';
-      } finally {
-        clearTimeout(timeoutId);
+      for (let tentativa = 1; tentativa <= 4; tentativa++) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+        try {
+          const resp = await fetch(`${API_BASE}/categorias`, { signal: controller.signal });
+          if (resp.ok) { pintar('--sucesso', 'API Online'); return; }
+        } catch (_) {
+          // servidor ainda acordando ou fora do ar: tenta de novo
+        } finally {
+          clearTimeout(timeoutId);
+        }
+        if (tentativa < 4) {
+          texto.textContent = 'Acordando servidor...';
+          await new Promise(r => setTimeout(r, 3000));
+        }
       }
+      pintar('--erro', 'API Offline');
     }
 
     verificarStatusApi();

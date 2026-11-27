@@ -137,7 +137,7 @@
                  <span style="font-size:.8rem;color:var(--texto-secundario);">${escapeHtml(c.email)}</span>
                </td>
                <td>${escapeHtml(c.cpf || '—')}</td>
-               <td>${escapeHtml(c.telefone || '—')}</td>
+               <td style="white-space:nowrap;">${escapeHtml(c.telefone || '—')}</td>
                <td class="text-center">${qtdPedidos}</td>
                <td><span class="badge ${badge}">${c.status}</span></td>
                <td>
@@ -313,9 +313,6 @@
    /* ============================================
       HELPERS
       ============================================ */
-   function formatarPreco(v) {
-     return Number(v || 0).toFixed(2).replace('.', ',');
-   }
    function formatarData(iso) {
      if (!iso) return '—';
      const d = new Date(iso);

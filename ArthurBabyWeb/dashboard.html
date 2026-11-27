@@ -178,7 +178,7 @@
         </div>
 
         <!-- ===== 2 colunas: Gráfico de Evolução + Resumo de Pedidos ===== -->
-        <div class="grid-dashboard" style="display:grid;grid-template-columns: 2fr 1fr; gap: 1rem;">
+        <div class="grid-dashboard" style="display:grid;grid-template-columns: minmax(0,2fr) minmax(0,1fr); gap: 1rem;">
           
           <!-- COLUNA ESQUERDA: Gráfico de Faturamento (Chart.js) -->
           <div class="card" style="display:flex; flex-direction:column;">
@@ -205,7 +205,7 @@
                   const pct = (qtd / pedidos.length) * 100;
                   return `
                     <div>
-                      <div style="display:flex; justify-content:space-between; font-size:.8rem; margin-bottom:.25rem;">
+                      <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem; font-size:.8rem; margin-bottom:.25rem;">
                         <span class="badge ${classeStatus(s)}" style="font-size:.7rem; padding: .15rem .4rem;">${rotuloStatus(s)}</span>
                         <strong>${qtd}</strong>
                       </div>
@@ -221,7 +221,7 @@
         </div>
 
         <!-- ===== 2 colunas: Estoque baixo + Últimos Pedidos ===== -->
-        <div class="grid-dashboard" style="display:grid;grid-template-columns:1fr 1fr; gap: 1rem; margin-top: 1rem;">
+        <div class="grid-dashboard" style="display:grid;grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 1rem; margin-top: 1rem;">
           
           <div class="card">
             <h3 class="secao-titulo" style="display:flex; align-items:center; gap:.5rem;">
@@ -256,7 +256,7 @@
             </div>
             ${ultimosPedidos.length === 0
               ? '<p style="color:var(--texto-secundario);font-size:.9rem;">Nenhum pedido cadastrado.</p>'
-              : `<table class="tabela tabela-mini">
+              : `<div class="tabela-rolavel"><table class="tabela tabela-mini">
                   <thead>
                     <tr>
                       <th>Número</th>
@@ -277,7 +277,7 @@
                       </tr>
                     `).join('')}
                   </tbody>
-                </table>`}
+                </table></div>`}
           </div>
         </div>
 
@@ -477,9 +477,6 @@
     }
 
     /* ===== Helpers ===== */
-    function formatarPreco(v) {
-      return Number(v || 0).toFixed(2).replace('.', ',');
-    }
     function formatarData(iso) {
       if (!iso) return '—';
       const d = new Date(iso);

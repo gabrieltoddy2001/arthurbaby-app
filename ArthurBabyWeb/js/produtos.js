@@ -240,9 +240,6 @@
    }
    
    /* ----- Helpers ----- */
-   function formatarPreco(v) {
-     return Number(v || 0).toFixed(2).replace('.', ',');
-   }
    function escapeHtml(s) {
      return String(s ?? '').replace(/[&<>"']/g, m => ({
        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'

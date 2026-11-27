@@ -525,9 +525,6 @@
    /* ============================================
       HELPERS
       ============================================ */
-   function formatarPreco(v) {
-     return Number(v || 0).toFixed(2).replace('.', ',');
-   }
    function badgeStatus(status) {
      if (status === 'CANCELADO') return 'badge-inativo';
      if (status === 'ENTREGUE') return 'badge-ativo';

@@ -135,3 +135,7 @@ async function redefinirSenhaUsuario(u, aoConcluir) {
 function formatarMoeda(v) {
   return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+/** Valor sem o "R$", com separador de milhar: 1283.2 → "1.283,20". */
+function formatarPreco(v) {
+  return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
