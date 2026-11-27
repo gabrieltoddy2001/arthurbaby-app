@@ -197,6 +197,9 @@ public class DadosExemploInitializer implements CommandLineRunner {
                     "Pedido PED-EX-0008 cancelado a pedido do cliente");
             auditoria(admin, "RESETAR_SENHA", "Usuario", juliana.getId(), "Resetou a senha da cliente Juliana Costa");
         }
+        // Fotos reais como capa de todos os produtos de exemplo (e do AB-001, criado pelo DataInitializer)
+        FOTOS_REAIS.keySet().forEach(this::garantirCapa);
+
         log.info("Carga de dados de exemplo conferida/aplicada");
     }
 
@@ -290,9 +293,45 @@ public class DadosExemploInitializer implements CommandLineRunner {
         return salvo;
     }
 
-    /** Fotos reais embutidas na API (src/main/resources/seed), por código de produto: arquivo e nome fixo no banco. */
-    private static final java.util.Map<String, String[]> FOTOS_REAIS = java.util.Map.of(
-            "EX-001", new String[]{"seed/body-rosa.jpg", "b0d1e5a0-0000-4000-8000-000000000001.jpg"});
+    /**
+     * Fotos reais embutidas na API (src/main/resources/seed), por código de produto: arquivo e nome fixo no banco.
+     * As de EX-002 em diante são do Pexels (licença livre para uso comercial, sem atribuição obrigatória).
+     */
+    private static final java.util.Map<String, String[]> FOTOS_REAIS = java.util.Map.ofEntries(
+            foto("AB-001", "kit-enxoval.jpg", 11),
+            foto("EX-001", "body-rosa.jpg", 1),
+            foto("EX-002", "macacao.jpg", 2),
+            foto("EX-003", "manta.jpg", 3),
+            foto("EX-004", "toalha-capuz.jpg", 4),
+            foto("EX-005", "vestido-floral.jpg", 5),
+            foto("EX-006", "conjunto-moletom.jpg", 6),
+            foto("EX-007", "kit-higiene.jpg", 7),
+            foto("EX-008", "babadores.jpg", 8),
+            foto("EX-009", "mosquiteiro.jpg", 9),
+            foto("EX-010", "kit-presente.jpg", 10));
+
+    private static java.util.Map.Entry<String, String[]> foto(String codigo, String arquivo, int numero) {
+        return java.util.Map.entry(codigo, new String[]{"seed/" + arquivo,
+                String.format("b0d1e5a0-0000-4000-8000-%012d.jpg", numero)});
+    }
+
+    /**
+     * Garante que o produto tenha a foto real como capa (também para produtos criados por outra carga, como o
+     * AB-001 do DataInitializer, ou criados antes de a foto existir). Não duplica se a foto já estiver lá.
+     */
+    private void garantirCapa(String codigo) {
+        String url = garantirFotoReal(codigo);
+        if (url == null) return;
+        produtos.findByCodigo(codigo).ifPresent(p -> {
+            if (p.getImagens().stream().anyMatch(i -> url.equals(i.getUrl()))) return;
+            p.getImagens().forEach(i -> i.setPrincipal(false));
+            ProdutoImagem capa = new ProdutoImagem();
+            capa.setProduto(p); capa.setUrl(url); capa.setDescricao("Foto principal");
+            capa.setOrdemExibicao(0); capa.setPrincipal(true);
+            p.getImagens().add(capa);
+            produtos.save(p);
+        });
+    }
 
     /**
      * Grava a foto real do produto na tabela imagem_arquivo (se ainda não estiver lá) e devolve o endereço dela.
