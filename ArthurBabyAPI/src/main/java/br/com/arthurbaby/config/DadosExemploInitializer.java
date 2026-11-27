@@ -37,8 +37,10 @@ import java.util.Optional;
  * Os registros criados aqui usam o prefixo {@code EX-} no código do produto e {@code PED-EX-} no pedido,
  * para ficarem fáceis de identificar.
  */
+// Desligue em produção com DADOS_EXEMPLO=false (senão os exemplos apagados voltam a cada inicialização)
 @Component
 @Order(3)
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "DADOS_EXEMPLO", havingValue = "true", matchIfMissing = true)
 public class DadosExemploInitializer implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DadosExemploInitializer.class);
 

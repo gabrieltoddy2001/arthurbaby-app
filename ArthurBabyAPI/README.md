@@ -45,7 +45,19 @@ JWT_SECRET=troque-por-uma-chave-grande-em-producao
 IMAGEM_BASE_URL=https://seu-dominio  # opcional; vazio = endereço pelo qual a API foi chamada
 PORT=8080  # o Render define automaticamente
 SEED_SENHA_INICIAL=  # senha das contas criadas num banco vazio (veja "Usuarios iniciais")
+CORS_ORIGENS=https://seu-painel.vercel.app  # dominios do painel web, separados por virgula
+DADOS_EXEMPLO=true  # false em producao: nao cria clientes/pedidos/produtos de exemplo
 ```
+
+## Deploy (Render + TiDB)
+
+1. Banco: crie um cluster TiDB Cloud Serverless e use a string JDBC dele em `DB_URL`, com SSL:
+   `jdbc:mysql://<host>:4000/arthurbaby?createDatabaseIfNotExist=true&sslMode=VERIFY_IDENTITY&enabledTLSProtocols=TLSv1.2,TLSv1.3&serverTimezone=America/Sao_Paulo`
+2. Render: New > Web Service, repositorio deste projeto, branch `master`, Root Directory `ArthurBabyAPI`,
+   runtime Docker (usa o `Dockerfile`). Configure as variaveis `DB_URL`, `DB_USER`, `DB_PASSWORD`,
+   `JWT_SECRET`, `SEED_SENHA_INICIAL`, `CORS_ORIGENS` e, se quiser, `DADOS_EXEMPLO=false`.
+3. A primeira inicializacao cria as tabelas e os dados iniciais. O plano gratuito "dorme" sem uso e
+   leva ate ~1 min para responder a primeira chamada.
 
 As fotos dos produtos enviadas pelo painel ficam no banco (tabela `imagem_arquivo`), porque o disco do
 Render e apagado a cada deploy. A pasta `uploads/` so e lida como reserva para fotos antigas locais.
