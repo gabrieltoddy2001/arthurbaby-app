@@ -47,6 +47,9 @@ PORT=8080  # o Render define automaticamente
 SEED_SENHA_INICIAL=  # senha das contas criadas num banco vazio (veja "Usuarios iniciais")
 CORS_ORIGENS=https://seu-painel.vercel.app  # dominios do painel web, separados por virgula
 DADOS_EXEMPLO=true  # false em producao: nao cria clientes/pedidos/produtos de exemplo
+ADMIN_EMAIL=admin@arthurbaby.com  # e-mail do unico administrador criado num banco vazio
+RESET_DIARIO=false  # true: apaga e recria todos os dados uma vez por dia (ambiente de demonstracao)
+RESET_HORA=4  # hora do reinicio diario, horario de Brasilia
 ```
 
 ## Deploy (Render + TiDB)
@@ -55,7 +58,8 @@ DADOS_EXEMPLO=true  # false em producao: nao cria clientes/pedidos/produtos de e
    `jdbc:mysql://<host>:4000/arthurbaby?createDatabaseIfNotExist=true&sslMode=VERIFY_IDENTITY&enabledTLSProtocols=TLSv1.2,TLSv1.3&serverTimezone=America/Sao_Paulo`
 2. Render: New > Web Service, repositorio deste projeto, branch `master`, Root Directory `ArthurBabyAPI`,
    runtime Docker (usa o `Dockerfile`). Configure as variaveis `DB_URL`, `DB_USER`, `DB_PASSWORD`,
-   `JWT_SECRET`, `SEED_SENHA_INICIAL`, `CORS_ORIGENS` e, se quiser, `DADOS_EXEMPLO=false`.
+   `JWT_SECRET`, `SEED_SENHA_INICIAL`, `CORS_ORIGENS` e, para a demonstracao, `RESET_DIARIO=true`
+   (ou `DADOS_EXEMPLO=false` numa loja real).
 3. A primeira inicializacao cria as tabelas e os dados iniciais. O plano gratuito "dorme" sem uso e
    leva ate ~1 min para responder a primeira chamada.
 
@@ -78,14 +82,22 @@ Console H2: http://localhost:8080/h2-console
 
 ## Usuarios iniciais
 
-Criados so quando o banco esta vazio:
+Criado so quando o banco esta vazio, um unico acesso:
 
-- Admin: `admin@arthurbaby.com.br`
-- Vendedor: `vendedor@arthurbaby.com.br`
-- Clientes: `ana.souza@email.com`, `mariana.santos@email.com`
+- Administrador do painel: e-mail de `ADMIN_EMAIL` (padrao `admin@arthurbaby.com`) e senha de
+  `SEED_SENHA_INICIAL`. Sem essa variavel, a API sorteia uma senha e mostra no log na primeira inicializacao.
 
-A senha de todos vem da variavel `SEED_SENHA_INICIAL`. Sem ela, a API sorteia uma senha e mostra no log
-na primeira inicializacao. Troque as senhas depois do primeiro acesso.
+As clientes de exemplo (Ana, Mariana, Beatriz, Fernanda, Juliana, Rafael) recebem senhas aleatorias
+descartaveis: existem so para os pedidos, avaliacoes e favoritos de teste, e ninguem entra no app com elas.
+Quem for testar o app cria a propria conta pelo cadastro.
+
+## Ambiente de demonstracao (reinicio diario)
+
+Com `RESET_DIARIO=true`, todo dia as `RESET_HORA` (padrao 4h, horario de Brasilia) a API apaga todos os
+dados e recria a carga inicial (administrador, catalogo com foto, 12 pedidos espalhados pelos ultimos meses).
+O que for alterado ou baguncado dura no maximo um dia. Como o plano gratuito do Render "dorme", a API tambem
+confere ao acordar: se o horario de reinicio passou desde o ultimo, reinicia antes de atender.
+A data do ultimo reinicio fica na tabela `reinicio_controle`.
 
 ## Fluxo minimo de teste
 

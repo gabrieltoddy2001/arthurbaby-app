@@ -37,13 +37,13 @@ public class DataInitializer {
                 configs.save(c);
             }
             if (usuarios.count() == 0) {
-                // Senha das contas iniciais: SEED_SENHA_INICIAL (fora do codigo); sem ela, aleatoria e mostrada no log
-                String senhaSeed = senhaInicial.senha();
-                Usuario admin = usuario("Administrador ArthurBaby", "admin@arthurbaby.com.br", senhaSeed, Perfil.ADMINISTRADOR, encoder);
-                Usuario vendedor = usuario("Carlos Almeida", "vendedor@arthurbaby.com.br", senhaSeed, Perfil.VENDEDOR, encoder);
-                Usuario ana = usuario("Ana Souza", "ana.souza@email.com", senhaSeed, Perfil.CLIENTE, encoder);
-                Usuario mariana = usuario("Mariana Santos", "mariana.santos@email.com", senhaSeed, Perfil.CLIENTE, encoder);
-                usuarios.saveAll(List.of(admin, vendedor, ana, mariana));
+                // Único acesso pronto: o administrador do painel (ADMIN_EMAIL + SEED_SENHA_INICIAL, fora do código).
+                // As clientes de exemplo recebem senhas aleatórias descartáveis: existem só para os pedidos de teste
+                // e ninguém consegue entrar no app com elas (quem for testar o app cria a própria conta).
+                Usuario admin = usuario("Administrador ArthurBaby", senhaInicial.emailAdmin(), senhaInicial.senha(), Perfil.ADMINISTRADOR, encoder);
+                Usuario ana = usuario("Ana Souza", "ana.souza@email.com", SenhaInicialSeed.senhaAleatoria(), Perfil.CLIENTE, encoder);
+                Usuario mariana = usuario("Mariana Santos", "mariana.santos@email.com", SenhaInicialSeed.senhaAleatoria(), Perfil.CLIENTE, encoder);
+                usuarios.saveAll(List.of(admin, ana, mariana));
             }
             if (categorias.count() == 0) {
                 int i = 1;

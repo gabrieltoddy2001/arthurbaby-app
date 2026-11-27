@@ -58,13 +58,18 @@ public class DadosExemploInitializer implements CommandLineRunner {
     private final AuditoriaRepository auditorias;
     private final PasswordEncoder encoder;
     private final SenhaInicialSeed senhaInicial;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final ImagemArquivoRepository arquivosImagem;
 
     public DadosExemploInitializer(UsuarioRepository usuarios, CategoriaRepository categorias, MarcaRepository marcas,
                                    TamanhoRepository tamanhos, CorRepository cores, ModeloRepository modelos,
                                    ProdutoRepository produtos, PedidoRepository pedidos, FavoritoRepository favoritos,
                                    AvaliacaoRepository avaliacoes, MovimentacaoEstoqueRepository movimentacoes,
                                    AuditoriaRepository auditorias, PasswordEncoder encoder,
-                                   SenhaInicialSeed senhaInicial) {
+                                   SenhaInicialSeed senhaInicial, org.springframework.jdbc.core.JdbcTemplate jdbc,
+                                   ImagemArquivoRepository arquivosImagem) {
+        this.jdbc = jdbc;
+        this.arquivosImagem = arquivosImagem;
         this.usuarios = usuarios;
         this.categorias = categorias;
         this.marcas = marcas;
@@ -85,14 +90,14 @@ public class DadosExemploInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        Usuario admin = usuarios.findByEmail("admin@arthurbaby.com.br").orElse(null);
-        Usuario vendedor = usuarios.findByEmail("vendedor@arthurbaby.com.br").orElse(admin);
+        Usuario admin = usuarios.findByEmail(senhaInicial.emailAdmin()).orElse(null);
+        Usuario vendedor = admin; // não há conta de vendedor: os pedidos de exemplo ficam com o administrador
         if (admin == null) {
-            log.warn("Carga de exemplo ignorada: usuário admin@arthurbaby.com.br não encontrado");
+            log.warn("Carga de exemplo ignorada: administrador {} não encontrado", senhaInicial.emailAdmin());
             return;
         }
 
-        // ---------- Clientes (senha SEED_SENHA_INICIAL), cada um com um endereço principal ----------
+        // ---------- Clientes (senha aleatória descartável: ninguém entra no app com elas), cada um com um endereço principal ----------
         Usuario beatriz = cliente("Beatriz Lima", "beatriz.lima@email.com", "(71) 98111-2233",
                 "41820-020", "Avenida Tancredo Neves", "1632", "Sala 1001", "Caminho das Árvores", "Próximo ao Shopping da Bahia");
         Usuario fernanda = cliente("Fernanda Rocha", "fernanda.rocha@email.com", "(71) 98222-3344",
@@ -149,6 +154,14 @@ public class DadosExemploInitializer implements CommandLineRunner {
                 null, List.of(item(vestido, 2)));
         pedido("PED-EX-0008", rafael, vendedor, PedidoStatus.CANCELADO, FormaRecebimento.ENTREGA, "18.00",
                 null, List.of(item(kitPresente, 1)));
+        pedido("PED-EX-0009", fernanda, vendedor, PedidoStatus.ENTREGUE, FormaRecebimento.ENTREGA, "15.00",
+                null, List.of(item(conjunto, 2), item(toalha, 1)));
+        pedido("PED-EX-0010", ana, vendedor, PedidoStatus.ENTREGUE, FormaRecebimento.RETIRADA_LOJA, "0.00",
+                null, List.of(item(kitPresente, 1), item(manta, 2)));
+        pedido("PED-EX-0011", juliana, vendedor, PedidoStatus.ENTREGUE, FormaRecebimento.ENTREGA, "12.00",
+                null, List.of(item(macacao, 1), item(body, 3)));
+        pedido("PED-EX-0012", beatriz, vendedor, PedidoStatus.ENTREGUE, FormaRecebimento.ENTREGA, "15.00",
+                "Deixar na portaria", List.of(item(vestido, 1), item(mosquiteiro, 1)));
 
         // ---------- Favoritos ----------
         favorito(beatriz, kitPresente);
@@ -189,14 +202,14 @@ public class DadosExemploInitializer implements CommandLineRunner {
 
     // ===================== Auxiliares =====================
 
-    /** Busca o cliente pelo e-mail; se não existir, cria com a senha inicial do seed e um endereço principal. */
+    /** Busca o cliente pelo e-mail; se não existir, cria com senha aleatória (sem acesso ao app) e um endereço principal. */
     private Usuario cliente(String nome, String email, String telefone, String cep, String logradouro, String numero,
                            String complemento, String bairro, String referencia) {
         Optional<Usuario> existente = usuarios.findByEmail(email);
         if (existente.isPresent()) return existente.get();
 
         Usuario u = new Usuario();
-        u.setNomeCompleto(nome); u.setEmail(email); u.setSenha(encoder.encode(senhaInicial.senha())); u.setTelefone(telefone);
+        u.setNomeCompleto(nome); u.setEmail(email); u.setSenha(encoder.encode(SenhaInicialSeed.senhaAleatoria())); u.setTelefone(telefone);
         u.setPerfil(Perfil.CLIENTE); u.setAceiteTermoUso(true); u.setAceiteLgpd(true);
         Endereco e = new Endereco();
         e.setUsuario(u); e.setCep(cep); e.setLogradouro(logradouro); e.setNumero(numero); e.setComplemento(complemento);
@@ -236,8 +249,15 @@ public class DadosExemploInitializer implements CommandLineRunner {
         p.setPeso(new BigDecimal("0.30")); p.setAltura(new BigDecimal("5.00"));
         p.setLargura(new BigDecimal("25.00")); p.setComprimento(new BigDecimal("30.00"));
 
-        // Imagens placeholder com o nome do produto escrito (rosa = capa, verde = 2ª foto)
-        p.getImagens().add(imagem(p, "ED83A4", nome, "Foto principal", 1, true));
+        // Foto real embutida na API quando houver (vira a capa); senão, placeholder com o nome do produto (rosa = capa, verde = 2ª foto)
+        String fotoReal = garantirFotoReal(codigo);
+        if (fotoReal != null) {
+            ProdutoImagem capa = imagem(p, "ED83A4", nome, "Foto principal", 1, true);
+            capa.setUrl(fotoReal);
+            p.getImagens().add(capa);
+        } else {
+            p.getImagens().add(imagem(p, "ED83A4", nome, "Foto principal", 1, true));
+        }
         p.getImagens().add(imagem(p, "37B6B0", nome, "Foto detalhe", 2, false));
 
         Modelo modelo = modelos.findByNome(nomeModelo).or(() -> modelos.findByNome("Padrão")).orElse(null);
@@ -268,6 +288,31 @@ public class DadosExemploInitializer implements CommandLineRunner {
             movimentacoes.save(m);
         }
         return salvo;
+    }
+
+    /** Fotos reais embutidas na API (src/main/resources/seed), por código de produto: arquivo e nome fixo no banco. */
+    private static final java.util.Map<String, String[]> FOTOS_REAIS = java.util.Map.of(
+            "EX-001", new String[]{"seed/body-rosa.jpg", "b0d1e5a0-0000-4000-8000-000000000001.jpg"});
+
+    /**
+     * Grava a foto real do produto na tabela imagem_arquivo (se ainda não estiver lá) e devolve o endereço dela.
+     * O endereço é relativo: o app e o painel completam com o servidor da API que estiverem usando.
+     */
+    private String garantirFotoReal(String codigo) {
+        String[] foto = FOTOS_REAIS.get(codigo);
+        if (foto == null) return null;
+        if (!arquivosImagem.existsById(foto[1])) {
+            try (java.io.InputStream in = new org.springframework.core.io.ClassPathResource(foto[0]).getInputStream()) {
+                byte[] bytes = in.readAllBytes();
+                ImagemArquivo arquivo = new ImagemArquivo();
+                arquivo.setNome(foto[1]); arquivo.setTipo("image/jpeg"); arquivo.setTamanho(bytes.length); arquivo.setDados(bytes);
+                arquivosImagem.save(arquivo);
+            } catch (java.io.IOException e) {
+                log.warn("Foto de exemplo {} não encontrada: usando placeholder", foto[0]);
+                return null;
+            }
+        }
+        return "/api/produtos/imagens/" + foto[1];
     }
 
     private static ProdutoImagem imagem(Produto p, String corFundo, String texto, String descricao, int ordem, boolean principal) {
@@ -342,7 +387,28 @@ public class DadosExemploInitializer implements CommandLineRunner {
         } else if (statusFinal.ordinal() >= PedidoStatus.CONFIRMADO.ordinal()) {
             pedido.setConfirmadoEm(java.time.LocalDateTime.now());
         }
-        pedidos.save(pedido);
+        pedidos.saveAndFlush(pedido); // grava já, para o UPDATE de datas achar o pedido e o histórico
+        retroagirData(pedido, DIAS_ATRAS.getOrDefault(numero, 0));
+    }
+
+    /** Há quantos dias cada pedido de exemplo foi feito: espalha os pedidos pelos últimos meses (gráficos do painel). */
+    private static final java.util.Map<String, Integer> DIAS_ATRAS = java.util.Map.ofEntries(
+            java.util.Map.entry("PED-EX-0001", 150), java.util.Map.entry("PED-EX-0009", 125),
+            java.util.Map.entry("PED-EX-0002", 100), java.util.Map.entry("PED-EX-0010", 75),
+            java.util.Map.entry("PED-EX-0003", 55), java.util.Map.entry("PED-EX-0008", 40),
+            java.util.Map.entry("PED-EX-0011", 28), java.util.Map.entry("PED-EX-0012", 15),
+            java.util.Map.entry("PED-EX-0004", 6), java.util.Map.entry("PED-EX-0005", 3),
+            java.util.Map.entry("PED-EX-0006", 1), java.util.Map.entry("PED-EX-0007", 0));
+
+    /** Volta a data do pedido e do seu histórico (os @PrePersist gravam "agora"). */
+    private void retroagirData(Pedido pedido, int diasAtras) {
+        if (diasAtras <= 0 || pedido.getId() == null) return;
+        java.sql.Timestamp data = java.sql.Timestamp.valueOf(java.time.LocalDateTime.now().minusDays(diasAtras).withHour(10 + diasAtras % 8));
+        jdbc.update("UPDATE pedido SET criado_em = ?, atualizado_em = ?, "
+                + "confirmado_em = CASE WHEN confirmado_em IS NULL THEN NULL ELSE ? END, "
+                + "cancelado_em = CASE WHEN cancelado_em IS NULL THEN NULL ELSE ? END WHERE id = ?",
+                data, data, data, data, pedido.getId());
+        jdbc.update("UPDATE pedido_status_historico SET criado_em = ? WHERE pedido_id = ?", data, pedido.getId());
     }
 
     private void favorito(Usuario cliente, Produto produto) {

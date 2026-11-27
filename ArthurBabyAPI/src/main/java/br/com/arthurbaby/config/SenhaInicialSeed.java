@@ -18,9 +18,12 @@ public class SenhaInicialSeed {
     private static final String LETRAS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
 
     private final String senha;
+    private final String emailAdmin;
     private boolean avisado;
 
-    public SenhaInicialSeed(@Value("${SEED_SENHA_INICIAL:}") String configurada) {
+    public SenhaInicialSeed(@Value("${SEED_SENHA_INICIAL:}") String configurada,
+                            @Value("${ADMIN_EMAIL:admin@arthurbaby.com}") String emailAdmin) {
+        this.emailAdmin = emailAdmin.trim().toLowerCase(java.util.Locale.ROOT);
         if (configurada != null && !configurada.isBlank()) {
             this.senha = configurada;
             this.avisado = true;
@@ -30,6 +33,20 @@ public class SenhaInicialSeed {
             for (int i = 0; i < 14; i++) sb.append(LETRAS.charAt(random.nextInt(LETRAS.length())));
             this.senha = sb.toString();
         }
+    }
+
+    /** E-mail do único administrador criado num banco vazio (variável ADMIN_EMAIL). */
+    public String emailAdmin() { return emailAdmin; }
+
+    /**
+     * Senha aleatória e descartável para as clientes de exemplo: elas existem só para ter pedidos, avaliações
+     * e favoritos de teste, e ninguém deve conseguir entrar no app com elas.
+     */
+    public static String senhaAleatoria() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 24; i++) sb.append(LETRAS.charAt(random.nextInt(LETRAS.length())));
+        return sb.toString();
     }
 
     /** Chamado só quando um seed realmente cria uma conta; avisa no log uma única vez se a senha foi gerada. */
