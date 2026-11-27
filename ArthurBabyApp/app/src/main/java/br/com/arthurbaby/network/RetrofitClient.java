@@ -14,22 +14,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClient {
 
     /**
-     * URL do backend.
-     * - Emulador: sempre http://10.0.2.2:8080/ (o localhost do PC visto de dentro do emulador)
-     * - Celular físico: "api.url" do local.properties (IP do PC na mesma rede Wi-Fi).
-     *   Antes o IP ficava fixo no código e, quando o IP do PC mudava, o login dava timeout.
+     * URL do backend: por padrão a API no Render; para usar a API do PC, defina "api.url"
+     * no local.properties (10.0.2.2 no emulador, IP do PC no celular). Veja o README.
      */
-    static final String URL_EMULADOR = br.com.arthurbaby.BuildConfig.API_URL; // padrão http://10.0.2.2:8080/
-    private static final String BASE_URL = ehEmulador() ? URL_EMULADOR : br.com.arthurbaby.BuildConfig.API_URL;
-
-    private static boolean ehEmulador() {
-        String fp = android.os.Build.FINGERPRINT;
-        String hw = android.os.Build.HARDWARE;
-        String produto = android.os.Build.PRODUCT;
-        return (fp != null && (fp.startsWith("generic") || fp.contains("emulator")))
-                || "goldfish".equals(hw) || "ranchu".equals(hw)
-                || (produto != null && (produto.contains("sdk") || produto.contains("emulator")));
-    }
+    private static final String BASE_URL = br.com.arthurbaby.BuildConfig.API_URL;
 
     public static String getBaseUrl() { return BASE_URL; }
 

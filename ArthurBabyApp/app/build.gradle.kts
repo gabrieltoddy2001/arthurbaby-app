@@ -4,8 +4,8 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-// Endereço da API para celular físico: defina "api.url" no local.properties
-// (ex.: api.url=http://192.168.1.110:8080/). No emulador o app usa 10.0.2.2 automaticamente.
+// Endereço da API: por padrão o Render. Para usar a API do PC, defina "api.url" no local.properties
+// (emulador: api.url=http://10.0.2.2:8080/ ; celular: IP do PC, ex.: http://192.168.0.10:8080/).
 val localProps = Properties().apply {
     val f = rootProject.file("local.properties")
     if (f.exists()) f.inputStream().use { load(it) }
