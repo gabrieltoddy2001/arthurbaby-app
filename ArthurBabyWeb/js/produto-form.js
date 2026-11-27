@@ -1300,10 +1300,10 @@
      marcarSujo(true);
    }
 
-   function removerVariacao(i) {
+   async function removerVariacao(i) {
      const v = variacoes[i];
 
-     if (v.id && !confirm(`Remover a variação ${v.sku || ''}? Se ela já tiver pedidos ou movimentações, o servidor pode recusar.\nAlternativa: deixe o estoque zerado.`)) {
+     if (v.id && !(await confirmarAcao(`Remover a variação ${v.sku || ''}? Se ela já tiver pedidos ou movimentações, o servidor pode recusar.\nAlternativa: deixe o estoque zerado.`))) {
        return;
      }
 

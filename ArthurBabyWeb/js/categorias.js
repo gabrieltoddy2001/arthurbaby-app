@@ -212,7 +212,7 @@
      if (cat.status === 'ATIVA') {
        const filhas = cache.filter(c => c.categoriaPaiId === id);
        if (filhas.length > 0) {
-         const ok = confirm(
+         const ok = await confirmarAcao(
            `Esta categoria tem ${filhas.length} subcategoria(s). ` +
            `Elas continuarão ativas. Deseja inativar mesmo assim?`
          );

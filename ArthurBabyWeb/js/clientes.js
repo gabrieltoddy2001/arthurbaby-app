@@ -254,7 +254,7 @@
        ? `Bloquear o cliente "${c.nome}"? Ele não conseguirá fazer login no app.`
        : `Desbloquear o cliente "${c.nome}"?`;
    
-     if (!confirm(msg)) return;
+     if (!(await confirmarAcao(msg, novoStatus === 'BLOQUEADO' ? { textoOk: 'Bloquear', perigo: true } : { textoOk: 'Desbloquear' }))) return;
    
      try {
        // Não usa o CRUD genérico de usuários: evita mexer em contas administrativas.
@@ -281,7 +281,7 @@
      if (!c) return;
    
      fecharModal();
-     const nova = prompt(`Nova senha para "${c.nome}"\n${POLITICA_SENHA}`);
+     const nova = await pedirTexto(POLITICA_SENHA, { titulo: `Nova senha para "${c.nome}"`, tipo: 'password', textoOk: 'Redefinir' });
      if (nova === null) return;
      const erroSenha = erroPoliticaSenha(nova);
      if (erroSenha) {

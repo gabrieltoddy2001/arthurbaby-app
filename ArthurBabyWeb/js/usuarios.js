@@ -321,7 +321,7 @@
    
      const novoStatus = u.status === 'ATIVO' ? 'INATIVO' : 'ATIVO';
    
-     if (!confirm(`Alterar status de "${u.nome}" para ${novoStatus}?`)) return;
+     if (!(await confirmarAcao(`Alterar status de "${u.nome}" para ${novoStatus}?`))) return;
    
      try {
        await adminApi.atualizar('usuarios', id, { ...u, status: novoStatus });

@@ -233,19 +233,19 @@ async function enviarStatus(status, observacao, motivoCancelamento, msgSucesso) 
   }
 }
 
-function mudarStatus() {
+async function mudarStatus() {
   const novo = document.getElementById('f-novo-status').value;
   const obs = document.getElementById('f-obs-status').value.trim();
   const etapas = etapasDoPedido(pedido);
   if (etapas.indexOf(novo) >= 0 && etapas.indexOf(novo) < etapas.indexOf(pedido.status)) {
-    if (!confirm(`Voltar o pedido para "${rotuloStatus(novo)}"? A correção fica registrada no histórico.`)) return;
+    if (!(await confirmarAcao(`Voltar o pedido para "${rotuloStatus(novo)}"? A correção fica registrada no histórico.`))) return;
   }
-  if (novo === 'ENTREGUE' && !confirm('Marcar como ENTREGUE finaliza o pedido (não poderá mais ser alterado). Confirmar?')) return;
+  if (novo === 'ENTREGUE' && !(await confirmarAcao('Marcar como ENTREGUE finaliza o pedido (não poderá mais ser alterado). Confirmar?'))) return;
   enviarStatus(novo, obs, null, `Status alterado para "${rotuloStatus(novo)}".`);
 }
 
-function avancar(status) {
-  if (status === 'ENTREGUE' && !confirm('Marcar como ENTREGUE finaliza o pedido (não poderá mais ser alterado). Confirmar?')) return;
+async function avancar(status) {
+  if (status === 'ENTREGUE' && !(await confirmarAcao('Marcar como ENTREGUE finaliza o pedido (não poderá mais ser alterado). Confirmar?'))) return;
   const obs = document.getElementById('f-obs-status')?.value.trim();
   enviarStatus(status, obs, null, `Status alterado para "${rotuloStatus(status)}".`);
 }
@@ -253,8 +253,9 @@ function avancar(status) {
 /* ============================================
    CANCELAR PEDIDO (estorna o estoque no servidor)
    ============================================ */
-function cancelar() {
-  const motivo = prompt('Motivo do cancelamento (obrigatório).\nO estoque dos itens será devolvido automaticamente.');
+async async function cancelar() {
+  const motivo = await pedirTexto('O estoque dos itens será devolvido automaticamente.', {
+    titulo: 'Motivo do cancelamento', placeholder: 'Obrigatório', textoOk: 'Cancelar pedido', textoCancelar: 'Voltar', perigo: true });
   if (motivo === null) return;
   if (!motivo.trim()) { alert('É necessário informar o motivo.'); return; }
   enviarStatus('CANCELADO', null, motivo.trim(), 'Pedido cancelado e estoque estornado.');

@@ -495,7 +495,7 @@
      const cupom = document.getElementById('f-cupom').value.trim();
      if (cupom && !cupomAplicado) return mostrarErro('Clique em "Aplicar" para validar o cupom antes de finalizar (ou apague o código).');
    
-     if (!confirm(`Confirmar pedido para ${clienteSel.nome}?\nO estoque será baixado.`)) return;
+     if (!(await confirmarAcao(`Confirmar pedido para ${clienteSel.nome}?\nO estoque será baixado.`))) return;
    
      const btn = document.getElementById('btn-finalizar');
      btn.disabled = true;

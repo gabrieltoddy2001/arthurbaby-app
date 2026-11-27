@@ -117,7 +117,7 @@ function garantirFavicon() {
 
 /* Redefine a senha de um usuário (cliente ou interno). A API grava o hash BCrypt. */
 async function redefinirSenhaUsuario(u, aoConcluir) {
-  const nova = prompt(`Nova senha para "${u.nome || u.nomeCompleto}"\n${POLITICA_SENHA}`);
+  const nova = await pedirTexto(POLITICA_SENHA, { titulo: `Nova senha para "${u.nome || u.nomeCompleto}"`, tipo: 'password', textoOk: 'Redefinir' });
   if (nova === null) return;
   const erroSenha = erroPoliticaSenha(nova);
   if (erroSenha) { alert(erroSenha); return; }
@@ -130,6 +130,73 @@ async function redefinirSenhaUsuario(u, aoConcluir) {
     alert('Erro ao redefinir senha: ' + err.message);
   }
 }
+
+/* ============================================
+   JANELAS DO PAINEL (no lugar de confirm/prompt/alert)
+   Alguns navegadores e visualizadores embutidos bloqueiam as janelas nativas: o confirm()
+   devolvia "não" na hora e botões como "Bloquear" pareciam não fazer nada.
+   ============================================ */
+function abrirJanela({ titulo, mensagem, campo, textoOk = 'Confirmar', textoCancelar = 'Cancelar', perigo = false }) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true" style="max-width:440px;">
+        <h2></h2>
+        <p class="janela-msg" style="white-space:pre-line;color:var(--texto-secundario);line-height:1.5;"></p>
+        ${campo ? `<div class="field" style="margin-top:1rem;"><input class="janela-campo" autocomplete="off"></div>` : ''}
+        <div class="modal-acoes">
+          ${textoCancelar ? '<button type="button" class="btn btn-ghost janela-cancelar"></button>' : ''}
+          <button type="button" class="btn ${perigo ? 'btn-danger' : 'btn-primary'} janela-ok"></button>
+        </div>
+      </div>`;
+    overlay.querySelector('h2').textContent = titulo || 'Confirmar';
+    overlay.querySelector('.janela-msg').textContent = mensagem || '';
+    overlay.querySelector('.janela-ok').textContent = textoOk;
+    const btnCancelar = overlay.querySelector('.janela-cancelar');
+    if (btnCancelar) btnCancelar.textContent = textoCancelar;
+    const input = overlay.querySelector('.janela-campo');
+    if (input) {
+      input.type = campo.tipo || 'text';
+      input.placeholder = campo.placeholder || '';
+    }
+
+    const fechar = (valor) => {
+      document.removeEventListener('keydown', teclas);
+      overlay.remove();
+      resolve(valor);
+    };
+    const confirmar = () => fechar(input ? input.value : true);
+    const cancelar = () => fechar(input ? null : false);
+    const teclas = (e) => {
+      if (e.key === 'Escape') cancelar();
+      if (e.key === 'Enter') { e.preventDefault(); confirmar(); }
+    };
+
+    overlay.querySelector('.janela-ok').addEventListener('click', confirmar);
+    if (btnCancelar) btnCancelar.addEventListener('click', cancelar);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cancelar(); });
+    document.addEventListener('keydown', teclas);
+    document.body.appendChild(overlay);
+    (input || overlay.querySelector('.janela-ok')).focus();
+  });
+}
+
+/** Pergunta sim/não. Ex.: if (!(await confirmarAcao('Bloquear o cliente?', { textoOk: 'Bloquear', perigo: true }))) return; */
+function confirmarAcao(mensagem, opcoes = {}) {
+  return abrirJanela({ titulo: opcoes.titulo || 'Confirmar', mensagem, ...opcoes });
+}
+
+/** Pede um texto (ou senha). Devolve o texto digitado, ou null se cancelar. */
+function pedirTexto(mensagem, opcoes = {}) {
+  return abrirJanela({ titulo: opcoes.titulo || 'Informe', mensagem, campo: { tipo: opcoes.tipo, placeholder: opcoes.placeholder }, textoOk: opcoes.textoOk || 'OK', ...opcoes });
+}
+
+/** Aviso simples com botão OK. Também substitui o alert() do navegador em todo o painel. */
+function avisar(mensagem, titulo = 'Aviso') {
+  return abrirJanela({ titulo, mensagem, textoOk: 'OK', textoCancelar: null });
+}
+window.alert = (mensagem) => { avisar(String(mensagem ?? '')); };
 
 /* Formatação compartilhada */
 function formatarMoeda(v) {
