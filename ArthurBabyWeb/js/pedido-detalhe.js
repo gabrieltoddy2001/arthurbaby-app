@@ -253,7 +253,7 @@ async function avancar(status) {
 /* ============================================
    CANCELAR PEDIDO (estorna o estoque no servidor)
    ============================================ */
-async async function cancelar() {
+async function cancelar() {
   const motivo = await pedirTexto('O estoque dos itens será devolvido automaticamente.', {
     titulo: 'Motivo do cancelamento', placeholder: 'Obrigatório', textoOk: 'Cancelar pedido', textoCancelar: 'Voltar', perigo: true });
   if (motivo === null) return;
